@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐱 囍勒喵 Xi-Le-Meow 到府洗貓 LINE LIFF 系統</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #0b0f19;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-2 md:p-6">
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-6xl w-full">
+        
+        <!-- Left: Explanatory & Guide Board -->
+        <div class="lg:col-span-4 space-y-5 text-slate-300 self-center">
+            <div>
+                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                    囍勒喵 系統架構沙盒 v3.5 (安全防禦版)
+                </span>
+                <h1 class="text-2xl font-bold text-slate-100 mt-2">🐱 囍勒喵行動洗貓預約網頁</h1>
+                <p class="text-sm text-slate-400 mt-2 leading-relaxed">
+                    Jemin，我們把最新的**「後台權限防禦機制」**、**「全體會員 CRM 名單」**與**「手動新增/編輯客戶備註」**完美整合進來了！
+                </p>
+            </div>
+
+            <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-xl space-y-3 text-xs">
+                <h3 class="font-bold text-amber-400 flex items-center gap-1.5">
+                    <span class="material-icons text-sm">security</span> 安全與名單控制說明：
+                </h3>
+                <ul class="space-y-2 list-disc list-inside text-slate-400 leading-relaxed">
+                    <li><strong class="text-slate-200">主控 ID 權限防護</strong>：只有當前 LINE 登入流水號為 <span class="text-amber-400 font-bold font-mono">XLM-26001</span> (Jemin) 時，點擊「後台管理」才能進入操作。其餘新用戶點擊會顯示無權限。</li>
+                    <li><strong class="text-slate-200">全體會員名單 (CRM)</strong>：主控端可以一覽所有註冊用戶，可點擊「鎖定並編輯財務」將控制台對準該會員進行加錢派券，或直接一鍵「刪除會員」！</li>
+                    <li><strong class="text-slate-200">新增與修改客戶備註</strong>：點擊名單上的編輯備註，可以手動紀錄家長喜好或貓咪眉角（如：貓咪脾氣大、愛看電視），對接 Supabase 進行永久儲存！</li>
+                </ul>
+            </div>
+
+            <div class="p-4 bg-amber-500/5 border border-amber-500/10 rounded-xl text-xs space-y-2">
+                <p class="text-amber-400 font-bold">💡 權限安全測試指引：</p>
+                <p class="text-slate-400">目前預設是以管理員 <strong>Jemin (XLM-26001)</strong> 進入。你可以隨時點擊下方橘色按鈕註冊一個全新用戶，體驗「非管理員」點擊後台時的防禦攔截警告，接著再用卡號切換回來管理！</p>
+                <button onclick="simulateNewUserOnboarding()" class="w-full py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold rounded-lg text-xs hover:from-amber-400 hover:to-amber-500 transition-all flex items-center justify-center gap-1">
+                    <span class="material-icons text-sm">person_add</span> 🔄 模擬全新用戶 (體驗新客註冊與防禦)
+                </button>
+            </div>
+        </div>
+
+        <!-- Right: Simulated Mobile Phone Screen (LINE LIFF Container) -->
+        <div class="lg:col-span-8 flex justify-center">
+            <div class="w-full max-w-[390px] h-[800px] bg-slate-950 rounded-[48px] border-8 border-slate-800 shadow-2xl relative overflow-hidden flex flex-col justify-between">
+                
+                <!-- Phone Ear Speaker & Camera Notch -->
+                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-6 bg-slate-800 rounded-b-2xl z-50 flex items-center justify-center">
+                    <div class="w-12 h-1.5 bg-slate-900 rounded-full"></div>
+                </div>
+
+                <!-- LINE App Header Mockup -->
+                <div class="bg-[#06c755] pt-8 pb-3 px-6 flex items-center justify-between text-white shrink-0 z-40">
+                    <div class="flex items-center gap-2">
+                        <span class="material-icons text-xl cursor-pointer">chevron_left</span>
+                        <span class="font-bold text-sm tracking-wide">囍勒喵・行動洗貓預約</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="material-icons text-lg cursor-pointer">more_horiz</span>
+                        <span class="material-icons text-lg cursor-pointer">close</span>
+                    </div>
+                </div>
+
+                <!-- LIFF Content Area (Scrollable) -->
+                <div id="liffBody" class="flex-1 overflow-y-auto no-scrollbar bg-slate-900 p-4 space-y-4 pb-20">
+                    <!-- Dynamic views rendered via JavaScript -->
+                </div>
+
+                <!-- LIFF Bottom Tab Bar -->
+                <div class="bg-slate-950 border-t border-slate-800/80 py-2.5 px-3 flex justify-around items-center shrink-0 z-40">
+                    <button onclick="switchTab('booking')" id="tab-booking" class="flex flex-col items-center gap-1 text-amber-400">
+                        <span class="material-icons text-xl">calendar_today</span>
+                        <span class="text-[10px] font-medium">線上預約</span>
+                    </button>
+                    <button onclick="switchTab('member')" id="tab-member" class="flex flex-col items-center gap-1 text-slate-500 hover:text-slate-300">
+                        <span class="material-icons text-xl">pets</span>
+                        <span class="text-[10px] font-medium">會員與主子</span>
+                    </button>
+                    <button onclick="switchTab('rules')" id="tab-rules" class="flex flex-col items-center gap-1 text-slate-500 hover:text-slate-300">
+                        <span class="material-icons text-xl">gavel</span>
+                        <span class="text-[10px] font-medium">方案與須知</span>
+                    </button>
+                    <button onclick="switchTab('admin')" id="tab-admin" class="flex flex-col items-center gap-1 text-slate-500 hover:text-slate-300">
+                        <span class="material-icons text-xl">security</span>
+                        <span class="text-[10px] font-medium">後台管理</span>
+                    </button>
+                </div>
+
+                <!-- Home Indicator Bar (iOS Style) -->
+                <div class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-32 h-1 bg-slate-700 rounded-full z-50"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Custom Dialog / Modal Modal replacement (Do not use alert/confirm) -->
+    <div id="customModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-3xl max-w-[320px] w-full text-center space-y-4">
+            <div id="modalIcon" class="w-12 h-12 rounded-full mx-auto flex items-center justify-center">
+                <!-- Icon via JS -->
+            </div>
+            <div class="space-y-1">
+                <h3 id="modalTitle" class="text-sm font-bold text-slate-100">標題</h3>
+                <p id="modalBody" class="text-xs text-slate-400 leading-relaxed">內文描述</p>
+            </div>
+            <div id="modalActions" class="flex gap-2 justify-center">
+                <!-- Action Buttons via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Block -->
+    <script>
+        const state = {
+            currentTab: 'booking',
+            isRegistered: true, 
+            
+            // Logged-in member reference pointer
+            user: null, 
+
+            // Global member directory (Database simulation)
+            members: [
+                {
+                    lineId: 'U8f9a2c3f4e5a6b7d8e9f0',
+                    memberSerialId: 'XLM-26001', 
+                    parentName: 'Jemin (創辦人)',
+                    phone: '0912-345-678',
+                    address: '新北市新莊區中正路100號', 
+                    district: '中區 (新莊/三重/永和)', 
+                    balance: 6000, 
+                    coupons: 1, 
+                    admin_notes: '囍勒喵創辦人系統管理員，擁有所有調帳權限。',
+                    cats: [
+                        { cat_id: 'cat_1', name: '阿橘', breed: '米克斯', weight: 4.5, health_notes: '無特殊疾病，皮膚正常', grooming_notes: '討厭吹風機，吹頭部會哈氣，需要溫柔安撫' },
+                        { cat_id: 'cat_2', name: '咪咪', breed: '英國短毛貓', weight: 5.2, health_notes: '輕微心臟肥大，避免過度驚嚇', grooming_notes: '剪指甲會稍微抗拒，洗澡很乖' }
+                    ]
+                },
+                {
+                    lineId: 'U7a8b9c0d1e2f3g4h5i6j',
+                    memberSerialId: 'XLM-26002',
+                    parentName: '陳小姐',
+                    phone: '0988-777-666',
+                    address: '新北市板橋區文化路二段100號',
+                    district: '近區 (土城/板橋/中和)',
+                    balance: 3000,
+                    coupons: 0,
+                    admin_notes: '貓咪非常溫和，洗完可以用小點心獎勵。',
+                    cats: [
+                        { cat_id: 'cat_3', name: '胖胖', breed: '米克斯', weight: 6.1, health_notes: '關節稍微退化，洗澡翻身請動作放輕', grooming_notes: '愛吹風，梳毛時會打呼嚕' }
+                    ]
+                }
+            ],
+            
+            // Transaction history database indexed by memberSerialId (Snapshot structure)
+            transactionHistory: {
+                'XLM-26001': [
+                    { type: 'deposit', amount: 6000, balanceAfter: 6000, couponsAfter: 1, desc: '線下儲值 囍勒喵尊榮方案', time: '2026-07-13 10:00' },
+                    { type: 'coupon_grant', amount: 1, balanceAfter: 6000, couponsAfter: 1, desc: '手動派發出車折抵券 1 張', time: '2026-07-13 10:01' }
+                ],
+                'XLM-26002': [
+                    { type: 'deposit', amount: 3000, balanceAfter: 3000, couponsAfter: 0, desc: '線下匯款 基礎會員方案', time: '2026-07-12 15:30' }
+                ]
+            },
+
+            adminLockedMemberId: 'XLM-26001', // Target member Serial ID currently locked in admin controls
+            timeSlots: ['09:00', '11:30', '14:00', '16:30'],
+
+            overrides: {
+                '2026-07-15': { isFullyBlocked: false, blockedSlots: ['11:30', '14:00'] },
+                '2026-07-16': { isFullyBlocked: true, blockedSlots: [] }, 
+                '2026-07-17': { isFullyBlocked: false, blockedSlots: ['09:00'] }
+            },
+
+            bookings: {
+                '2026-07-15': ['09:00']
+            },
+
+            selectedDate: '2026-07-14', 
+            selectedTime: '',
+            selectedCats: ['阿橘'], 
+            paymentMethod: 'balance',
+            useCoupon: false 
+        };
+
+        const config = {
+            memberPrice: 1200,
+            originalPrice: 1500,
+            outCallFees: {
+                '近區 (土城/板橋/中和)': 500,
+                '中區 (新莊/三重/永和)': 650,
+                '遠區 (淡水/八里/深坑)': 850
+            }
+        };
+
+        // Initialize default user session as Jemin (XLM-26001)
+        state.user = state.members[0];
+
+        function showModal(title, body, type = 'info', actions = []) {
+            const modal = document.getElementById('customModal');
+            const icon = document.getElementById('modalIcon');
+            const titleEl = document.getElementById('modalTitle');
+            const bodyEl = document.getElementById('modalBody');
+            const actionsEl = document.getElementById('modalActions');
+
+            // Setup Icon styling
+            if (type === 'success') {
+                icon.className = "w-12 h-12 rounded-full mx-auto flex items-center justify-center bg-emerald-500/10 text-emerald-400";
+                icon.innerHTML = `<span class="material-icons">verified</span>`;
+            } else if (type === 'warning') {
+                icon.className = "w-12 h-12 rounded-full mx-auto flex items-center justify-center bg-amber-500/10 text-amber-400";
+                icon.innerHTML = `<span class="material-icons">warning</span>`;
+            } else if (type === 'danger') {
+                icon.className = "w-12 h-12 rounded-full mx-auto flex items-center justify-center bg-rose-500/10 text-rose-400";
+                icon.innerHTML = `<span class="material-icons">gavel</span>`;
+            } else {
+                icon.className = "w-12 h-12 rounded-full mx-auto flex items-center justify-center bg-sky-500/10 text-sky-400";
+                icon.innerHTML = `<span class="material-icons">info</span>`;
+            }
+
+            titleEl.innerText = title;
+            bodyEl.innerText = body;
+            actionsEl.innerHTML = '';
+
+            if (actions.length === 0) {
+                // Default close action
+                actions.push({
+                    text: '我知道了',
+                    style: 'bg-slate-800 hover:bg-slate-750 text-slate-200',
+                    onClick: () => modal.classList.add('hidden')
+                });
+            }
+
+            actions.forEach(act => {
+                const btn = document.createElement('button');
+                btn.className = `px-4 py-2 rounded-xl text-xs font-bold transition-all ${act.style}`;
+                btn.innerText = act.text;
+                btn.onclick = () => {
+                    act.onClick();
+                    modal.classList.add('hidden');
+                };
+                actionsEl.appendChild(btn);
+            });
+
+            modal.classList.remove('hidden');
+        }
+
+        function simulateNewUserOnboarding() {
+            state.isRegistered = false;
+            state.currentTab = 'booking';
+            renderView();
+        }
+
+        function switchTab(tabId) {
+            if (!state.isRegistered) {
+                // Force user to stay in registration flow
+                return;
+            }
+
+            state.currentTab = tabId;
+            
+            ['booking', 'member', 'rules', 'admin'].forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === tabId) {
+                    btn.className = "flex flex-col items-center gap-1 text-amber-400";
+                } else {
+                    btn.className = "flex flex-col items-center gap-1 text-slate-500 hover:text-slate-300";
+                }
+            });
+
+            renderView();
+        }
+
+        function renderView() {
+            const container = document.getElementById('liffBody');
+            container.innerHTML = '';
+
+            // Handle Registration Flow First if unregistered
+            if (!state.isRegistered) {
+                renderOnboardingFlow(container);
+                return;
+            }
+
+            if (state.currentTab === 'booking') {
+                renderBookingTab(container);
+            } else if (state.currentTab === 'member') {
+                renderMemberTab(container);
+            } else if (state.currentTab === 'rules') {
+                renderRulesTab(container);
+            } else if (state.currentTab === 'admin') {
+                // Privilege Access Check: Only Jemin (XLM-26001) is allowed in Admin tab
+                if (state.user.memberSerialId !== 'XLM-26001') {
+                    renderAccessDenied(container);
+                } else {
+                    renderAdminTab(container);
+                }
+            }
+        }
+
+        /* Access Denied View for Unauthorized Users */
+        function renderAccessDenied(container) {
+            const div = document.createElement('div');
+            div.className = "py-12 text-center space-y-4 animate-fade-in";
+            div.innerHTML = `
+                <div class="w-16 h-16 bg-rose-500/10 text-rose-400 rounded-full mx-auto flex items-center justify-center">
+                    <span class="material-icons text-3xl">security</span>
+                </div>
+                <div class="space-y-1">
+                    <h2 class="text-base font-bold text-slate-200">權限不足！</h2>
+                    <p class="text-xs text-slate-400 leading-relaxed px-8">
+                        此分頁僅限囍勒喵主控端管理員 <strong class="text-amber-400">Jemin (XLM-26001)</strong> 查看與操作。<br>目前您登入的流水卡號為：<strong class="text-rose-400 font-mono">${state.user.memberSerialId}</strong>。
+                    </p>
+                </div>
+                <button onclick="switchTab('member')" class="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-750 text-slate-200 text-xs font-semibold">
+                    返回會員中心
+                </button>
+            `;
+            container.appendChild(div);
+        }
+
+        function renderOnboardingFlow(container) {
+            const div = document.createElement('div');
+            div.className = "space-y-6 py-6 animate-fade-in";
+
+            // Screen 1: Simulating LINE Authentication
+            div.innerHTML = `
+                <div class="text-center space-y-4 py-8">
+                    <div class="w-16 h-16 bg-[#06c755] text-white rounded-3xl mx-auto flex items-center justify-center shadow-lg shadow-emerald-500/10">
+                        <span class="material-icons text-3xl">login</span>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-100">囍勒喵 登入授權</h2>
+                        <p class="text-xs text-slate-400 mt-1">囍勒喵到府洗貓預約系統需要讀取您的 LINE 暱稱以建立尊榮會員卡</p>
+                    </div>
+
+                    <div class="p-4 bg-slate-900 border border-slate-800 rounded-2xl text-left space-y-2 max-w-[300px] mx-auto text-xs text-slate-400">
+                        <p class="font-bold text-slate-300 flex items-center gap-1"><span class="material-icons text-sm text-emerald-400">gavel</span> 授權要求權限：</p>
+                        <p>• 讀取您的 LINE 唯一 User ID (Profile)</p>
+                        <p>• 讀取您的 LINE 顯示名稱與頭像</p>
+                    </div>
+
+                    <button onclick="simulateLineLoginSuccess()" class="w-full max-w-[280px] py-3.5 bg-[#06c755] hover:bg-[#05b34c] text-white font-bold rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/10 mx-auto">
+                        <span class="material-icons text-sm">fingerprint</span> 許可並授權登入
+                    </button>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function simulateLineLoginSuccess() {
+            const container = document.getElementById('liffBody');
+            container.innerHTML = '';
+
+            // Screen 2: Fill out Profile Form
+            const div = document.createElement('div');
+            div.className = "space-y-4 animate-fade-in";
+
+            div.innerHTML = `
+                <div class="bg-gradient-to-r from-amber-500 to-amber-600 p-4 rounded-2xl text-slate-950">
+                    <h2 class="text-sm font-bold flex items-center gap-1.5">
+                        <span class="material-icons text-lg">celebrate</span> 
+                        歡迎來到囍勒喵！
+                    </h2>
+                    <p class="text-[10px] opacity-90 mt-1">這是您第一次登入。請填寫以下囍勒喵會員的基本聯絡資料，我們將即時為您自動派發專屬的流水號會員卡號！</p>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-3 text-xs">
+                    <h3 class="font-bold text-slate-200 flex items-center gap-1"><span class="material-icons text-sm text-amber-400">badge</span> 填寫家長會員資料</h3>
+                    
+                    <div class="space-y-2.5">
+                        <div>
+                            <label class="text-slate-400 block mb-1">家長姓名/稱呼</label>
+                            <input id="reg-name" type="text" placeholder="例：林小姐" class="w-full bg-slate-850 border border-slate-800 text-slate-200 p-2.5 rounded-xl outline-none focus:border-amber-500">
+                        </div>
+                        <div>
+                            <label class="text-slate-400 block mb-1">聯絡電話</label>
+                            <input id="reg-phone" type="text" placeholder="例：0912-345-678" class="w-full bg-slate-850 border border-slate-800 text-slate-200 p-2.5 rounded-xl outline-none focus:border-amber-500">
+                        </div>
+                        <div>
+                            <label class="text-slate-400 block mb-1">選擇到府洗貓預設地區</label>
+                            <select id="reg-district" class="w-full bg-slate-850 border border-slate-800 text-slate-200 p-2.5 rounded-xl outline-none focus:border-amber-500">
+                                <option value="近區 (土城/板橋/中和)">近區 (土城/板橋/中和) ➔ 車馬費 $500</option>
+                                <option value="中區 (新莊/三重/永和)" selected>中區 (新莊/三重/永和) ➔ 車馬費 $650</option>
+                                <option value="遠區 (淡水/八里/深坑)">遠區 (淡水/八里/深坑) ➔ 車馬費 $850</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-slate-400 block mb-1">預設詳細地址</label>
+                            <input id="reg-address" type="text" placeholder="例：新北市新莊區中正路100號" class="w-full bg-slate-850 border border-slate-800 text-slate-200 p-2.5 rounded-xl outline-none focus:border-amber-500">
+                        </div>
+                    </div>
+
+                    <button onclick="executeOnboardingRegistration()" class="w-full py-3 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs hover:bg-amber-400 transition-all flex items-center justify-center gap-1 mt-2">
+                        <span class="material-icons text-sm">how_to_reg</span> 建立囍勒喵尊榮帳戶
+                    </button>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function executeOnboardingRegistration() {
+            const name = document.getElementById('reg-name').value.trim();
+            const phone = document.getElementById('reg-phone').value.trim();
+            const district = document.getElementById('reg-district').value;
+            const address = document.getElementById('reg-address').value.trim();
+
+            if (!name || !phone || !address) {
+                showModal('資料不全', '請填寫所有欄位以建立您的帳號！', 'warning');
+                return;
+            }
+
+            // Generate next available Serial ID dynamically
+            const nextIndex = state.members.length + 1;
+            const newSerialId = `XLM-2600${nextIndex}`;
+
+            const newMember = {
+                lineId: 'U' + Math.random().toString(36).substring(2, 15),
+                memberSerialId: newSerialId,
+                parentName: name,
+                phone: phone,
+                address: address,
+                district: district,
+                balance: 0, 
+                coupons: 0, 
+                admin_notes: '新註冊會員，無特殊備註。',
+                cats: []    
+            };
+
+            // Write to mock DB lists
+            state.members.push(newMember);
+            state.transactionHistory[newSerialId] = [];
+
+            // Shift current session user to this new member
+            state.user = newMember;
+            state.isRegistered = true;
+            state.currentTab = 'member'; 
+
+            showModal('註冊完成！', `系統已成功在 囍勒喵 Supabase 資料庫建立您的會員卡！\n專屬卡號：${newSerialId}`, 'success', [
+                {
+                    text: '進入囍勒喵',
+                    style: 'bg-amber-500 text-slate-950',
+                    onClick: () => completeOnboardingFlow()
+                }
+            ]);
+        }
+
+        function completeOnboardingFlow() {
+            switchTab('member');
+        }
+
+        function renderBookingTab(container) {
+            const div = document.createElement('div');
+            div.className = "space-y-4 animate-fade-in";
+
+            div.innerHTML = `
+                <div class="bg-slate-900 border border-slate-800/80 p-4 rounded-2xl">
+                    <div class="flex justify-between items-start">
+                        <h2 class="text-sm font-bold text-slate-100 flex items-center gap-1.5">
+                            <span class="material-icons text-amber-400 text-lg">pets</span> 
+                            哈囉 ${state.user.parentName} 家長！
+                        </h2>
+                        <span class="text-[9px] font-mono px-2 py-0.5 bg-amber-500/10 text-amber-400 rounded border border-amber-500/20">${state.user.memberSerialId}</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1">今天想幫哪位主子預約專屬到府沙龍呢？</p>
+                </div>
+            `;
+
+            // Dynamic Calendar Card
+            const calCard = document.createElement('div');
+            calCard.className = "bg-slate-900/60 border border-slate-850 p-4 rounded-2xl space-y-3";
+            calCard.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-bold text-slate-300 flex items-center gap-1">
+                        <span class="material-icons text-xs text-amber-400">calendar_month</span> 
+                        1. 選擇預約日期
+                    </h3>
+                    <span class="text-[10px] text-slate-500 font-medium">2026 年 7 月</span>
+                </div>
+            `;
+
+            const dateGrid = document.createElement('div');
+            dateGrid.className = "grid grid-cols-7 gap-1.5 text-center";
+            const weekdays = ['一', '二', '三', '四', '五', '六', '日'];
+            weekdays.forEach(w => {
+                const wh = document.createElement('div');
+                wh.className = "text-[10px] font-bold text-slate-500 py-1";
+                wh.innerText = w;
+                dateGrid.appendChild(wh);
+            });
+
+            const startDay = 14; 
+            for (let i = 0; i < 14; i++) {
+                const dayNum = startDay + i;
+                const dateStr = `2026-07-${dayNum}`;
+                
+                const override = state.overrides[dateStr] || { isFullyBlocked: false, blockedSlots: [] };
+                const userBookings = state.bookings[dateStr] || [];
+                
+                const isFullyBlocked = override.isFullyBlocked || 
+                    (override.blockedSlots.length + userBookings.length >= state.timeSlots.length);
+
+                const isSelected = state.selectedDate === dateStr;
+
+                const dayBtn = document.createElement('button');
+                dayBtn.disabled = isFullyBlocked;
+
+                if (isFullyBlocked) {
+                    dayBtn.className = "py-2 rounded-lg bg-slate-950 text-slate-700 border border-slate-900 cursor-not-allowed text-xs";
+                } else if (isSelected) {
+                    dayBtn.className = "py-2 rounded-lg bg-amber-500 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/20";
+                } else {
+                    dayBtn.className = "py-2 rounded-lg bg-slate-850 hover:bg-slate-800 text-slate-300 text-xs transition-all";
+                }
+
+                dayBtn.onclick = () => {
+                    state.selectedDate = dateStr;
+                    state.selectedTime = ''; 
+                    renderView();
+                };
+
+                dayBtn.innerHTML = `
+                    <span class="block text-[8px] opacity-70">${dayNum === 13 ? '今天' : '7月'}</span>
+                    <span class="block font-bold text-xs">${dayNum}</span>
+                `;
+                dateGrid.appendChild(dayBtn);
+            }
+            calCard.appendChild(dateGrid);
+            div.appendChild(calCard);
+
+            // Time Slots Card
+            const slotCard = document.createElement('div');
+            slotCard.className = "bg-slate-900/60 border border-slate-850 p-4 rounded-2xl space-y-3";
+            slotCard.innerHTML = `<h3 class="text-xs font-bold text-slate-300 flex items-center gap-1"><span class="material-icons text-xs text-amber-400">schedule</span> 2. 選擇服務時段</h3>`;
+            
+            const slotGrid = document.createElement('div');
+            slotGrid.className = "grid grid-cols-2 gap-2";
+
+            const override = state.overrides[state.selectedDate] || { isFullyBlocked: false, blockedSlots: [] };
+            const userBookings = state.bookings[state.selectedDate] || [];
+
+            state.timeSlots.forEach(slot => {
+                const isBooked = override.blockedSlots.includes(slot) || userBookings.includes(slot);
+                const isSelected = state.selectedTime === slot;
+
+                const btn = document.createElement('button');
+                btn.className = isBooked
+                    ? "py-2.5 rounded-xl bg-slate-800/40 text-slate-650 border border-slate-850/50 cursor-not-allowed text-xs flex flex-col items-center justify-center gap-0.5 line-through"
+                    : isSelected
+                    ? "py-2.5 rounded-xl bg-amber-500/10 border-2 border-amber-400 text-amber-400 font-bold text-xs flex flex-col items-center justify-center gap-0.5"
+                    : "py-2.5 rounded-xl bg-slate-850 hover:bg-slate-800 text-slate-300 border border-transparent text-xs flex flex-col items-center justify-center gap-0.5 transition-all";
+                
+                btn.disabled = isBooked;
+                btn.onclick = () => {
+                    state.selectedTime = slot;
+                    renderView();
+                };
+
+                btn.innerHTML = `
+                    <span class="font-bold">${slot}</span>
+                    <span class="text-[8px] tracking-wider">${isBooked ? '已客滿/休息 🚫' : '可預約 🐱'}</span>
+                `;
+                slotGrid.appendChild(btn);
+            });
+            slotCard.appendChild(slotGrid);
+            div.appendChild(slotCard);
+
+            // Registered Cats Section
+            const catSelectCard = document.createElement('div');
+            catSelectCard.className = "bg-slate-900/60 border border-slate-850 p-4 rounded-2xl space-y-3";
+            catSelectCard.innerHTML = `
+                <h3 class="text-xs font-bold text-slate-300 flex items-center gap-1">
+                    <span class="material-icons text-xs text-amber-400">checklist</span> 
+                    3. 勾選本次預約主子
+                </h3>
+            `;
+            
+            if (state.user.cats.length === 0) {
+                catSelectCard.innerHTML += `<p class="text-xs text-slate-500">目前沒有登記的主子，請先至「會員與主子」分頁新增喔！</p>`;
+            } else {
+                const catGrid = document.createElement('div');
+                catGrid.className = "space-y-2";
+                state.user.cats.forEach(cat => {
+                    const isChecked = state.selectedCats.includes(cat.name);
+                    const catRow = document.createElement('div');
+                    catRow.className = "flex items-center justify-between bg-slate-850 p-2.5 rounded-xl border border-slate-800/80";
+                    catRow.innerHTML = `
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" id="check-${cat.name}" ${isChecked ? 'checked' : ''} class="w-4 h-4 rounded accent-amber-500 cursor-pointer">
+                            <label for="check-${cat.name}" class="text-xs font-semibold text-slate-200 cursor-pointer">${cat.name} <span class="text-[10px] text-slate-500 font-normal">(${cat.weight}kg)</span></label>
+                        </div>
+                        <span class="text-[10px] text-slate-500 truncate max-w-[150px]" title="${cat.grooming_notes}">${cat.grooming_notes || '無注意事項'}</span>
+                    `;
+
+                    const checkbox = catRow.querySelector('input');
+                    checkbox.onchange = () => {
+                        if (checkbox.checked) {
+                            if (!state.selectedCats.includes(cat.name)) state.selectedCats.push(cat.name);
+                        } else {
+                            state.selectedCats = state.selectedCats.filter(name => name !== cat.name);
+                        }
+                        renderView();
+                    };
+
+                    catGrid.appendChild(catRow);
+                });
+                catSelectCard.appendChild(catGrid);
+            }
+            div.appendChild(catSelectCard);
+
+            const formCard = document.createElement('div');
+            formCard.className = "bg-slate-900/60 border border-slate-850 p-4 rounded-2xl space-y-3";
+            formCard.innerHTML = `
+                <h3 class="text-xs font-bold text-slate-300 flex items-center gap-1"><span class="material-icons text-xs text-amber-400">contact_mail</span> 4. 填寫到府聯絡資訊</h3>
+                <div class="space-y-2.5 text-xs">
+                    <div>
+                        <label class="text-slate-400 block mb-1">家長姓名</label>
+                        <input id="form-name" type="text" value="${state.user.parentName}" class="w-full bg-slate-850 border border-slate-800 text-slate-200 p-2.5 rounded-xl outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">聯絡電話</label>
+                        <input id="form-phone" type="text" value="${state.user.phone}" class="w-full bg-slate-850 border border-slate-800 text-slate-200 p-2.5 rounded-xl outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">選擇到府地區（出車費加價）</label>
+                        <select id="form-district" class="w-full bg-slate-850 border border-slate-800 text-slate-200 p-2.5 rounded-xl outline-none focus:border-amber-500">
+                            <option value="近區 (土城/板橋/中和)" ${state.user.district === '近區 (土城/板橋/中和)' ? 'selected' : ''}>近區 (土城/板橋/中和) ➔ $500</option>
+                            <option value="中區 (新莊/三重/永和)" ${state.user.district === '中區 (新莊/三重/永和)' ? 'selected' : ''}>中區 (新莊/三重/永和) ➔ $650</option>
+                            <option value="遠區 (淡水/八里/深坑)" ${state.user.district === '遠區 (淡水/八里/深坑)' ? 'selected' : ''}>遠區 (淡水/八里/深坑) ➔ $850</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">詳細地址</label>
+                        <input id="form-address" type="text" value="${state.user.address}" class="w-full bg-slate-850 border border-slate-800 text-slate-200 p-2.5 rounded-xl outline-none focus:border-amber-500" placeholder="巷弄樓層門牌">
+                    </div>
+                </div>
+            `;
+
+            const districtSelect = formCard.querySelector('#form-district');
+            districtSelect.onchange = () => {
+                state.user.district = districtSelect.value;
+                renderView();
+            };
+
+            div.appendChild(formCard);
+
+            // Calculations based on distance & coupon
+            const catsCount = state.selectedCats.length;
+            const originalOutCallFee = config.outCallFees[state.user.district] || 500;
+            
+            // Coupon checkbox rendering with $500 discount logic
+            let couponHtml = "";
+            let finalOutCallFee = originalOutCallFee;
+            
+            if (state.user.coupons > 0) {
+                couponHtml = `
+                    <div class="flex items-center justify-between bg-amber-500/10 p-2.5 rounded-xl border border-amber-500/20 text-xs mt-2">
+                        <div class="flex items-center gap-1.5">
+                            <input type="checkbox" id="use-coupon-checkbox" ${state.useCoupon ? 'checked' : ''} class="w-4 h-4 rounded accent-amber-500 cursor-pointer">
+                            <label for="use-coupon-checkbox" class="text-amber-400 font-bold cursor-pointer flex items-center gap-1">
+                                <span class="material-icons text-sm">confirmation_number</span> 
+                                使用 1 張出車折抵券 (剩餘 ${state.user.coupons} 張)
+                            </label>
+                        </div>
+                        <span class="text-amber-400 font-bold">-NT$ 500</span>
+                    </div>
+                `;
+                if (state.useCoupon) {
+                    finalOutCallFee = Math.max(0, originalOutCallFee - 500);
+                }
+            } else {
+                state.useCoupon = false; 
+            }
+
+            const ratePerCat = state.paymentMethod === 'balance' ? config.memberPrice : config.originalPrice;
+            const totalServicePrice = (ratePerCat * catsCount) + finalOutCallFee;
+            const isBalanceEnough = state.user.balance >= totalServicePrice;
+
+            const payCard = document.createElement('div');
+            payCard.className = "bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-3";
+            payCard.innerHTML = `
+                <div class="space-y-1.5 text-xs">
+                    <div class="flex justify-between text-slate-400">
+                        <span>預約主子數量：</span>
+                        <span class="text-slate-200 font-bold">${catsCount} 隻</span>
+                    </div>
+                    <div class="flex justify-between text-slate-400">
+                        <span>基礎洗護小計：</span>
+                        <span class="text-slate-200">NT$ ${ratePerCat * catsCount}</span>
+                    </div>
+                    <div class="flex justify-between text-slate-400">
+                        <span>出車里程費：</span>
+                        <span class="text-slate-200">NT$ ${originalOutCallFee}</span>
+                    </div>
+                    ${couponHtml}
+                    <div class="border-t border-slate-800/80 my-2"></div>
+                    <div class="flex justify-between text-xs items-center">
+                        <span class="text-slate-400">本次服務預估金額：</span>
+                        <span class="text-amber-400 font-bold text-lg">NT$ ${totalServicePrice}</span>
+                    </div>
+                </div>
+
+                <div class="space-y-2 pt-1">
+                    <label class="text-xs font-bold text-slate-300 block">💳 選擇扣款方式</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="setPayment('balance')" class="${state.paymentMethod === 'balance' ? 'border-2 border-amber-400 bg-amber-500/10 text-amber-400' : 'bg-slate-850 text-slate-400 border border-transparent'} py-2 rounded-xl text-[11px] flex flex-col items-center justify-center transition-all">
+                            <span class="font-bold">儲值金扣款 (享8折)</span>
+                            <span class="text-[9px] scale-90">餘額：$${state.user.balance} ${isBalanceEnough ? '✅' : '❌'}</span>
+                        </button>
+                        <button onclick="setPayment('cash')" class="${state.paymentMethod === 'cash' ? 'border-2 border-amber-400 bg-amber-500/10 text-amber-400' : 'bg-slate-850 text-slate-400 border border-transparent'} py-2 rounded-xl text-[11px] flex flex-col items-center justify-center transition-all">
+                            <span class="font-bold">現場付現 (原價)</span>
+                            <span class="text-[9px] scale-90">單次 $${config.originalPrice} 起</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            const couponCheckbox = payCard.querySelector('#use-coupon-checkbox');
+            if (couponCheckbox) {
+                couponCheckbox.onchange = () => {
+                    state.useCoupon = couponCheckbox.checked;
+                    renderView();
+                };
+            }
+
+            const submitBtn = document.createElement('button');
+            const canBook = state.selectedTime && catsCount > 0 && (state.paymentMethod === 'cash' || isBalanceEnough);
+
+            submitBtn.className = canBook
+                ? "w-full py-3.5 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs hover:bg-amber-400 transition-all flex items-center justify-center gap-1 shadow-lg shadow-amber-500/10"
+                : "w-full py-3.5 bg-slate-800 text-slate-500 font-bold rounded-xl text-xs cursor-not-allowed flex items-center justify-center gap-1";
+
+            submitBtn.disabled = !canBook;
+            
+            let btnText = '送出囍勒喵預約申請';
+            if (!state.selectedTime) btnText = '請先選擇預約時段';
+            else if (catsCount === 0) btnText = '請先勾選要洗澡的主子';
+            else if (!isBalanceEnough && state.paymentMethod === 'balance') btnText = '儲值金不足，請選現場付現';
+
+            submitBtn.innerHTML = `<span class="material-icons text-sm">check_circle</span> ${btnText}`;
+            submitBtn.onclick = () => handleBookingSubmit(totalServicePrice, originalOutCallFee);
+
+            payCard.appendChild(submitBtn);
+            div.appendChild(payCard);
+
+            container.appendChild(div);
+        }
+
+        function setPayment(method) {
+            state.paymentMethod = method;
+            renderView();
+        }
+
+        function handleBookingSubmit(totalPrice, originalOutCall) {
+            state.user.parentName = document.getElementById('form-name').value;
+            state.user.phone = document.getElementById('form-phone').value;
+            state.user.address = document.getElementById('form-address').value;
+
+            if (!state.bookings[state.selectedDate]) {
+                state.bookings[state.selectedDate] = [];
+            }
+            state.bookings[state.selectedDate].push(state.selectedTime);
+
+            let logMsg = '';
+            let usedCoupon = state.useCoupon && state.user.coupons > 0;
+
+            if (usedCoupon) {
+                state.user.coupons -= 1;
+            }
+
+            if (state.paymentMethod === 'balance') {
+                state.user.balance -= totalPrice;
+                logMsg = `預約成功扣款，使用儲值金支付 NT$ ${totalPrice}。`;
+                
+                state.transactionHistory[state.user.memberSerialId].unshift({
+                    type: 'spend',
+                    amount: -totalPrice,
+                    balanceAfter: state.user.balance,
+                    couponsAfter: state.user.coupons,
+                    desc: `預約洗貓扣款 (${state.selectedCats.join(', ')})${usedCoupon ? ' (使用車馬券折抵 $500)' : ''}`,
+                    time: getCurrentTimeString()
+                });
+            } else {
+                logMsg = `預約成功，預計現場向美容師支付 NT$ ${totalPrice}。`;
+            }
+
+            const container = document.getElementById('liffBody');
+            container.innerHTML = `
+                <div class="space-y-4 py-8 text-center animate-fade-in">
+                    <span class="material-icons text-amber-400 text-6xl">verified</span>
+                    <h2 class="text-xl font-bold text-slate-100">預約成功！</h2>
+                    <p class="text-xs text-slate-400 leading-relaxed px-4">
+                        系統已成功同步時段至 <strong>囍勒喵</strong> 資料庫！您可以在 LINE 聊天視窗收到預約明細。
+                    </p>
+
+                    <div class="bg-slate-900 border border-slate-800 text-left p-4 rounded-2xl max-w-[300px] mx-auto space-y-2 text-xs text-slate-300">
+                        <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-1">
+                            <span class="font-bold text-amber-400 text-sm">📅 預約確認明細</span>
+                            <span class="text-[9px] font-mono opacity-80">${state.user.memberSerialId}</span>
+                        </div>
+                        <p><strong class="text-slate-500">家長姓名：</strong> ${state.user.parentName}</p>
+                        <p><strong class="text-slate-500">洗澡主子：</strong> ${state.selectedCats.join(', ')}</p>
+                        <p><strong class="text-slate-500">預約日期：</strong> ${state.selectedDate} (${state.selectedTime})</p>
+                        <p class="truncate"><strong class="text-slate-500">服務地區：</strong> ${state.user.district}</p>
+                        <p class="truncate"><strong class="text-slate-500">到府地址：</strong> ${state.user.address}</p>
+                        <div class="border-t border-slate-800/80 pt-2 flex justify-between">
+                            <span class="text-slate-500">付款金額：</span>
+                            <span class="font-bold text-amber-400">${state.paymentMethod === 'balance' ? '儲值金扣款' : '現場付現'} NT$ ${totalPrice}</span>
+                        </div>
+                        ${usedCoupon ? `<p class="text-[10px] text-emerald-400 font-bold flex items-center gap-1"><span class="material-icons text-xs">confirmation_number</span> 已使用 1 張出車折抵券 (扣抵 $500)</p>` : ''}
+                    </div>
+
+                    <p class="text-[10px] text-slate-500 italic mt-2">${logMsg}</p>
+
+                    <button onclick="switchTab('booking')" class="px-6 py-2 rounded-xl bg-slate-800 hover:bg-slate-750 text-slate-200 text-xs font-semibold">
+                        返回預約頁面
+                    </button>
+                </div>
+            `;
+            
+            state.selectedTime = '';
+            state.useCoupon = false;
+        }
+
+        function renderMemberTab(container) {
+            const div = document.createElement('div');
+            div.className = "space-y-4 animate-fade-in";
+
+            // Digital Membership Card with ID and dynamic coupons snapshot
+            const card = document.createElement('div');
+            card.className = "bg-gradient-to-br from-amber-500 to-amber-700 p-5 rounded-3xl text-slate-950 space-y-4 shadow-xl shadow-amber-500/10 relative overflow-hidden";
+            card.innerHTML = `
+                <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-white/5 rounded-full"></div>
+                <div class="absolute right-12 top-4 w-12 h-12 bg-white/10 rounded-full"></div>
+
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-[10px] tracking-widest uppercase font-bold opacity-80">囍勒喵 Xi-Le-Meow VIP卡</p>
+                        <h3 class="text-base font-bold mt-0.5">${state.user.parentName} 的溫馨貓窩</h3>
+                    </div>
+                    <span class="font-mono text-xs font-bold bg-slate-950/20 px-2.5 py-1 rounded-lg">${state.user.memberSerialId}</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <div>
+                        <p class="text-[9px] font-semibold opacity-70">儲值金可用餘額 (Balance)</p>
+                        <p class="text-xl font-bold tracking-tight mt-0.5">NT$ ${state.user.balance.toLocaleString()}</p>
+                    </div>
+                    <div class="border-l border-slate-950/20 pl-3">
+                        <p class="text-[9px] font-semibold opacity-70">出車折抵券 (Coupons)</p>
+                        <p class="text-xl font-bold tracking-tight mt-0.5 flex items-center gap-1">
+                            <span class="material-icons text-lg">confirmation_number</span> 
+                            ${state.user.coupons} 張
+                        </p>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center text-[9px] opacity-70 pt-1 font-bold">
+                    <span>LINE ID: U8f9a2...b7d8</span>
+                    <span>等級: 尊榮會員 🏆</span>
+                </div>
+            `;
+            div.appendChild(card);
+
+            // Registered Cats List Section
+            const catListCard = document.createElement('div');
+            catListCard.className = "bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-3";
+            catListCard.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-bold text-slate-300 flex items-center gap-1">
+                        <span class="material-icons text-amber-400 text-sm">pets</span> 
+                        已登記的主子 (${state.user.cats.length} 隻)
+                    </h3>
+                    <button onclick="toggleCatForm()" class="text-[10px] font-bold text-amber-400 flex items-center gap-0.5">
+                        <span class="material-icons text-[12px]">add_circle</span> 新增主子
+                    </button>
+                </div>
+            `;
+
+            const addCatForm = document.createElement('div');
+            addCatForm.id = "addCatForm";
+            addCatForm.className = "hidden bg-slate-850 p-3 rounded-xl border border-slate-800 space-y-2 text-xs text-slate-300";
+            addCatForm.innerHTML = `
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block mb-1 text-slate-400">主子名字</label>
+                        <input id="cat-name-input" type="text" class="w-full bg-slate-800 p-2 rounded-lg outline-none border border-slate-700 focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block mb-1 text-slate-400">主子品種</label>
+                        <input id="cat-breed-input" type="text" placeholder="如: 英國短毛貓" class="w-full bg-slate-800 p-2 rounded-lg outline-none border border-slate-700 focus:border-amber-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block mb-1 text-slate-400">主子體重 (kg)</label>
+                        <input id="cat-weight-input" type="number" step="0.1" class="w-full bg-slate-800 p-2 rounded-lg outline-none border border-slate-700 focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block mb-1 text-slate-400">健康注意事項</label>
+                        <input id="cat-health-input" type="text" placeholder="如: 皮膚敏感、無疾病" class="w-full bg-slate-800 p-2 rounded-lg outline-none border border-slate-700 focus:border-amber-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block mb-1 text-slate-400">美容注意事項 (Grooming Notes)</label>
+                    <input id="cat-grooming-input" type="text" placeholder="如: 討厭吹風機、剪指甲會抗拒..." class="w-full bg-slate-800 p-2 rounded-lg outline-none border border-slate-700 focus:border-amber-500">
+                </div>
+                <div class="flex justify-end gap-2 pt-1">
+                    <button onclick="toggleCatForm()" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300">取消</button>
+                    <button onclick="saveNewCat()" class="px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-bold">確認新增</button>
+                </div>
+            `;
+            catListCard.appendChild(addCatForm);
+
+            const catsContainer = document.createElement('div');
+            catsContainer.className = "space-y-2 mt-1";
+            state.user.cats.forEach(cat => {
+                const row = document.createElement('div');
+                row.className = "bg-slate-850 p-2.5 rounded-xl border border-slate-800 flex justify-between items-start text-xs";
+                row.innerHTML = `
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-1.5">
+                            <span class="font-bold text-slate-200">${cat.name}</span>
+                            <span class="px-1.5 py-0.5 bg-slate-800 text-slate-400 rounded text-[9px]">${cat.breed || '米克斯'} (${cat.weight || 0} kg)</span>
+                        </div>
+                        <p class="text-[10px] text-slate-450 flex items-center gap-1">
+                            <span class="material-icons text-[11px] text-emerald-500">health_and_safety</span>
+                            健康：${cat.health_notes || '良好'}
+                        </p>
+                        <p class="text-[10px] text-slate-450 flex items-center gap-1">
+                            <span class="material-icons text-[11px] text-amber-500">cut</span>
+                            美容：${cat.grooming_notes || '無注意事項'}
+                        </p>
+                    </div>
+                    <button onclick="deleteCat('${cat.name}')" class="text-slate-600 hover:text-red-400 transition-all">
+                        <span class="material-icons text-sm">delete</span>
+                    </button>
+                `;
+                catsContainer.appendChild(row);
+            });
+            catListCard.appendChild(catsContainer);
+            div.appendChild(catListCard);
+
+            // Stored Value Passive Info Area (Non-interactive for client, guide only)
+            const depositCard = document.createElement('div');
+            depositCard.className = "bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-3";
+            depositCard.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xs font-bold text-slate-350 flex items-center gap-1"><span class="material-icons text-xs text-amber-400">payments</span> 尊榮會員儲值方案</h3>
+                    <span class="text-[9px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded">線下派發</span>
+                </div>
+                <p class="text-[10px] text-slate-450 leading-relaxed">
+                    囍勒喵採用線下實體交易。您可於美容師到府洗貓時現場支付，或透過銀行轉帳。美容師確認後將於後台即時派發額度與贈券。
+                </p>
+                <div class="space-y-2 pt-1">
+                    <div class="p-2.5 bg-slate-850 rounded-xl border border-slate-800/80 text-xs">
+                        <div class="flex justify-between font-bold text-slate-200">
+                            <span>儲值 $3,000</span>
+                            <span class="text-slate-400">標準派發</span>
+                        </div>
+                        <p class="text-[9px] text-slate-500 mt-0.5">帳戶匯入 $3,000，洗澡享會員 8 折優惠抵扣（實扣 $1,200/次）</p>
+                    </div>
+                    <div class="p-2.5 bg-slate-850 rounded-xl border border-slate-800/80 text-xs">
+                        <div class="flex justify-between font-bold text-amber-400">
+                            <span>儲值 $6,000</span>
+                            <span class="text-emerald-400">🎁 贈 1 張車馬券</span>
+                        </div>
+                        <p class="text-[9px] text-slate-500 mt-0.5">帳戶匯入 $6,000。額外贈送 1 張 $500 出車券，可折抵里程費用！</p>
+                    </div>
+                    <div class="p-2.5 bg-gradient-to-r from-amber-500/5 to-amber-600/10 rounded-xl border border-amber-500/20 text-xs">
+                        <div class="flex justify-between font-bold text-amber-400">
+                            <span>👑 儲值 $10,000 (VIP)</span>
+                            <span class="text-emerald-400">🎁 贈 2 張車馬券</span>
+                        </div>
+                        <p class="text-[9px] text-amber-500/70 mt-0.5">帳戶匯入 $10,000。額外贈送 2 張 $500 出車券（市值省 $1,000）</p>
+                    </div>
+                </div>
+            `;
+            div.appendChild(depositCard);
+
+            // Transaction History Logs Card (Snapshot Audit trail)
+            const logsCard = document.createElement('div');
+            logsCard.className = "bg-slate-900/60 border border-slate-850 p-4 rounded-2xl space-y-2.5 text-xs text-slate-300";
+            logsCard.innerHTML = `<h3 class="text-xs font-bold text-slate-300 flex items-center gap-1"><span class="material-icons text-xs text-amber-400">history</span> 最近消費與交易紀錄 (上限10筆)</h3>`;
+            
+            const logsList = document.createElement('div');
+            logsList.className = "space-y-2 max-h-[180px] overflow-y-auto no-scrollbar";
+            
+            const displayedHistory = state.transactionHistory[state.user.memberSerialId] || [];
+            if (displayedHistory.length === 0) {
+                logsList.innerHTML = `<p class="text-slate-500 text-[10px] text-center py-4">尚無消費交易紀錄</p>`;
+            } else {
+                displayedHistory.slice(0, 10).forEach(log => {
+                    const row = document.createElement('div');
+                    row.className = "flex justify-between items-center bg-slate-850/60 p-2 rounded-xl text-[10px]";
+                    
+                    const isPositive = log.amount > 0;
+                    row.innerHTML = `
+                        <div>
+                            <p class="font-bold text-slate-200">${log.desc}</p>
+                            <span class="text-[8px] text-slate-500">${log.time}</span>
+                        </div>
+                        <div class="text-right">
+                            <p class="${isPositive ? 'text-emerald-400' : 'text-rose-400'} font-bold">
+                                ${isPositive ? '+' : ''}${log.amount.toLocaleString()}
+                            </p>
+                            <span class="text-[8px] text-slate-550 block">餘額 $${log.balanceAfter}</span>
+                            <span class="text-[8px] text-amber-500 font-medium">出車券 ${log.couponsAfter ?? 0} 張</span>
+                        </div>
+                    `;
+                    logsList.appendChild(row);
+                });
+            }
+            logsCard.appendChild(logsList);
+            div.appendChild(logsCard);
+
+            container.appendChild(div);
+        }
+
+        // Member cat handlers
+        function toggleCatForm() {
+            const form = document.getElementById('addCatForm');
+            form.classList.toggle('hidden');
+        }
+
+        function saveNewCat() {
+            const name = document.getElementById('cat-name-input').value.trim();
+            const breed = document.getElementById('cat-breed-input').value.trim();
+            const weight = parseFloat(document.getElementById('cat-weight-input').value) || 0;
+            const health_notes = document.getElementById('cat-health-input').value.trim();
+            const grooming_notes = document.getElementById('cat-grooming-input').value.trim();
+
+            if (!name) return;
+
+            state.user.cats.push({
+                cat_id: 'cat_' + Date.now(),
+                name,
+                breed: breed || '米克斯',
+                weight: weight || 0,
+                health_notes: health_notes || '無特殊狀況',
+                grooming_notes: grooming_notes || '無特殊狀況'
+            });
+            renderView();
+        }
+
+        function deleteCat(catName) {
+            state.user.cats = state.user.cats.filter(cat => cat.name !== catName);
+            renderView();
+        }
+
+        function renderRulesTab(container) {
+            const div = document.createElement('div');
+            div.className = "space-y-4 animate-fade-in";
+
+            div.innerHTML = `
+                <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+                    <h2 class="text-sm font-bold text-slate-100 flex items-center gap-1.5">
+                        <span class="material-icons text-amber-400 text-lg">description</span> 
+                        囍勒喵收費與合約須知
+                    </h2>
+                    <p class="text-xs text-slate-450 mt-1">我們堅持公開透明的收費與退費機制，保障每位主子與家長的權益。</p>
+                </div>
+
+                <div class="bg-slate-900/60 border border-slate-850 p-4 rounded-2xl space-y-3">
+                    <h3 class="text-xs font-bold text-slate-350 flex items-center gap-1">💸 1. 差別定價標準</h3>
+                    <div class="space-y-2 text-xs">
+                        <div class="flex justify-between bg-slate-850 p-2.5 rounded-xl">
+                            <span class="text-slate-400">非會員（現場付現）</span>
+                            <span class="font-bold text-slate-200">NT$ ${config.originalPrice} / 次</span>
+                        </div>
+                        <div class="flex justify-between bg-amber-500/5 p-2.5 rounded-xl border border-amber-500/20">
+                            <span class="text-amber-400">會員（儲值金抵扣）</span>
+                            <span class="font-bold text-amber-400">NT$ ${config.memberPrice} / 次 (享 8 折!)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/60 border border-slate-850 p-4 rounded-2xl space-y-2.5 text-xs text-slate-400">
+                    <h3 class="text-xs font-bold text-slate-350 flex items-center gap-1">📍 2. 里程車馬費與出車券折抵</h3>
+                    <p class="leading-relaxed">
+                        囍勒喵全面加收基本出車里程費，依地區遠近彈性加收：
+                    </p>
+                    <p class="leading-relaxed pl-2">
+                        • <strong>近區</strong>（土城/板橋/中和）：單次收費 <strong class="text-slate-200">NT$ 500</strong>。
+                    </p>
+                    <p class="leading-relaxed pl-2">
+                        • <strong>中區</strong>（新莊/三重/永和）：單次收費 <strong class="text-slate-200">NT$ 650</strong>。
+                    </p>
+                    <p class="leading-relaxed pl-2">
+                        • <strong>遠區</strong>（淡水/八里/深坑）：單次收費 <strong class="text-slate-200">NT$ 850</strong>。
+                    </p>
+                    <p class="bg-slate-950/50 p-2.5 rounded-xl border border-slate-850 text-amber-400 font-semibold leading-relaxed">
+                        🎟️ <strong>出車券折抵標準</strong>：面額固定為 $500。近區用券後實付 $0；中區用券折抵後需補貼差額 $150；遠區用券折抵後需補貼差額 $350。
+                    </p>
+                </div>
+
+                <div class="bg-red-500/5 border border-red-500/10 p-4 rounded-2xl space-y-2.5 text-xs text-slate-400">
+                    <h3 class="text-xs font-bold text-red-400 flex items-center gap-1"><span class="material-icons text-sm">warning</span> 3. 退費保障防套利機制</h3>
+                    <p class="leading-relaxed">
+                        家長隨時可申請退還未使用的儲值金，但為保障合約誠信、防止短期套利：
+                    </p>
+                    <p class="bg-slate-950/50 p-2.5 rounded-xl border border-slate-850 text-slate-300 leading-relaxed font-bold">
+                        ⚠️「中途申請退費時，已使用的洗護服務次數，將回溯依非會員原價 ($1,500/次) 與實際車馬費進行扣除後，退還其餘額（且贈送之出車折抵券自動失效作廢）。」
+                    </p>
+                </div>
+            `;
+
+            container.appendChild(div);
+        }
+
+        function renderAdminTab(container) {
+            const div = document.createElement('div');
+            div.className = "space-y-4 animate-fade-in pb-12";
+
+            div.innerHTML = `
+                <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+                    <h2 class="text-sm font-bold text-slate-100 flex items-center gap-1.5">
+                        <span class="material-icons text-amber-400 text-lg">admin_panel_settings</span> 
+                        囍勒喵・主控管理端
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-1">模擬管理員後台。你可在這裡配置時段、依流水 ID 鎖定並調整客戶的儲值金、折抵券、以及管理全體會員名單與客戶專屬備註。</p>
+                </div>
+            `;
+
+            // PART A: TIME CONTROL OVERRIDES
+            const configCard = document.createElement('div');
+            configCard.className = "bg-slate-900/60 border border-slate-850 p-4 rounded-2xl space-y-3";
+            configCard.innerHTML = `
+                <h3 class="text-xs font-bold text-amber-400 flex items-center gap-1"><span class="material-icons text-xs">calendar_month</span> 1. 營業時段與強制排休配置</h3>
+                <div class="flex items-center justify-between text-xs text-slate-350 font-bold mb-1">
+                    <span>選擇要調整的日期</span>
+                    <select id="admin-date-picker" onchange="syncAdminDatePicker()" class="bg-slate-800 p-1.5 rounded-lg border border-slate-700 outline-none text-slate-200">
+                        <option value="2026-07-14">7月14日</option>
+                        <option value="2026-07-15">7月15日</option>
+                        <option value="2026-07-16">7月16日</option>
+                        <option value="2026-07-17">7月17日</option>
+                        <option value="2026-07-18">7月18日</option>
+                    </select>
+                </div>
+                <div class="border-t border-slate-850/80 my-2"></div>
+            `;
+
+            const adminDate = state.selectedDate; 
+            const overrideState = state.overrides[adminDate] || { isFullyBlocked: false, blockedSlots: [] };
+
+            const blockDayRow = document.createElement('div');
+            blockDayRow.className = "flex justify-between items-center text-xs p-2.5 bg-slate-850 rounded-xl border border-slate-800";
+            blockDayRow.innerHTML = `
+                <div>
+                    <p class="font-bold text-slate-200">一鍵封鎖整天不開放 (Mutex)</p>
+                    <span class="text-[9px] text-slate-500">開啟後，客戶端日曆上的該日立即變灰</span>
+                </div>
+                <div class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="toggle-block-day" ${overrideState.isFullyBlocked ? 'checked' : ''} class="sr-only peer">
+                    <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
+                </div>
+            `;
+
+            const toggleBlockDay = blockDayRow.querySelector('input');
+            toggleBlockDay.onchange = () => {
+                if (!state.overrides[adminDate]) {
+                    state.overrides[adminDate] = { isFullyBlocked: false, blockedSlots: [] };
+                }
+                state.overrides[adminDate].isFullyBlocked = toggleBlockDay.checked;
+                renderView();
+            };
+            configCard.appendChild(blockDayRow);
+
+            const slotsHeader = document.createElement('div');
+            slotsHeader.className = "text-xs font-bold text-slate-300 pt-1.5 mb-1";
+            slotsHeader.innerText = "單一時段劃掉/關閉配置：";
+            configCard.appendChild(slotsHeader);
+
+            const adminSlotsGrid = document.createElement('div');
+            adminSlotsGrid.className = "grid grid-cols-2 gap-2";
+
+            state.timeSlots.forEach(slot => {
+                const isBlocked = overrideState.blockedSlots.includes(slot);
+                
+                const slotBtn = document.createElement('button');
+                slotBtn.className = isBlocked
+                    ? "py-2.5 rounded-xl bg-rose-500/10 border-2 border-rose-500/40 text-rose-400 font-bold text-xs"
+                    : "py-2.5 rounded-xl bg-slate-850 hover:bg-slate-800 text-slate-300 text-xs transition-all";
+                
+                slotBtn.innerHTML = `
+                    <span class="block">${slot}</span>
+                    <span class="text-[8px] tracking-wider font-normal">${isBlocked ? '強制劃掉 (Blocked) 🚫' : '開放中 ✅'}</span>
+                `;
+
+                slotBtn.onclick = () => {
+                    if (!state.overrides[adminDate]) {
+                        state.overrides[adminDate] = { isFullyBlocked: false, blockedSlots: [] };
+                    }
+                    if (isBlocked) {
+                        state.overrides[adminDate].blockedSlots = state.overrides[adminDate].blockedSlots.filter(s => s !== slot);
+                    } else {
+                        state.overrides[adminDate].blockedSlots.push(slot);
+                    }
+                    renderView();
+                };
+
+                adminSlotsGrid.appendChild(slotBtn);
+            });
+            configCard.appendChild(adminSlotsGrid);
+            div.appendChild(configCard);
+
+            // PART B: CRM MEMBER LIST AND NOTES
+            const crmCard = document.createElement('div');
+            crmCard.className = "bg-slate-900/60 border border-slate-850 p-4 rounded-2xl space-y-3";
+            crmCard.innerHTML = `
+                <h3 class="text-xs font-bold text-amber-400 flex items-center gap-1">
+                    <span class="material-icons text-xs">groups</span> 
+                    2. 囍勒喵 全體註冊會員名單 (CRM)
+                </h3>
+                <p class="text-[10px] text-slate-400">目前資料庫共有 ${state.members.length} 位會員。在此進行備註修改、調度鎖定或刪除戶頭。</p>
+            `;
+
+            const memberListWrapper = document.createElement('div');
+            memberListWrapper.className = "space-y-3 mt-2";
+
+            state.members.forEach(m => {
+                const isLocked = state.adminLockedMemberId === m.memberSerialId;
+                const mRow = document.createElement('div');
+                mRow.className = `p-3 rounded-2xl border text-xs space-y-2.5 transition-all ${isLocked ? 'bg-amber-500/5 border-amber-500/30' : 'bg-slate-850/60 border-slate-800'}`;
+                
+                mRow.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="font-bold text-slate-200 text-sm flex items-center gap-1.5">
+                                ${m.parentName}
+                                <span class="px-1.5 py-0.5 rounded font-mono text-[9px] ${isLocked ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-slate-800 text-slate-400'}">${m.memberSerialId}</span>
+                            </p>
+                            <p class="text-[10px] text-slate-450 mt-1 flex items-center gap-1"><span class="material-icons text-[11px]">phone</span> ${m.phone} | <span class="material-icons text-[11px]">room</span> ${m.district}</p>
+                        </div>
+                        <div class="text-right text-[11px] font-mono">
+                            <p class="text-emerald-400 font-bold">$${m.balance}</p>
+                            <p class="text-amber-400 font-bold">${m.coupons}張出車券</p>
+                        </div>
+                    </div>
+
+                    <!-- Note Display Section -->
+                    <div class="p-2 bg-slate-900/60 rounded-xl border border-slate-800/80 relative">
+                        <p class="text-[10px] text-slate-400 font-semibold flex items-center gap-1"><span class="material-icons text-xs text-amber-400">rate_review</span> 備註資訊：</p>
+                        <p id="note-text-${m.memberSerialId}" class="text-[10px] text-slate-300 mt-1 leading-relaxed whitespace-pre-wrap">${m.admin_notes || '無注意事項備註'}</p>
+                        
+                        <!-- Inline Note Edit Form -->
+                        <div id="note-edit-box-${m.memberSerialId}" class="hidden mt-1.5 space-y-1.5">
+                            <textarea id="note-input-${m.memberSerialId}" class="w-full bg-slate-800 text-slate-200 border border-slate-700 p-2 rounded-xl text-[10px] outline-none h-12 resize-none" placeholder="輸入家長特徵或貓咪備註...">${m.admin_notes || ''}</textarea>
+                            <div class="flex justify-end gap-1.5">
+                                <button onclick="toggleNoteEdit('${m.memberSerialId}', false)" class="px-2 py-1 bg-slate-800 text-slate-400 rounded-lg text-[9px]">取消</button>
+                                <button onclick="saveMemberNote('${m.memberSerialId}')" class="px-2.5 py-1 bg-amber-500 text-slate-950 font-bold rounded-lg text-[9px]">儲存</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Row Controls -->
+                    <div class="flex justify-between items-center pt-1 border-t border-slate-800/60">
+                        <div class="flex gap-2">
+                            <button onclick="lockOnMemberDirect('${m.memberSerialId}')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-[10px] rounded-lg transition-all flex items-center gap-0.5">
+                                <span class="material-icons text-xs">tune</span> 鎖定並編輯財務
+                            </button>
+                            <button onclick="toggleNoteEdit('${m.memberSerialId}', true)" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-[10px] rounded-lg transition-all flex items-center gap-0.5">
+                                <span class="material-icons text-xs">edit_note</span> 編輯備註
+                            </button>
+                        </div>
+                        ${m.memberSerialId !== 'XLM-26001' ? `
+                            <button onclick="promptDeleteMember('${m.memberSerialId}')" class="text-rose-500/70 hover:text-rose-400 p-1 rounded transition-all">
+                                <span class="material-icons text-sm">person_remove</span>
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+                memberListWrapper.appendChild(mRow);
+            });
+            crmCard.appendChild(memberListWrapper);
+            div.appendChild(crmCard);
+
+            // PART C: ADMIN FINANCE CONTROLS FOR THE LOCKED MEMBER
+            const lockedMemberObj = state.members.find(m => m.memberSerialId === state.adminLockedMemberId) || state.members[0];
+            const financeCard = document.createElement('div');
+            financeCard.className = "bg-slate-900/60 border border-slate-850 p-4 rounded-2xl space-y-3.5";
+            financeCard.innerHTML = `
+                <h3 class="text-xs font-bold text-amber-400 flex items-center gap-1"><span class="material-icons text-xs">monetization_on</span> 3. 囍勒喵 鎖定帳戶財務調度台</h3>
+                
+                <div class="space-y-1.5 bg-slate-950/60 p-3 rounded-xl border border-slate-850">
+                    <div class="text-[11px] text-slate-350 space-y-1">
+                        <p class="flex justify-between"><span>🔒 當前鎖定目標：</span><span class="text-amber-400 font-bold font-mono">${lockedMemberObj.memberSerialId}</span></p>
+                        <p class="flex justify-between"><span>鎖定家長：</span><span class="text-slate-200 font-bold">${lockedMemberObj.parentName}</span></p>
+                        <p class="flex justify-between"><span>儲值金餘額：</span><span class="text-emerald-400 font-bold">NT$ ${lockedMemberObj.balance.toLocaleString()} 元</span></p>
+                        <p class="flex justify-between"><span>出車折抵券：</span><span class="text-amber-400 font-bold">${lockedMemberObj.coupons} 張</span></p>
+                    </div>
+                </div>
+
+                <!-- Section B1: Admin Deposit & Coupon control -->
+                <div class="space-y-2 pt-1 border-t border-slate-800/50">
+                    <p class="text-[11px] font-bold text-slate-300">💰 A. 管理端手動調度 (儲值金與折抵券)：</p>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                            <label class="text-slate-550 block mb-1">調度儲值金 (可輸入負數)</label>
+                            <input id="admin-dep-amt" type="number" placeholder="如: 6000" class="w-full bg-slate-850 border border-slate-800 text-slate-200 p-2 rounded-xl outline-none focus:border-amber-500">
+                        </div>
+                        <div>
+                            <label class="text-slate-550 block mb-1">調度折抵券 (可輸入負數)</label>
+                            <input id="admin-coupon-qty" type="number" placeholder="如: 2" class="w-full bg-slate-850 border border-slate-800 text-slate-200 p-2 rounded-xl outline-none focus:border-amber-500">
+                        </div>
+                    </div>
+                    <button onclick="adminDepositExecute()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition-all flex items-center justify-center gap-1 shadow-lg shadow-emerald-600/10">
+                        <span class="material-icons text-xs">tune</span> 執行手動調度
+                    </button>
+                </div>
+
+                <!-- Section B2: Admin Expense & Auto Deduction -->
+                <div class="space-y-2 pt-1 border-t border-slate-800/50">
+                    <p class="text-[11px] font-bold text-slate-300">🛍️ B. 手動新增現場/線下消費紀錄 (自動判定扣款)：</p>
+                    <div class="space-y-2 text-xs">
+                        <div>
+                            <label class="text-slate-550 block mb-1">消費描述明細 (Description)</label>
+                            <input id="admin-exp-desc" type="text" placeholder="例如: 現場加購深層除蚤 SPA 碳酸浴" class="w-full bg-slate-850 border border-slate-800 text-slate-200 p-2.5 rounded-xl outline-none focus:border-amber-500">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-slate-550 block mb-1">消費金額 (NT$)</label>
+                                <input id="admin-exp-amt" type="number" placeholder="例如: 1200" class="w-full bg-slate-850 border border-slate-800 text-slate-200 p-2.5 rounded-xl outline-none focus:border-amber-500">
+                            </div>
+                            <div class="flex flex-col justify-end pb-1">
+                                <div class="flex items-center gap-1.5 p-2 bg-slate-800 rounded-xl h-10 border border-slate-700/80">
+                                    <input type="checkbox" id="admin-deduct-coupon" ${lockedMemberObj.coupons <= 0 ? 'disabled' : ''} class="w-4 h-4 accent-amber-500 cursor-pointer">
+                                    <label for="admin-deduct-coupon" class="text-[10px] text-slate-300 font-bold cursor-pointer">折抵車馬費 (扣1券)</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="adminExpenseExecute()" class="w-full py-2 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs hover:bg-amber-400 transition-all flex items-center justify-center gap-1">
+                        <span class="material-icons text-xs">point_of_sale</span> 執行手動扣款與記帳
+                    </button>
+                </div>
+            `;
+            div.appendChild(financeCard);
+
+            container.appendChild(div);
+            document.getElementById('admin-date-picker').value = adminDate;
+        }
+
+        function syncAdminDatePicker() {
+            const selectedVal = document.getElementById('admin-date-picker').value;
+            state.selectedDate = selectedVal;
+            renderView();
+        }
+
+        function toggleNoteEdit(serialId, show) {
+            const textBox = document.getElementById(`note-text-${serialId}`);
+            const editBox = document.getElementById(`note-edit-box-${serialId}`);
+            if (show) {
+                textBox.classList.add('hidden');
+                editBox.classList.remove('hidden');
+            } else {
+                textBox.classList.remove('hidden');
+                editBox.classList.add('hidden');
+            }
+        }
+
+        function saveMemberNote(serialId) {
+            const inputVal = document.getElementById(`note-input-${serialId}`).value.trim();
+            const member = state.members.find(m => m.memberSerialId === serialId);
+            if (member) {
+                member.admin_notes = inputVal;
+                showModal('更新備註成功 ✅', `系統已成功儲存會員 ${member.parentName} 的最新照護與 CRM 備註。`, 'success');
+                renderView();
+            }
+        }
+
+        function lockOnMemberDirect(serialId) {
+            state.adminLockedMemberId = serialId;
+            showModal('已鎖定目標 🔒', `主控調度台已成功切換至會員：${serialId}。現在可以為他手動儲值或新增扣帳消費。`, 'success');
+            renderView();
+        }
+
+        function promptDeleteMember(serialId) {
+            const member = state.members.find(m => m.memberSerialId === serialId);
+            if (!member) return;
+
+            showModal(
+                '確認刪除會員？',
+                `⚠️ 警告：您正準備刪除會員 ${member.parentName} (${serialId})。此操作將會連同他的儲值金 $${member.balance}、折抵券、以及所有登記的主子與交易紀錄一併抹除！是否確認？`,
+                'danger',
+                [
+                    {
+                        text: '取消放手',
+                        style: 'bg-slate-800 text-slate-300',
+                        onClick: () => {}
+                    },
+                    {
+                        text: '確認永久刪除',
+                        style: 'bg-rose-600 hover:bg-rose-500 text-white',
+                        onClick: () => executeDeleteMember(serialId)
+                    }
+                ]
+            );
+        }
+
+        function executeDeleteMember(serialId) {
+            // Delete member obj
+            state.members = state.members.filter(m => m.memberSerialId !== serialId);
+            delete state.transactionHistory[serialId];
+
+            // Safety recovery: If locked member was deleted, target XLM-26001
+            if (state.adminLockedMemberId === serialId) {
+                state.adminLockedMemberId = 'XLM-26001';
+            }
+
+            // If deleted member was current session user, log Jemin back in
+            if (state.user.memberSerialId === serialId) {
+                state.user = state.members[0];
+            }
+
+            showModal('會員已被永久抹除 🗑️', `流水號為 ${serialId} 的客戶資料與額度已完全自 Supabase 沙盒中清除。`, 'success');
+            renderView();
+        }
+
+        function adminDepositExecute() {
+            const amountInput = document.getElementById('admin-dep-amt');
+            const couponInput = document.getElementById('admin-coupon-qty');
+
+            const amount = parseInt(amountInput.value) || 0;
+            const couponDelta = parseInt(couponInput.value) || 0;
+
+            if (amount === 0 && couponDelta === 0) {
+                return;
+            }
+
+            const lockedMember = state.members.find(m => m.memberSerialId === state.adminLockedMemberId);
+            if (!lockedMember) return;
+
+            lockedMember.balance += amount;
+            lockedMember.coupons += couponDelta;
+            if (lockedMember.coupons < 0) lockedMember.coupons = 0; 
+
+            if (!state.transactionHistory[lockedMember.memberSerialId]) {
+                state.transactionHistory[lockedMember.memberSerialId] = [];
+            }
+
+            if (amount !== 0) {
+                state.transactionHistory[lockedMember.memberSerialId].unshift({
+                    type: 'deposit',
+                    amount: amount,
+                    balanceAfter: lockedMember.balance,
+                    couponsAfter: lockedMember.coupons,
+                    desc: amount > 0 ? `後台手動新增儲值 (線下交易)` : `後台手動扣減餘額`,
+                    time: getCurrentTimeString()
+                });
+            }
+
+            if (couponDelta !== 0) {
+                state.transactionHistory[lockedMember.memberSerialId].unshift({
+                    type: 'coupon_adjust',
+                    amount: couponDelta,
+                    balanceAfter: lockedMember.balance,
+                    couponsAfter: lockedMember.coupons,
+                    desc: couponDelta > 0 ? `後台手動調度贈券 +${couponDelta} 張` : `後台手動回收折抵券 ${Math.abs(couponDelta)} 張`,
+                    time: getCurrentTimeString()
+                });
+            }
+
+            // Clear inputs
+            amountInput.value = '';
+            couponInput.value = '';
+
+            showModal('手動調度完成 ✅', `已成功為 ${lockedMember.parentName} 更新帳目！\n最新儲值金：$${lockedMember.balance}，車馬券：${lockedMember.coupons}張。`, 'success');
+            renderView();
+        }
+
+        function adminExpenseExecute() {
+            const descInput = document.getElementById('admin-exp-desc');
+            const amountInput = document.getElementById('admin-exp-amt');
+            const couponCheckbox = document.getElementById('admin-deduct-coupon');
+
+            const desc = descInput.value.trim();
+            const amount = parseInt(amountInput.value) || 0;
+            const useCoupon = couponCheckbox ? couponCheckbox.checked : false;
+
+            if (!desc || amount <= 0) {
+                showModal('輸入錯誤', '請填寫完整的消費明細與正確金額。', 'warning');
+                return;
+            }
+
+            const lockedMember = state.members.find(m => m.memberSerialId === state.adminLockedMemberId);
+            if (!lockedMember) return;
+
+            // Apply coupon if checked and valid (Offsets exactly $500 of the bill)
+            let finalAmount = amount;
+            let finalDesc = desc;
+            if (useCoupon && lockedMember.coupons > 0) {
+                lockedMember.coupons -= 1;
+                finalAmount = Math.max(0, amount - 500); 
+                finalDesc += " (扣券折抵 $500)";
+            }
+
+            if (!state.transactionHistory[lockedMember.memberSerialId]) {
+                state.transactionHistory[lockedMember.memberSerialId] = [];
+            }
+
+            // Mutex check: Auto-deduction from balance if enough; otherwise shift to Cash Record
+            if (lockedMember.balance >= finalAmount) {
+                lockedMember.balance -= finalAmount;
+
+                state.transactionHistory[lockedMember.memberSerialId].unshift({
+                    type: 'spend',
+                    amount: -finalAmount,
+                    balanceAfter: lockedMember.balance,
+                    couponsAfter: lockedMember.coupons,
+                    desc: `後台自動扣帳: ${finalDesc}`,
+                    time: getCurrentTimeString()
+                });
+                showModal('自動扣帳成功 ✅', `系統偵測到儲值餘額充足，已自動由 ${lockedMember.parentName} 的儲值金帳戶扣抵 $${finalAmount}！`, 'success');
+            } else {
+                state.transactionHistory[lockedMember.memberSerialId].unshift({
+                    type: 'spend_cash',
+                    amount: -finalAmount,
+                    balanceAfter: lockedMember.balance, 
+                    couponsAfter: lockedMember.coupons,
+                    desc: `後台現場記帳(現金): ${finalDesc}`,
+                    time: getCurrentTimeString()
+                });
+                showModal('餘額不足 ⚠️ 改為現場收現', `帳戶餘額不足以支付 $${finalAmount}。系統已改為「現場付現/匯款」記帳方式！`, 'warning');
+            }
+
+            // Clear inputs
+            descInput.value = '';
+            amountInput.value = '';
+
+            renderView();
+        }
+
+        // Helpers
+        function getCurrentTimeString() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const date = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const mins = String(now.getMinutes()).padStart(2, '0');
+            return `${year}-${month}-${date} ${hours}:${mins}`;
+        }
+
+        window.onload = function() {
+            renderView();
+        };
+    </script>
+</body>
+</html>
