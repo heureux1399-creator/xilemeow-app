@@ -68,7 +68,7 @@
 
       <!-- 診斷/模式列 -->
       <div :class="['text-[10px] font-mono px-3 py-1.5 leading-relaxed break-words tracking-wide', isLineMode ? 'bg-grape-700 text-grape-100' : 'bg-amber-300 text-amber-900']">
-        <span class="opacity-60">v260720.09</span> · <span class="font-black">{{ isLineMode ? 'LIVE' : 'DEV' }}</span> · <span class="opacity-80">{{ statusCode }}</span>
+        <span class="opacity-60">v260720.10</span> · <span class="font-black">{{ isLineMode ? 'LIVE' : 'DEV' }}</span> · <span class="opacity-80">{{ statusCode }}</span>
       </div>
 
       <!-- Toast -->
@@ -105,40 +105,125 @@
           </div>
         </div>
 
-        <!-- 頁籤 1: 良辰吉日 -->
-        <section v-if="currentTab==='booking'" class="bg-white rounded-3xl p-5 shadow-softer border border-grape-100/60">
-          <h2 class="text-base font-black text-grape-700 mb-1 flex items-center gap-2">📅 挑個良辰吉日</h2>
-          <p class="text-[11px] text-grape-300 font-bold mb-4">綠色格子代表有空檔，點一下就選起來</p>
-          <div class="min-h-[210px] flex items-center justify-center">
-            <div v-if="calendarDates.length===0" class="flex flex-col items-center gap-2 text-grape-300 py-8">
-              <div class="w-8 h-8 border-3 border-grape-100 border-t-grape-400 rounded-full animate-spin" style="border-width:3px"></div>
-              <span class="text-xs font-bold">日曆讀取中…</span>
-            </div>
-            <div v-else class="w-full">
-              <div class="flex justify-between items-center mb-3">
-                <button @click="moveWeeks(-28)" class="press bg-grape-50 text-grape-600 font-extrabold text-xs px-4 py-2 rounded-full">‹ 上月</button>
-                <span class="text-xs font-black text-grape-400">四週檢視</span>
-                <button @click="moveWeeks(28)" class="press bg-grape-50 text-grape-600 font-extrabold text-xs px-4 py-2 rounded-full">下月 ›</button>
+        <!-- 頁籤 1: 良辰吉日 + 預約流程 -->
+          <div v-if="currentTab==='booking'" class="space-y-4">
+
+            <!-- 步驟 1: 選日期 -->
+            <section v-if="bookStep===1" class="bg-white rounded-3xl p-5 shadow-softer border border-grape-100/60">
+              <h2 class="text-base font-black text-grape-700 mb-4">📅 良辰吉日</h2>
+              <div class="min-h-[210px] flex items-center justify-center">
+                <div v-if="calendarDates.length===0" class="flex flex-col items-center gap-2 text-grape-300 py-8">
+                  <div class="w-8 h-8 rounded-full animate-spin" style="border-width:3px;border-color:#e7d9ff;border-top-color:#b48cf5"></div>
+                  <span class="text-xs font-bold">讀取中…</span>
+                </div>
+                <div v-else class="w-full">
+                  <div class="flex justify-between items-center mb-3">
+                    <button @click="moveWeeks(-28)" class="press bg-grape-50 text-grape-600 font-extrabold text-xl w-9 h-9 rounded-full flex items-center justify-center">‹</button>
+                    <span class="text-xs font-black text-grape-300">{{ calMonthLabel }}</span>
+                    <button @click="moveWeeks(28)" class="press bg-grape-50 text-grape-600 font-extrabold text-xl w-9 h-9 rounded-full flex items-center justify-center">›</button>
+                  </div>
+                  <div class="grid grid-cols-7 gap-1.5">
+                    <button v-for="d in calendarDates" :key="d.dateStr" :disabled="!d.isClickable"
+                        :class="['press aspect-square rounded-2xl flex flex-col items-center justify-center border-2 text-center transition-all',
+                          selectedDate===d.dateStr ? 'bg-grape-500 border-grape-500 text-white shadow-soft scale-105' :
+                          (d.isClickable ? 'bg-emerald-50 border-emerald-100 text-emerald-700' :
+                          'bg-slate-50 border-transparent text-slate-200')]"
+                        @click="selectDate(d)">
+                      <div class="text-[11px] font-black leading-none">{{ d.dateLabel }}</div>
+                      <div v-if="d.isClickable" class="text-[8px] font-bold mt-0.5 text-emerald-400">吉兆</div>
+                    </button>
+                  </div>
+                  <button v-if="selectedDate" @click="bookStep=2"
+                    class="press mt-4 w-full bg-gradient-to-r from-grape-500 to-grape-600 text-white font-black py-3.5 rounded-2xl text-sm shadow-softer">
+                    {{ selectedDate }} ✦ 選時辰
+                  </button>
+                </div>
               </div>
-              <div class="grid grid-cols-7 gap-1.5">
-                <button v-for="d in calendarDates" :key="d.dateStr" :disabled="!d.isClickable"
-                    :class="['press aspect-square rounded-2xl flex flex-col items-center justify-center border-2 text-center',
-                      selectedDate===d.dateStr ? 'bg-grape-500 border-grape-500 text-white shadow-soft' :
-                      (d.isClickable ? 'bg-emerald-50 border-emerald-100 text-emerald-700' :
-                       (d.isPast ? 'bg-slate-50 border-slate-100 text-slate-300' : 'bg-slate-50 border-slate-100 text-slate-300'))]"
-                    @click="selectDate(d)">
-                  <div class="text-[11px] font-black leading-none">{{ d.dateLabel }}</div>
-                  <div class="text-[8px] font-bold mt-1 leading-none">{{ d.isPast ? '—' : (d.isOpen ? '有空' : '滿') }}</div>
+            </section>
+
+            <!-- 步驟 2: 選時段 -->
+            <section v-if="bookStep===2" class="bg-white rounded-3xl p-5 shadow-softer border border-grape-100/60 space-y-4">
+              <div class="flex items-center gap-3">
+                <button @click="bookStep=1" class="press text-grape-300 text-xl font-black">‹</button>
+                <div><h2 class="text-base font-black text-grape-700">⏰ 選個時辰</h2><p class="text-xs text-grape-300 font-bold">{{ selectedDate }}</p></div>
+              </div>
+              <div v-if="availableSlots.length===0" class="text-center py-6 text-grape-300 text-sm font-bold">此日無可選時段</div>
+              <div v-else class="grid grid-cols-2 gap-2">
+                <button v-for="slot in availableSlots" :key="slot"
+                  @click="selectedSlot=slot; bookStep=3"
+                  class="press py-3.5 rounded-2xl font-extrabold text-sm border-2 bg-grape-50 text-grape-600 border-grape-100 hover:border-grape-300">
+                  {{ slot }}
                 </button>
               </div>
-              <p v-if="selectedDate" class="text-center text-xs font-extrabold text-grape-600 mt-4 bg-grape-50 rounded-full py-2">
-                已選 {{ selectedDate }} 🐾（預約功能稍後開放）
-              </p>
-            </div>
-          </div>
-        </section>
+            </section>
 
-        <!-- 頁籤 2: 喵星護照 -->
+            <!-- 步驟 3: 勾貓 + 確認台數 -->
+            <section v-if="bookStep===3" class="bg-white rounded-3xl p-5 shadow-softer border border-grape-100/60 space-y-4">
+              <div class="flex items-center gap-3">
+                <button @click="bookStep=2" class="press text-grape-300 text-xl font-black">‹</button>
+                <div><h2 class="text-base font-black text-grape-700">🐱 選喵寶</h2><p class="text-xs text-grape-300 font-bold">{{ selectedDate }} · {{ selectedSlot }}</p></div>
+              </div>
+              <div v-if="myCats.length===0" class="text-center py-4 text-grape-300 text-xs font-bold">尚未登記喵寶，請先到「喵星護照」新增</div>
+              <div v-else class="space-y-2">
+                <div v-for="cat in myCats" :key="cat.name"
+                  @click="toggleCatSelect(cat.name)"
+                  :class="['press flex items-center gap-3 p-3.5 rounded-2xl border-2 cursor-pointer transition-all',
+                    selectedCats.includes(cat.name) ? 'bg-grape-50 border-grape-400' : 'bg-slate-50 border-transparent']">
+                  <span class="text-xl">{{ cat.gender==='女生' ? '🐈' : '🐈‍⬛' }}</span>
+                  <div class="flex-1">
+                    <div class="font-black text-grape-800 text-sm">{{ cat.name }}</div>
+                    <div class="text-[11px] text-grape-400 font-bold">{{ cat.breed }} · {{ cat.weight }}kg</div>
+                  </div>
+                  <div :class="['w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all',
+                    selectedCats.includes(cat.name) ? 'bg-grape-500 border-grape-500' : 'border-slate-300']">
+                    <span v-if="selectedCats.includes(cat.name)" class="text-white text-[10px] font-black">✓</span>
+                  </div>
+                </div>
+              </div>
+              <div class="space-y-2 pt-2 border-t border-grape-100">
+                <label class="lbl">洗浴台數（可修改）</label>
+                <div class="flex items-center gap-4">
+                  <button @click="bookCatCount=Math.max(1,bookCatCount-1)" class="press w-10 h-10 rounded-full bg-grape-50 text-grape-600 font-black text-xl flex items-center justify-center">−</button>
+                  <span class="text-2xl font-black text-grape-700">{{ bookCatCount }}</span>
+                  <button @click="bookCatCount++" class="press w-10 h-10 rounded-full bg-grape-50 text-grape-600 font-black text-xl flex items-center justify-center">＋</button>
+                  <span class="text-xs text-grape-300 font-bold">台</span>
+                </div>
+                <p class="text-[11px] text-grape-300 font-bold">已勾 {{ selectedCats.length }} 隻，最終以台數為準</p>
+              </div>
+              <div><label class="lbl">備註（選填）</label><input v-model="bookNotes" class="fld" placeholder="特殊需求或叮嚀"></div>
+              <button @click="bookStep=4" class="press w-full bg-gradient-to-r from-grape-500 to-grape-600 text-white font-black py-3.5 rounded-2xl text-sm shadow-softer">下一步 → 確認預約</button>
+            </section>
+
+            <!-- 步驟 4: 最終確認 -->
+            <section v-if="bookStep===4" class="bg-white rounded-3xl p-5 shadow-softer border border-grape-100/60 space-y-4">
+              <div class="flex items-center gap-3">
+                <button @click="bookStep=3" class="press text-grape-300 text-xl font-black">‹</button>
+                <h2 class="text-base font-black text-grape-700">📋 確認預約</h2>
+              </div>
+              <div class="bg-grape-50 rounded-2xl p-4 space-y-3 text-sm">
+                <div class="flex justify-between"><span class="text-grape-400 font-bold">良辰吉日</span><span class="font-black text-grape-800">{{ selectedDate }}</span></div>
+                <div class="flex justify-between"><span class="text-grape-400 font-bold">時辰</span><span class="font-black text-grape-800">{{ selectedSlot }}</span></div>
+                <div class="flex justify-between"><span class="text-grape-400 font-bold">喵寶</span><span class="font-black text-grape-800">{{ selectedCats.join('、') || '(未勾選)' }}</span></div>
+                <div class="flex justify-between"><span class="text-grape-400 font-bold">洗浴台數</span><span class="font-black text-grape-800">{{ bookCatCount }} 台</span></div>
+                <div v-if="bookNotes" class="flex justify-between"><span class="text-grape-400 font-bold">備註</span><span class="font-black text-grape-800">{{ bookNotes }}</span></div>
+              </div>
+              <p class="text-[11px] text-grape-300 font-bold text-center">送出後由喵師傅確認時間，請留意 LINE 訊息</p>
+              <button @click="submitBooking" :disabled="bookLoading"
+                class="press w-full bg-gradient-to-r from-emerald-400 to-emerald-500 text-white font-black py-3.5 rounded-2xl text-sm shadow-softer">
+                {{ bookLoading ? '送出中…' : '🐾 送出預約申請' }}
+              </button>
+            </section>
+
+            <!-- 步驟 5: 送出成功 -->
+            <section v-if="bookStep===5" class="bg-white rounded-3xl p-8 shadow-softer border border-grape-100/60 text-center space-y-4">
+              <div class="text-5xl">🎉</div>
+              <h2 class="text-lg font-black text-grape-700">預約申請已送出！</h2>
+              <p class="text-sm text-grape-400 font-bold leading-relaxed">喵師傅收到後會與您確認時間<br>請留意 LINE 訊息通知</p>
+              <button @click="resetBook" class="press mt-2 bg-grape-50 text-grape-600 font-black px-6 py-2.5 rounded-full text-sm">回到日曆</button>
+            </section>
+          </div>
+
+          <!-- 頁籤 2: 喵星護照 -->
         <section v-if="currentTab==='cats'" class="space-y-4">
           <!-- 已登記的貓 -->
           <div class="bg-white rounded-3xl p-5 shadow-softer border border-grape-100/60">
@@ -241,7 +326,7 @@
     <script>
       const LIFF_ID = "2010742657-DOz9QdF3";
       // ⚙️ 唯一要維護：GAS 的 /exec 網址（重新部署若網址變了改這行）
-      const GAS_API = "https://script.google.com/macros/s/AKfycby4DLHoTU09GwQlEuuKH7kerTCIt52m4HTeEiJj1mP9QCecFiigNFN_ePDYmc6NULhj/exec";
+      const GAS_API = "https://script.google.com/macros/s/AKfycbypbbVLTcgxzMmCcLISvs0odRKLb2K9V7nHfd9n83w4nBJs3lRTFLX43qJboz7m4u5i/exec";
       const { createApp, ref, onMounted } = Vue;
       createApp({
         setup() {
@@ -256,7 +341,16 @@
           const weekOffset = ref(0);
           const toast = ref({ show:false, message:'', isError:false });
           const statusCode = ref('INIT');
-          const isLineMode = ref(true);   // GitHub 版一律 LINE 正式
+          const isLineMode = ref(true);
+          // 預約流程狀態
+          const bookStep = ref(1);
+          const selectedSlot = ref('');
+          const selectedCats = ref([]);
+          const bookCatCount = ref(1);
+          const bookNotes = ref('');
+          const bookLoading = ref(false);
+          const availableSlots = ref([]);
+          const calMonthLabel = ref('');
           let scheduleCacheMap = {};
           let idToken = '';
 
@@ -307,9 +401,11 @@
             renderMatrix();
           };
           const renderMatrix = () => {
-            const today=new Date(); today.setHours(0,0,0,0);
+            const today = new Date(); today.setHours(0,0,0,0);
             const cd=today.getDay(), toMon=cd===0?-6:1-cd;
             const start=new Date(today); start.setDate(today.getDate()+toMon+weekOffset.value);
+            // 更新月份標籤
+            calMonthLabel.value = `${start.getFullYear()}年${start.getMonth()+1}月`;
             const arr=[];
             for(let i=0;i<28;i++){
               let t=new Date(start); t.setDate(start.getDate()+i);
@@ -321,8 +417,48 @@
             }
             calendarDates.value=arr;
           };
-          const selectDate = (day) => { if(day.isClickable) selectedDate.value=day.dateStr; };
-          const moveWeeks = (days) => { weekOffset.value+=days; renderMatrix(); };
+          const selectDate = (day) => {
+            if(!day.isClickable) return;
+            selectedDate.value = day.dateStr;
+            selectedSlot.value = '';
+            selectedCats.value = [];
+            bookCatCount.value = 1;
+            // 取得該日可用時段
+            const dm = scheduleCacheMap[day.dateStr] || {};
+            availableSlots.value = Object.keys(dm).filter(s => String(dm[s]).trim() === '開放');
+          };
+          const moveWeeks = (days) => {
+            weekOffset.value += days;
+            // 更新月份標籤
+            const today = new Date();
+            const d = new Date(today);
+            d.setDate(d.getDate() + weekOffset.value);
+            calMonthLabel.value = `${d.getFullYear()}年${d.getMonth()+1}月`;
+            renderMatrix();
+          };
+          const toggleCatSelect = (name) => {
+            const i = selectedCats.value.indexOf(name);
+            if(i >= 0) selectedCats.value.splice(i,1);
+            else { selectedCats.value.push(name); bookCatCount.value = selectedCats.value.length; }
+          };
+          const submitBooking = async () => {
+            bookLoading.value = true;
+            try {
+              const catDetails = selectedCats.value.join('、') || '(未指定)';
+              const res = await apiPost({
+                action: 'submitMyAppointment', idToken,
+                dateStr: selectedDate.value, slotStr: selectedSlot.value,
+                catCount: bookCatCount.value, catDetails, notes: bookNotes.value
+              });
+              if(res && res.success){ bookStep.value = 5; }
+              else showToast('送出失敗：'+(res?res.error:'null'), true);
+            } catch(e){ showToast('送出失敗 '+e.message, true); }
+            bookLoading.value = false;
+          };
+          const resetBook = () => {
+            bookStep.value = 1; selectedDate.value = ''; selectedSlot.value = '';
+            selectedCats.value = []; bookCatCount.value = 1; bookNotes.value = '';
+          };
 
           const saveProfile = async () => {
             const p=myProfile.value;
@@ -379,7 +515,9 @@
           });
 
           return { currentTab, myProfile, myCats, calendarDates, selectedDate, newCat, editIdx, editCat, toast, statusCode, isLineMode,
-            switchTab, moveWeeks, selectDate, saveProfile, registerCat, toggleEdit, saveEditCat, removeCat };
+            switchTab, moveWeeks, selectDate, saveProfile, registerCat, toggleEdit, saveEditCat, removeCat,
+            bookStep, selectedSlot, selectedCats, bookCatCount, bookNotes, bookLoading, availableSlots, calMonthLabel,
+            toggleCatSelect, submitBooking, resetBook };
         }
       }).mount('#app');
         </script>
