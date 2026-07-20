@@ -241,7 +241,7 @@
     <script>
       const LIFF_ID = "2010742657-DOz9QdF3";
       // ⚙️ 唯一要維護：GAS 的 /exec 網址（重新部署若網址變了改這行）
-      const GAS_API = "https://script.google.com/macros/s/AKfycbzw2zqMksKC0D9eWbJBEaQX8ZOmcAuwi-CYc9V7_eNxxm5DEaTGmnVZTyfrrNRGFPq3/exec";
+      const GAS_API = "https://script.google.com/macros/s/AKfycbxyUpWuehq3XhpOeYbQy6VaQS4ftQHWFygDWsakM3ze73cfbrU23zPH_kWEjCTm8DZl/exec";
       const { createApp, ref, onMounted } = Vue;
       createApp({
         setup() {
@@ -365,7 +365,7 @@
               }
               idToken = liff.getIDToken();
               if(!idToken){ debugStage.value='拿不到 idToken'; showToast('身分驗證失敗，請重開', true); return; }
-              debugStage.value='LINE 身分驗證中…';
+              debugStage.value='已取得 idToken（前20字）:' + idToken.substring(0,20) + '…　驗證中…';
               loadProfile();
             }).catch((err)=>{ debugStage.value='liff.init 失敗:'+err; showToast('LIFF 初始化失敗', true); });
           });
