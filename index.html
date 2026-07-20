@@ -68,7 +68,7 @@
 
       <!-- 診斷/模式列 -->
       <div :class="['text-[10px] font-mono px-3 py-1.5 leading-relaxed break-words tracking-wide', isLineMode ? 'bg-grape-700 text-grape-100' : 'bg-amber-300 text-amber-900']">
-        [v07] {{ isLineMode ? '🟣 LINE 正式' : '🧪 測試模式' }}　·　{{ debugStage }}
+        [v08] {{ isLineMode ? '🟣 LINE 正式' : '🧪 測試模式' }}　·　{{ debugStage }}
       </div>
 
       <!-- Toast -->
@@ -286,7 +286,15 @@
             try {
               const res = await apiGet({ action:"getMyProfile", idToken });
               if(res && res.success){ applyProfile(res); debugStage.value='完成 '+res.info.uid; loadCalendar(); }
-              else { debugStage.value='失敗:'+(res?res.error:'null'); showToast('讀取失敗：'+(res?res.error:'null'), true); }
+              else {
+                debugStage.value='失敗:'+(res?res.error:'null');
+                showToast('讀取失敗：'+(res?res.error:'null'), true);
+                // 🧪 驗證失敗時，自動撈詳細原因顯示出來
+                try {
+                  const dbg = await apiGet({ action:"debugVerify", idToken });
+                  debugStage.value = '🔍除錯 httpCode=' + dbg.httpCode + ' | ' + dbg.rawResponse;
+                } catch(e2) { debugStage.value += ' (除錯查詢也失敗:'+e2.message+')'; }
+              }
             } catch(e){ debugStage.value='fetch失敗:'+e.message; showToast('連線出錯了 '+e.message, true); }
           };
           const reloadProfile = async () => {
