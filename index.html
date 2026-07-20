@@ -5,261 +5,375 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>洗咧喵 - 到府美容護照</title>
-
     <script src="https://unpkg.com/vue@3.3.4/dist/vue.global.prod.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-
-    <!-- 🚨 錯誤捕獲器（除錯用，穩定後可刪） -->
     <script>
-      window.onerror = function(message, source, lineno) {
+      window.onerror = function(m, s, l) {
         var d = document.createElement('div');
-        d.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:red;color:white;z-index:99999;padding:16px;font-size:12px;word-wrap:break-word;';
-        d.innerHTML = "🚨 同步錯誤：" + message + "<br>行數: " + lineno;
-        document.body.appendChild(d);
-        return true;
+        d.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:#ef4444;color:white;z-index:99999;padding:14px;font-size:12px;word-wrap:break-word;';
+        d.innerHTML = "\u{1F6A8} \u540C\u6B65\u932F\u8AA4\uFF1A" + m + "<br>\u884C:" + l; document.body.appendChild(d); return true;
       };
       window.addEventListener('unhandledrejection', function(e) {
         var d = document.createElement('div');
-        d.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:orange;color:black;z-index:99999;padding:16px;font-size:12px;word-wrap:break-word;';
-        d.innerHTML = "🟠 Promise 錯誤：" + (e.reason && e.reason.message ? e.reason.message : e.reason);
+        d.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:#fb923c;color:#3b1a00;z-index:99999;padding:14px;font-size:12px;word-wrap:break-word;';
+        d.innerHTML = "\u{1F7E0} Promise \u932F\u8AA4\uFF1A" + (e.reason && e.reason.message ? e.reason.message : e.reason);
         document.body.appendChild(d);
       });
     </script>
-
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              round: ['Nunito', 'Noto Sans TC', 'sans-serif'],
+            },
+            colors: {
+              grape: {
+                50:'#faf7ff',100:'#f3ecff',200:'#e7d9ff',300:'#d0b8ff',
+                400:'#b48cf5',500:'#9d6ee8',600:'#8654d6',700:'#6f42b8',
+              },
+              cream: '#fbf8ff',
+            },
+            boxShadow: {
+              soft: '0 6px 24px -8px rgba(134,84,214,0.22)',
+              softer: '0 2px 12px -4px rgba(134,84,214,0.14)',
+            },
+            borderRadius: { '3xl':'1.75rem', '4xl':'2.25rem' },
+          }
+        }
+      }
+    </script>
     <style>
-      [v-cloak] { display: none !important; }
-      body { -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: #fdf4ff;}
+      [v-cloak]{ display:none !important; }
+      html,body{ background:#f6f0ff; }
+      body{ -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent; font-family:'Nunito','Noto Sans TC',sans-serif; color:#4a4458; }
+      .press{ transition:transform .12s ease, box-shadow .12s ease; }
+      .press:active{ transform:scale(.96); }
+      .pop-enter-active{ transition:all .28s cubic-bezier(.34,1.56,.64,1); }
+      .pop-enter-from{ opacity:0; transform:translateY(8px) scale(.96); }
+      .fld{ width:100%; border:2px solid #efe7fb; border-radius:1rem; padding:.8rem 1rem; background:#fbf8ff; font-size:.95rem; transition:border-color .15s, background .15s; }
+      .fld:focus{ outline:none; border-color:#b48cf5; background:#fff; }
+      .fld::placeholder{ color:#c4bcd6; }
+      .lbl{ display:block; font-size:.72rem; font-weight:800; color:#9a8fb5; margin-bottom:.35rem; letter-spacing:.02em; }
+      ::-webkit-scrollbar{ width:0; }
     </style>
   </head>
-  <body class="text-slate-700 pb-24">
-    <div id="app" v-cloak class="min-h-screen flex flex-col max-w-md mx-auto bg-white shadow-2xl relative">
+  <body class="pb-28">
+    <div id="app" v-cloak class="min-h-screen flex flex-col max-w-md mx-auto relative">
 
-      <!-- 🔍 診斷列（穩定後可整段刪除） -->
-      <div class="bg-slate-900 text-lime-300 text-[11px] font-mono px-3 py-2 leading-relaxed break-words">
-        🔍 {{ debugStage }}
+      <!-- 診斷/模式列 -->
+      <div :class="['text-[10px] font-mono px-3 py-1.5 leading-relaxed break-words tracking-wide', isLineMode ? 'bg-grape-700 text-grape-100' : 'bg-amber-300 text-amber-900']">
+        {{ isLineMode ? '🟣 LINE 正式' : '🧪 測試模式' }}　·　{{ debugStage }}
       </div>
 
-      <div v-if="toast.show" :class="['fixed top-6 left-1/2 -translate-x-1/2 px-5 py-3 rounded-2xl shadow-xl z-[1000] flex items-center gap-2.5 font-bold text-sm w-[90%] max-w-xs', toast.isError ? 'bg-rose-600 text-white' : 'bg-slate-900 text-white']">
-        <i :class="['fa-solid', toast.isError ? 'fa-triangle-exclamation text-rose-200' : 'fa-bell text-purple-300']"></i>
-        <span class="break-words w-full">{{ toast.message }}</span>
-      </div>
+      <!-- Toast -->
+      <transition name="pop">
+        <div v-if="toast.show" :class="['fixed top-5 left-1/2 -translate-x-1/2 px-5 py-3.5 rounded-3xl shadow-soft z-[1000] flex items-center gap-2.5 font-extrabold text-sm w-[88%] max-w-xs', toast.isError ? 'bg-rose-500 text-white' : 'bg-white text-grape-700 border-2 border-grape-100']">
+          <span class="text-lg">{{ toast.isError ? '🙀' : '😻' }}</span>
+          <span class="break-words w-full leading-snug">{{ toast.message }}</span>
+        </div>
+      </transition>
 
-      <header class="bg-purple-600 text-white pt-8 pb-10 px-6 rounded-b-[32px] text-center shadow-lg">
-        <h1 class="text-xl font-black tracking-widest flex items-center justify-center gap-2">洗咧喵 🐱 到府美容護照</h1>
-        <p class="text-[11px] opacity-80 mt-1.5 font-medium tracking-wider">翻閱農民曆選吉日 ‧ 喵寶在家洗香香</p>
+      <!-- Header -->
+      <header class="relative bg-gradient-to-br from-grape-500 to-grape-700 text-white pt-9 pb-14 px-6 text-center overflow-hidden rounded-b-[2.5rem] shadow-soft">
+        <div class="absolute -top-6 -left-4 text-6xl opacity-15 rotate-12">🐾</div>
+        <div class="absolute top-8 -right-3 text-5xl opacity-15 -rotate-12">🐾</div>
+        <div class="relative">
+          <div class="text-4xl mb-1">🐱</div>
+          <h1 class="text-2xl font-black tracking-wide">洗咧喵</h1>
+          <p class="text-[13px] font-bold opacity-90 mt-0.5">到府美容護照</p>
+          <p class="text-[11px] opacity-75 mt-2 font-semibold tracking-wider">翻閱農民曆選吉日 · 喵寶在家洗香香</p>
+        </div>
       </header>
 
-      <main class="flex-1 p-4 space-y-4">
+      <main class="flex-1 px-4 -mt-7 space-y-4 relative z-10">
 
-        <div class="bg-purple-50 p-4 rounded-xl border border-purple-200 text-center">
-           <span class="text-xs text-purple-600 font-bold">目前綁定卡號：</span>
-           <div class="text-lg font-black font-mono text-purple-900 mt-1">
-             {{ myProfile.uid || '⏳ 系統連線驗證中...' }}
-           </div>
+        <!-- 會員卡 -->
+        <div class="bg-white rounded-3xl px-5 py-5 shadow-soft border border-grape-100/60 text-center">
+          <div class="text-[11px] text-grape-400 font-extrabold tracking-wide">🎫 我的喵星卡號</div>
+          <div class="text-2xl font-black font-round text-grape-700 mt-1.5 tracking-wide">
+            <span v-if="myProfile.uid">{{ myProfile.uid }}</span>
+            <span v-else class="text-base text-grape-300 animate-pulse">連線中 · 稍候喵…</span>
+          </div>
+          <div v-if="myProfile.uid" class="inline-flex items-center gap-1.5 mt-2 bg-grape-50 text-grape-600 text-xs font-extrabold px-3 py-1 rounded-full">
+            <span>💰 儲值餘額</span><span class="text-grape-700">{{ myProfile.balance }} 元</span>
+          </div>
         </div>
 
-        <div class="space-y-4">
-          <!-- 頁籤 1: 良辰吉日 -->
-          <div v-if="currentTab === 'booking'" class="space-y-4">
-            <section class="bg-white rounded-2xl p-5 border shadow-sm">
-              <h2 class="text-sm font-black text-purple-900 mb-4">1. 選擇良辰吉日</h2>
-              <div class="bg-slate-50 p-3 rounded-xl min-h-[200px] flex items-center justify-center">
-                 <span v-if="calendarDates.length === 0" class="text-slate-400 text-sm font-bold animate-pulse">日曆數據讀取中...</span>
-                 <div v-else class="w-full">
-                   <div class="flex justify-between mb-4">
-                     <button @click="moveWeeks(-28)" class="bg-purple-100 px-4 py-1 rounded font-bold text-purple-700">上月</button>
-                     <button @click="moveWeeks(28)" class="bg-purple-100 px-4 py-1 rounded font-bold text-purple-700">下月</button>
-                   </div>
-                   <div class="grid grid-cols-7 gap-1">
-                     <button v-for="d in calendarDates" :key="d.dateStr" :disabled="!d.isClickable"
-                          :class="['p-1 rounded text-center border', selectedDate === d.dateStr ? 'bg-purple-600 text-white' : (!d.isClickable ? 'bg-slate-100 text-slate-300' : 'bg-white border-slate-300')]" @click="selectDate(d)">
-                       <div class="text-[10px] font-bold">{{ d.dateLabel }}</div>
-                       <div class="text-[8px] mt-1">{{ d.isPast ? '已過' : (d.isOpen ? '有空' : '滿') }}</div>
-                     </button>
-                   </div>
-                 </div>
+        <!-- 頁籤 1: 良辰吉日 -->
+        <section v-if="currentTab==='booking'" class="bg-white rounded-3xl p-5 shadow-softer border border-grape-100/60">
+          <h2 class="text-base font-black text-grape-700 mb-1 flex items-center gap-2">📅 挑個良辰吉日</h2>
+          <p class="text-[11px] text-grape-300 font-bold mb-4">綠色格子代表有空檔，點一下就選起來</p>
+          <div class="min-h-[210px] flex items-center justify-center">
+            <div v-if="calendarDates.length===0" class="flex flex-col items-center gap-2 text-grape-300 py-8">
+              <div class="w-8 h-8 border-3 border-grape-100 border-t-grape-400 rounded-full animate-spin" style="border-width:3px"></div>
+              <span class="text-xs font-bold">日曆讀取中…</span>
+            </div>
+            <div v-else class="w-full">
+              <div class="flex justify-between items-center mb-3">
+                <button @click="moveWeeks(-28)" class="press bg-grape-50 text-grape-600 font-extrabold text-xs px-4 py-2 rounded-full">‹ 上月</button>
+                <span class="text-xs font-black text-grape-400">四週檢視</span>
+                <button @click="moveWeeks(28)" class="press bg-grape-50 text-grape-600 font-extrabold text-xs px-4 py-2 rounded-full">下月 ›</button>
               </div>
-            </section>
+              <div class="grid grid-cols-7 gap-1.5">
+                <button v-for="d in calendarDates" :key="d.dateStr" :disabled="!d.isClickable"
+                    :class="['press aspect-square rounded-2xl flex flex-col items-center justify-center border-2 text-center',
+                      selectedDate===d.dateStr ? 'bg-grape-500 border-grape-500 text-white shadow-soft' :
+                      (d.isClickable ? 'bg-emerald-50 border-emerald-100 text-emerald-700' :
+                       (d.isPast ? 'bg-slate-50 border-slate-100 text-slate-300' : 'bg-slate-50 border-slate-100 text-slate-300'))]"
+                    @click="selectDate(d)">
+                  <div class="text-[11px] font-black leading-none">{{ d.dateLabel }}</div>
+                  <div class="text-[8px] font-bold mt-1 leading-none">{{ d.isPast ? '—' : (d.isOpen ? '有空' : '滿') }}</div>
+                </button>
+              </div>
+              <p v-if="selectedDate" class="text-center text-xs font-extrabold text-grape-600 mt-4 bg-grape-50 rounded-full py-2">
+                已選 {{ selectedDate }} 🐾（預約功能稍後開放）
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 頁籤 2: 喵星護照 -->
+        <section v-if="currentTab==='cats'" class="space-y-4">
+          <!-- 已登記的貓 -->
+          <div class="bg-white rounded-3xl p-5 shadow-softer border border-grape-100/60">
+            <h2 class="text-base font-black text-grape-700 mb-3 flex items-center gap-2">
+              🐈 我的喵寶 <span class="text-xs font-extrabold text-grape-300">（{{ myCats.length }} 隻）</span>
+            </h2>
+            <div v-if="myCats.length===0" class="text-center py-6 text-grape-300">
+              <div class="text-4xl mb-2">🐾</div>
+              <p class="text-xs font-bold">還沒有喵寶護照，下面新增一隻吧！</p>
+            </div>
+            <div v-else class="space-y-2.5">
+              <div v-for="(cat, idx) in myCats" :key="idx" class="rounded-2xl border-2 border-grape-100/70 overflow-hidden">
+                <!-- 顯示列 -->
+                <button @click="toggleEdit(idx)" class="press w-full flex items-center justify-between p-3.5 bg-grape-50/40">
+                  <div class="flex items-center gap-2.5">
+                    <span class="text-xl">{{ cat.gender==='女生' ? '🐈' : '🐈‍⬛' }}</span>
+                    <div class="text-left">
+                      <div class="font-black text-grape-800 text-sm">{{ cat.name }}</div>
+                      <div class="text-[11px] text-grape-400 font-bold">{{ cat.breed || '品種未填' }} · {{ cat.weight || '?' }}kg</div>
+                    </div>
+                  </div>
+                  <span class="text-grape-300 text-xs font-black">{{ editIdx===idx ? '收合 ▲' : '編輯 ▼' }}</span>
+                </button>
+                <!-- 展開編輯 -->
+                <transition name="pop">
+                  <div v-if="editIdx===idx" class="p-4 space-y-3 bg-white border-t-2 border-grape-100/70">
+                    <div><label class="lbl">貓咪名字</label><input v-model="editCat.name" class="fld"></div>
+                    <div>
+                      <label class="lbl">性別</label>
+                      <div class="grid grid-cols-2 gap-2">
+                        <button @click="editCat.gender='男生'" :class="['press py-2.5 rounded-xl font-extrabold text-sm border-2', editCat.gender==='男生'?'bg-grape-500 text-white border-grape-500':'bg-grape-50 text-grape-500 border-grape-100']">🐈‍⬛ 男生</button>
+                        <button @click="editCat.gender='女生'" :class="['press py-2.5 rounded-xl font-extrabold text-sm border-2', editCat.gender==='女生'?'bg-grape-500 text-white border-grape-500':'bg-grape-50 text-grape-500 border-grape-100']">🐈 女生</button>
+                      </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                      <div><label class="lbl">品種</label><input v-model="editCat.breed" class="fld" placeholder="布偶貓"></div>
+                      <div><label class="lbl">體重(kg)</label><input type="number" step="0.1" inputmode="decimal" v-model="editCat.weight" class="fld" placeholder="4.5"></div>
+                    </div>
+                    <div><label class="lbl">健康叮嚀</label><input v-model="editCat.note" class="fld" placeholder="怕吹風機、肚子敏感"></div>
+                    <div class="flex gap-2 pt-1">
+                      <button @click="saveEditCat(idx)" class="press flex-1 bg-grape-600 text-white font-black py-3 rounded-xl text-sm">💾 儲存變更</button>
+                      <button @click="removeCat(idx)" class="press bg-rose-50 text-rose-500 font-black px-4 py-3 rounded-xl text-sm border-2 border-rose-100">🗑️ 刪除</button>
+                    </div>
+                  </div>
+                </transition>
+              </div>
+            </div>
           </div>
 
-          <!-- 頁籤 2: 喵星護照 -->
-          <div v-if="currentTab === 'cats'" class="space-y-4">
-            <section class="bg-white rounded-2xl p-5 border shadow-sm">
-               <h2 class="text-sm font-black text-purple-900 mb-4">建立護照</h2>
-               <input type="text" v-model="newCat.name" placeholder="貓咪名字" class="w-full border p-3 rounded mb-2 bg-slate-50">
-               <button @click="registerCat" class="w-full bg-emerald-500 text-white font-bold p-3 rounded">新增貓咪</button>
-            </section>
+          <!-- 新增貓 -->
+          <div class="bg-white rounded-3xl p-5 shadow-softer border border-grape-100/60 space-y-3">
+            <h2 class="text-base font-black text-grape-700 flex items-center gap-2">➕ 新增喵寶護照</h2>
+            <div><label class="lbl">貓咪名字 <span class="text-rose-400">*</span></label><input v-model="newCat.name" class="fld" placeholder="例如：咪咪"></div>
+            <div>
+              <label class="lbl">性別</label>
+              <div class="grid grid-cols-2 gap-2">
+                <button @click="newCat.gender='男生'" :class="['press py-2.5 rounded-xl font-extrabold text-sm border-2', newCat.gender==='男生'?'bg-grape-500 text-white border-grape-500':'bg-grape-50 text-grape-500 border-grape-100']">🐈‍⬛ 男生</button>
+                <button @click="newCat.gender='女生'" :class="['press py-2.5 rounded-xl font-extrabold text-sm border-2', newCat.gender==='女生'?'bg-grape-500 text-white border-grape-500':'bg-grape-50 text-grape-500 border-grape-100']">🐈 女生</button>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div><label class="lbl">品種</label><input v-model="newCat.breed" class="fld" placeholder="米克斯"></div>
+              <div><label class="lbl">體重(kg)</label><input type="number" step="0.1" inputmode="decimal" v-model="newCat.weight" class="fld" placeholder="4.5"></div>
+            </div>
+            <div><label class="lbl">健康叮嚀</label><input v-model="newCat.note" class="fld" placeholder="怕吹風機、肚子敏感"></div>
+            <button @click="registerCat" class="press w-full bg-gradient-to-r from-emerald-400 to-emerald-500 text-white font-black py-3.5 rounded-2xl text-sm shadow-softer">🐾 新增這隻喵寶</button>
           </div>
+        </section>
 
-          <!-- 頁籤 3: 家長中心 -->
-          <div v-if="currentTab === 'member'" class="space-y-4">
-            <section class="bg-white rounded-2xl p-5 border shadow-sm">
-               <h2 class="text-sm font-black text-purple-900 mb-4">家長資料</h2>
-               <input type="text" v-model="myProfile.name" placeholder="姓名" class="w-full border p-3 rounded mb-2 bg-slate-50">
-               <input type="text" v-model="myProfile.phone" placeholder="電話" class="w-full border p-3 rounded mb-2 bg-slate-50">
-               <input type="text" v-model="myProfile.address" placeholder="地址" class="w-full border p-3 rounded mb-2 bg-slate-50">
-               <button @click="saveProfile" class="w-full bg-purple-600 text-white font-bold p-3 rounded">儲存資料</button>
-            </section>
+        <!-- 頁籤 3: 家長中心 -->
+        <section v-if="currentTab==='member'" class="bg-white rounded-3xl p-5 shadow-softer border border-grape-100/60 space-y-3">
+          <h2 class="text-base font-black text-grape-700 flex items-center gap-2">👤 家長資料</h2>
+          <div><label class="lbl">姓名 / 暱稱</label><input v-model="myProfile.name" class="fld" placeholder="怎麼稱呼您"></div>
+          <div><label class="lbl">聯絡電話</label><input type="tel" inputmode="numeric" v-model="myProfile.phone" class="fld" placeholder="0912345678"></div>
+          <div><label class="lbl">到府地址</label><input v-model="myProfile.address" class="fld" placeholder="完整地址，方便喵師傅找到您"></div>
+          <div>
+            <label class="lbl">電梯資訊</label>
+            <div class="grid grid-cols-2 gap-2">
+              <button @click="myProfile.elevator='有電梯'" :class="['press py-2.5 rounded-xl font-extrabold text-sm border-2', myProfile.elevator==='有電梯'?'bg-grape-500 text-white border-grape-500':'bg-grape-50 text-grape-500 border-grape-100']">🛗 有電梯</button>
+              <button @click="myProfile.elevator='無電梯'" :class="['press py-2.5 rounded-xl font-extrabold text-sm border-2', myProfile.elevator==='無電梯'?'bg-grape-500 text-white border-grape-500':'bg-grape-50 text-grape-500 border-grape-100']">🪜 無電梯</button>
+            </div>
           </div>
-        </div>
+          <div><label class="lbl">停車 / 到府提醒</label><input v-model="myProfile.parking" class="fld" placeholder="巷口有停車場、到樓下請打電話"></div>
+          <button @click="saveProfile" class="press w-full bg-gradient-to-r from-grape-500 to-grape-600 text-white font-black py-3.5 rounded-2xl text-sm shadow-softer">💾 儲存我的資料</button>
+        </section>
+
       </main>
 
-      <nav class="fixed bottom-0 left-0 w-full bg-white border-t flex justify-around p-3 z-50">
-        <button @click="switchTab('booking')" :class="['font-bold text-sm', currentTab==='booking' ? 'text-purple-600' : 'text-slate-400']">良辰吉日</button>
-        <button @click="switchTab('cats')" :class="['font-bold text-sm', currentTab==='cats' ? 'text-purple-600' : 'text-slate-400']">喵星護照</button>
-        <button @click="switchTab('member')" :class="['font-bold text-sm', currentTab==='member' ? 'text-purple-600' : 'text-slate-400']">家長中心</button>
+      <!-- 底部導航 -->
+      <nav class="fixed bottom-0 left-0 w-full z-50">
+        <div class="max-w-md mx-auto m-3 bg-white/95 backdrop-blur border border-grape-100 rounded-3xl shadow-soft flex justify-around p-2">
+          <button @click="switchTab('booking')" :class="['press flex flex-col items-center gap-0.5 px-5 py-2 rounded-2xl font-black text-[11px]', currentTab==='booking'?'bg-grape-500 text-white':'text-grape-300']"><span class="text-lg leading-none">📅</span>良辰吉日</button>
+          <button @click="switchTab('cats')" :class="['press flex flex-col items-center gap-0.5 px-5 py-2 rounded-2xl font-black text-[11px]', currentTab==='cats'?'bg-grape-500 text-white':'text-grape-300']"><span class="text-lg leading-none">🐱</span>喵星護照</button>
+          <button @click="switchTab('member')" :class="['press flex flex-col items-center gap-0.5 px-5 py-2 rounded-2xl font-black text-[11px]', currentTab==='member'?'bg-grape-500 text-white':'text-grape-300']"><span class="text-lg leading-none">👤</span>家長中心</button>
+        </div>
       </nav>
 
     </div>
 
     <script>
-      // ==========================================================
-      // ⚙️ 唯一需要你維護的設定：GAS 的 /exec 網址
-      //    （若之後重新部署導致網址變了，只要改這一行）
-      // ==========================================================
-      const GAS_API = "https://script.google.com/macros/s/AKfycby3eWQRPWnYfqWctOdGjtDomq4qAxzNfrSceWo0lo_m2gHnyiyi2KVGYx1-EB9GRtoW/exec";
       const LIFF_ID = "2010742657-DOz9QdF3";
-
+      // ⚙️ 唯一要維護：GAS 的 /exec 網址（重新部署若網址變了改這行）
+      const GAS_API = "https://script.google.com/macros/s/AKfycby3eWQRPWnYfqWctOdGjtDomq4qAxzNfrSceWo0lo_m2gHnyiyi2KVGYx1-EB9GRtoW/exec";
       const { createApp, ref, onMounted } = Vue;
       createApp({
         setup() {
           const currentTab = ref('booking');
-          const myProfile = ref({ uid: '', name: '', balance: 0, address: '', phone: '', note: '' });
+          const myProfile = ref({ uid:'', name:'', balance:0, address:'', phone:'', elevator:'有電梯', parking:'', note:'' });
           const myCats = ref([]);
           const calendarDates = ref([]);
           const selectedDate = ref('');
-          const newCat = ref({ name: '', breed: '', weight: '', gender: '小男生 👦', note: '' });
+          const newCat = ref({ name:'', breed:'', weight:'', gender:'男生', note:'' });
+          const editIdx = ref(-1);
+          const editCat = ref({ name:'', breed:'', weight:'', gender:'男生', note:'' });
           const weekOffset = ref(0);
-          const toast = ref({ show: false, message: '', isError: false });
-          const debugStage = ref('尚未開始');
+          const toast = ref({ show:false, message:'', isError:false });
+          const debugStage = ref('啟動中…');
+          const isLineMode = ref(true);   // GitHub 版一律 LINE 正式
           let scheduleCacheMap = {};
-          let lineUserId = '';
+          let idToken = '';
 
-          const showToast = (msg, isError = false) => {
-            toast.value.message = msg; toast.value.isError = isError; toast.value.show = true;
-            setTimeout(() => { toast.value.show = false; }, 3000);
-          };
-          const switchTab = (tab) => { currentTab.value = tab; };
+          const showToast = (m, e=false) => { toast.value={ show:true, message:m, isError:e }; setTimeout(()=>toast.value.show=false, 3000); };
+          const switchTab = (t) => { currentTab.value=t; editIdx.value=-1; };
 
-          // ---- 讀取類：用 GET（帶 action 參數）----
+          // ---- fetch 封裝 ----
           const apiGet = async (params) => {
             const url = GAS_API + "?" + new URLSearchParams(params).toString();
-            const resp = await fetch(url);              // GAS 的 GET 無 CORS 問題
-            return await resp.json();
+            const r = await fetch(url); return await r.json();
           };
-
-          // ---- 寫入類：用 POST（text/plain 避開 CORS 預檢）----
           const apiPost = async (payload) => {
-            const resp = await fetch(GAS_API, {
-              method: "POST",
-              headers: { "Content-Type": "text/plain;charset=utf-8" },
-              body: JSON.stringify(payload)
-            });
-            return await resp.json();
+            const r = await fetch(GAS_API, { method:"POST", headers:{ "Content-Type":"text/plain;charset=utf-8" }, body:JSON.stringify(payload) });
+            return await r.json();
           };
 
-          const fetchUserData = async () => {
-            debugStage.value = '④ 呼叫後端 getProfile（自動判斷新舊客/發卡）...';
+          const applyProfile = (res) => {
+            myProfile.value.uid=res.info.uid; myProfile.value.name=res.info.name;
+            myProfile.value.phone=res.info.phone; myProfile.value.address=res.info.address;
+            myProfile.value.elevator=res.info.elevator||'有電梯'; myProfile.value.parking=res.info.parking||'';
+            myProfile.value.balance=res.info.balance; myProfile.value.note=res.info.note;
+            myCats.value=res.cats||[];
+          };
+
+          const loadProfile = async () => {
+            debugStage.value='取得卡號中…';
             try {
-              const res = await apiGet({ action: "getProfile", uid: lineUserId });
-              if (res && res.success) {
-                myProfile.value.uid = res.info.uid;
-                myProfile.value.name = res.info.name;
-                myProfile.value.phone = res.info.phone;
-                myProfile.value.address = res.info.address;
-                debugStage.value = '⑤ 完成！卡號 = ' + res.info.uid;
-                preloadSchedule();
-              } else {
-                debugStage.value = '④ 後端回失敗：' + (res ? res.error : 'null');
-                showToast("讀取失敗：" + (res ? res.error : 'null'), true);
-              }
-            } catch (e) {
-              debugStage.value = '④ fetch 失敗：' + e.message + '（多半是 GAS 網址錯或權限沒開 Anyone）';
-              showToast("連線失敗：" + e.message, true);
-            }
+              const res = await apiGet({ action:"getMyProfile", idToken });
+              if(res && res.success){ applyProfile(res); debugStage.value='完成 '+res.info.uid; loadCalendar(); }
+              else { debugStage.value='失敗:'+(res?res.error:'null'); showToast('讀取失敗：'+(res?res.error:'null'), true); }
+            } catch(e){ debugStage.value='fetch失敗:'+e.message; showToast('連線出錯了 '+e.message, true); }
+          };
+          const reloadProfile = async () => {
+            try { const res = await apiGet({ action:"getMyProfile", idToken }); if(res && res.success) applyProfile(res); } catch(e){}
           };
 
-          const preloadSchedule = async () => {
-            debugStage.value = '⑤ 載入日曆...';
-            try {
-              const today = new Date();
-              const res = await apiGet({ action: "getCalendar", year: today.getFullYear(), month: today.getMonth() + 1 });
-              if (res && res.scheduleMap) scheduleCacheMap = res.scheduleMap;
-              renderMatrixFromCache();
-              debugStage.value = '✅ 全部完成';
-            } catch (e) {
-              debugStage.value = '⑤ 日曆載入失敗：' + e.message;
-              renderMatrixFromCache();
-            }
+          const loadCalendar = async () => {
+            const t=new Date();
+            try { const res = await apiGet({ action:"getCalendar", year:t.getFullYear(), month:t.getMonth()+1 }); if(res && res.scheduleMap) scheduleCacheMap=res.scheduleMap; } catch(e){}
+            renderMatrix();
           };
-
-          const renderMatrixFromCache = () => {
-            const today = new Date(); today.setHours(0,0,0,0);
-            const currentDay = today.getDay(), distanceToMonday = currentDay === 0 ? -6 : 1 - currentDay;
-            const startMonday = new Date(today); startMonday.setDate(today.getDate() + distanceToMonday + weekOffset.value);
-            const datesArray = [];
-            for (let i = 0; i < 28; i++) {
-              let t = new Date(startMonday); t.setDate(startMonday.getDate() + i);
-              let y = t.getFullYear(), m = t.getMonth() + 1, d = t.getDate();
-              let dStr = `${y}-${m < 10 ? '0' + m : m}-${d < 10 ? '0' + d : d}`;
-              let isPast = (t.getTime() <= today.getTime()), isOpen = false, isClickable = false;
-              // 至少一個時段 === '開放' 才算有空
-              if (!isPast && scheduleCacheMap[dStr]) {
-                let dayMap = scheduleCacheMap[dStr];
-                let hasOpen = Object.keys(dayMap).some(function(slot) {
-                  return String(dayMap[slot]).trim() === '開放';
-                });
-                if (hasOpen) { isOpen = true; isClickable = true; }
-              }
-              datesArray.push({ dateStr: dStr, dateLabel: `${m}/${d}`, isPast, isOpen, isClickable });
+          const renderMatrix = () => {
+            const today=new Date(); today.setHours(0,0,0,0);
+            const cd=today.getDay(), toMon=cd===0?-6:1-cd;
+            const start=new Date(today); start.setDate(today.getDate()+toMon+weekOffset.value);
+            const arr=[];
+            for(let i=0;i<28;i++){
+              let t=new Date(start); t.setDate(start.getDate()+i);
+              let y=t.getFullYear(),m=t.getMonth()+1,d=t.getDate();
+              let dStr=`${y}-${m<10?'0'+m:m}-${d<10?'0'+d:d}`;
+              let isPast=(t.getTime()<=today.getTime()), isOpen=false, isClickable=false;
+              if(!isPast && scheduleCacheMap[dStr]){ let dm=scheduleCacheMap[dStr]; if(Object.keys(dm).some(s=>String(dm[s]).trim()==='開放')){ isOpen=true; isClickable=true; } }
+              arr.push({ dateStr:dStr, dateLabel:`${m}/${d}`, isPast, isOpen, isClickable });
             }
-            calendarDates.value = datesArray;
+            calendarDates.value=arr;
           };
-
-          const selectDate = (day) => { if (day.isClickable) selectedDate.value = day.dateStr; };
-          const moveWeeks = (days) => { weekOffset.value += days; renderMatrixFromCache(); };
+          const selectDate = (day) => { if(day.isClickable) selectedDate.value=day.dateStr; };
+          const moveWeeks = (days) => { weekOffset.value+=days; renderMatrix(); };
 
           const saveProfile = async () => {
+            const p=myProfile.value;
             try {
-              const res = await apiPost({
-                action: "updateProfile", uid: myProfile.value.uid,
-                name: myProfile.value.name, address: myProfile.value.address,
-                phone: myProfile.value.phone, clientNote: ""
-              });
-              showToast(res && res.success ? '更新成功！' : '更新失敗', !(res && res.success));
-            } catch (e) { showToast("更新失敗：" + e.message, true); }
+              const res = await apiPost({ action:"updateMyProfile", idToken, name:p.name, address:p.address, phone:p.phone, elevator:p.elevator, parking:p.parking });
+              showToast(res&&res.success?'資料儲存好囉！':'更新失敗', !(res&&res.success));
+            } catch(e){ showToast('更新失敗 '+e.message, true); }
           };
 
           const registerCat = async () => {
+            if(!newCat.value.name.trim()){ showToast('請先幫喵寶取名字～', true); return; }
             try {
-              const res = await apiPost({ action: "registerCat", uid: myProfile.value.uid, cat: newCat.value });
-              showToast(res && res.success ? '註冊成功！' : '註冊失敗', !(res && res.success));
-            } catch (e) { showToast("註冊失敗：" + e.message, true); }
+              const res = await apiPost({ action:"registerMyCat", idToken, cat:JSON.parse(JSON.stringify(newCat.value)) });
+              if(res&&res.success){ showToast('喵寶護照新增成功！'); newCat.value={ name:'', breed:'', weight:'', gender:'男生', note:'' }; reloadProfile(); }
+              else showToast('新增失敗', true);
+            } catch(e){ showToast('新增失敗 '+e.message, true); }
           };
 
-          onMounted(() => {
-            debugStage.value = '① 開始 liff.init...';
-            liff.init({ liffId: LIFF_ID }).then(() => {
-              debugStage.value = '② liff.init 成功，檢查登入...';
-              if (liff.isLoggedIn()) {
-                debugStage.value = '③ 已登入，取得 profile...';
-                liff.getProfile().then(profile => {
-                  lineUserId = profile.userId;
-                  debugStage.value = '③ profile OK，userId=' + profile.userId.substring(0, 8) + '...';
-                  fetchUserData();
-                }).catch(err => { debugStage.value = '③ getProfile 失敗：' + err; showToast("Profile Error", true); });
-              } else {
-                if (liff.isInClient()) { debugStage.value = '② 未登入，觸發 login...'; liff.login(); }
-                else { debugStage.value = '② 非 LINE 環境'; showToast("請在 LINE 開啟"); }
+          const toggleEdit = (idx) => {
+            if(editIdx.value===idx){ editIdx.value=-1; return; }
+            editIdx.value=idx; editCat.value=JSON.parse(JSON.stringify(myCats.value[idx]));
+          };
+          const saveEditCat = async (idx) => {
+            const oldName=myCats.value[idx].name;
+            const obj=JSON.parse(JSON.stringify(editCat.value));
+            if(!obj.name.trim()){ showToast('名字不能空白喔', true); return; }
+            try {
+              const res = await apiPost({ action:"updateMyCat", idToken, oldName, cat:obj });
+              if(res&&res.success){ showToast('喵寶資料更新好囉！'); editIdx.value=-1; reloadProfile(); }
+              else showToast('更新失敗', true);
+            } catch(e){ showToast('更新失敗 '+e.message, true); }
+          };
+          const removeCat = async (idx) => {
+            const name=myCats.value[idx].name;
+            try {
+              const res = await apiPost({ action:"deleteMyCat", idToken, catName:name });
+              if(res&&res.success){ showToast('已刪除 '+name); editIdx.value=-1; reloadProfile(); }
+              else showToast('刪除失敗', true);
+            } catch(e){ showToast('刪除失敗 '+e.message, true); }
+          };
+
+          onMounted(()=>{
+            debugStage.value='liff.init…';
+            liff.init({ liffId:LIFF_ID }).then(()=>{
+              if(!liff.isLoggedIn()){
+                if(liff.isInClient()){ liff.login(); return; }
+                debugStage.value='請從 LINE 開啟'; showToast('請從 LINE 開啟本頁', true); return;
               }
-            }).catch(err => { debugStage.value = '① liff.init 失敗：' + err; showToast("Init Error: " + err, true); });
+              idToken = liff.getIDToken();
+              if(!idToken){ debugStage.value='拿不到 idToken'; showToast('身分驗證失敗，請重開', true); return; }
+              debugStage.value='LINE 身分驗證中…';
+              loadProfile();
+            }).catch((err)=>{ debugStage.value='liff.init 失敗:'+err; showToast('LIFF 初始化失敗', true); });
           });
 
-          return { currentTab, myProfile, myCats, calendarDates, selectedDate, newCat, toast, debugStage, switchTab, moveWeeks, selectDate, saveProfile, registerCat };
+          return { currentTab, myProfile, myCats, calendarDates, selectedDate, newCat, editIdx, editCat, toast, debugStage, isLineMode,
+            switchTab, moveWeeks, selectDate, saveProfile, registerCat, toggleEdit, saveEditCat, removeCat };
         }
       }).mount('#app');
-    </script>
+        </script>
   </body>
 </html>
