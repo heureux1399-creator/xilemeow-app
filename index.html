@@ -68,7 +68,7 @@
 
       <!-- 診斷/模式列 -->
       <div :class="['text-[10px] font-mono px-3 py-1.5 leading-relaxed break-words tracking-wide', isLineMode ? 'bg-grape-700 text-grape-100' : 'bg-amber-300 text-amber-900']">
-        {{ isLineMode ? '🟣 LINE 正式' : '🧪 測試模式' }}　·　{{ debugStage }}
+        [v07] {{ isLineMode ? '🟣 LINE 正式' : '🧪 測試模式' }}　·　{{ debugStage }}
       </div>
 
       <!-- Toast -->
@@ -241,7 +241,7 @@
     <script>
       const LIFF_ID = "2010742657-DOz9QdF3";
       // ⚙️ 唯一要維護：GAS 的 /exec 網址（重新部署若網址變了改這行）
-      const GAS_API = "https://script.google.com/macros/s/AKfycbxyUpWuehq3XhpOeYbQy6VaQS4ftQHWFygDWsakM3ze73cfbrU23zPH_kWEjCTm8DZl/exec";
+      const GAS_API = "https://script.google.com/macros/s/AKfycbxI4EmCbmCUmLUvF6yIj_WPACH4D8mtoTW1jo4YAzz2wZjVgWnmSLnsxv4h3-qsT6dq/exec";
       const { createApp, ref, onMounted } = Vue;
       createApp({
         setup() {
