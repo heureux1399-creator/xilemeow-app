@@ -166,9 +166,9 @@
 <body>
 <div id="app" v-cloak>
 
-  <!-- 系統列 (正式進版: v260721.01) -->
+  <!-- 系統列 (進版: v260721.02) -->
   <div :class="['sys-bar', isLineMode?'live':'dev']">
-    <span>v260721.01 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
+    <span>v260721.02 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
     <!-- ⚡ 非阻塞連線狀態提示 -->
     <span v-if="globalLoading" class="sync-badge">
       <svg class="spin" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
@@ -197,9 +197,13 @@
         <div v-else-if="authFailed" class="member-loading" style="color:var(--err); font-weight:700;">身分失效</div>
         <div v-else class="member-loading">驗證中⋯</div>
       </div>
-      <div v-if="myProfile.uid" class="member-card-right">
+      <!-- ⚡ 防呆優化：未載入資料前顯示 ──，防止客人誤以為餘額是 0 元 -->
+      <div class="member-card-right">
         <div class="bal-label">儲值餘額</div>
-        <div><span class="bal-val">{{ myProfile.balance }}</span><span class="bal-unit">元</span></div>
+        <div>
+          <span class="bal-val">{{ myProfile.balance !== null ? myProfile.balance : '──' }}</span>
+          <span class="bal-unit">元</span>
+        </div>
       </div>
     </div>
   </div>
@@ -543,7 +547,8 @@
       createApp({
         setup() {
           const currentTab = ref('booking');
-          const myProfile = ref({ uid:'', name:'', balance:0, address:'', phone:'', elevator:'有電梯', parking:'', note:'' });
+          // ⚡ 優化：balance 預設 null，未載入時畫面顯示 ──，避免閃出 0 元
+          const myProfile = ref({ uid:'', name:'', balance: null, address:'', phone:'', elevator:'有電梯', parking:'', note:'' });
           const myCats = ref([]);
           const calendarDates = ref([]);
           const selectedDate = ref('');
@@ -556,9 +561,7 @@
           const isLineMode = ref(true);
           const authFailed = ref(false);
 
-          // ⚡ 全域非阻塞式連線狀態
           const globalLoading = ref(false);
-
           const isSavingProfile = ref(false);
           const isRegisteringCat = ref(false);
           const isSavingCat = ref(false);
@@ -599,7 +602,7 @@
             }
           };
 
-          // ---- fetch 封裝（附帶非阻塞全域 Loading 計數）----
+          // ---- fetch 封裝（非阻塞 Sync 標籤）----
           const apiGet = async (params) => {
             globalLoading.value = true;
             try {
@@ -766,7 +769,7 @@
             editIdx.value=idx; editCat.value=JSON.parse(JSON.stringify(myCats.value[idx]));
           };
           
-          // ⭐️ 關鍵修復：正確帶入 oldName: oldName 參數，並進行樂觀更新 (Optimistic UI)
+          // ⭐️ 關鍵修復：正確指定 key 為 oldName，轉換性別格式，並樂觀更新 (Optimistic UI)
           const saveEditCat = async (idx) => {
             const oldName = myCats.value[idx].name;
             const obj = JSON.parse(JSON.stringify(editCat.value));
@@ -786,7 +789,7 @@
             isSavingCat.value = false;
           };
           
-          // ⭐️ 關鍵修復：正確帶入 catName 刪除參數，並進行樂觀更新
+          // ⭐️ 關鍵修復：正確指定 key 為 catName
           const removeCat = async (idx) => {
             const name = myCats.value[idx].name;
             if (!confirm(`確定要刪除「${name}」的護照嗎？`)) return;
