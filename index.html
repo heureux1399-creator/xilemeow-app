@@ -68,7 +68,7 @@
 
       <!-- 診斷/模式列 -->
       <div :class="['text-[10px] font-mono px-3 py-1.5 leading-relaxed break-words tracking-wide', isLineMode ? 'bg-grape-700 text-grape-100' : 'bg-amber-300 text-amber-900']">
-        <span class="opacity-60">v260720.10</span> · <span class="font-black">{{ isLineMode ? 'LIVE' : 'DEV' }}</span> · <span class="opacity-80">{{ statusCode }}</span>
+        <span class="opacity-60">v260720.12</span> · <span class="font-black">{{ isLineMode ? 'LIVE' : 'DEV' }}</span> · <span class="opacity-80">{{ statusCode }}</span>
       </div>
 
       <!-- Toast -->
@@ -103,6 +103,9 @@
           <div v-if="myProfile.uid" class="inline-flex items-center gap-1.5 mt-2 bg-grape-50 text-grape-600 text-xs font-extrabold px-3 py-1 rounded-full">
             <span>💰 儲值餘額</span><span class="text-grape-700">{{ myProfile.balance }} 元</span>
           </div>
+          <button v-if="myProfile.uid && currentTab==='booking' && bookStep===1" @click="refreshCalendar" :disabled="refreshing" class="press block mx-auto mt-3 text-[11px] font-black text-grape-400 bg-grape-50 px-4 py-1.5 rounded-full">
+            {{ refreshing ? '更新中…' : '🔄 更新時段' }}
+          </button>
         </div>
 
         <!-- 頁籤 1: 良辰吉日 + 預約流程 -->
@@ -326,7 +329,7 @@
     <script>
       const LIFF_ID = "2010742657-DOz9QdF3";
       // ⚙️ 唯一要維護：GAS 的 /exec 網址（重新部署若網址變了改這行）
-      const GAS_API = "https://script.google.com/macros/s/AKfycbz0El5SY0nigiJAvii3n72eIv12K2BSETeomTRkmCUc5KoOHsZrNAnQMBjLrtnB7ebt/exec";
+      const GAS_API = "https://script.google.com/macros/s/AKfycbyOZBPsOa2AW6cqoWnCj3T3avDWOTDa3XX8UWHYRo6k-GZU7WGiFyEXB6JkRbkgO7B9/exec";
       const { createApp, ref, onMounted } = Vue;
       createApp({
         setup() {
@@ -349,13 +352,25 @@
           const bookCatCount = ref(1);
           const bookNotes = ref('');
           const bookLoading = ref(false);
+          const refreshing = ref(false);
           const availableSlots = ref([]);
           const calMonthLabel = ref('');
           let scheduleCacheMap = {};
           let idToken = '';
 
           const showToast = (m, e=false) => { toast.value={ show:true, message:m, isError:e }; setTimeout(()=>toast.value.show=false, 3000); };
-          const switchTab = (t) => { currentTab.value=t; editIdx.value=-1; };
+          const switchTab = (t) => {
+            // 預約進行中（步驟2以後）或有未儲存的貓編輯，切頁籤前提示
+            if(bookStep.value > 1 && t !== 'booking') {
+              if(!confirm('預約尚未完成，確定要離開嗎？')) return;
+              resetBook();
+            }
+            if(editIdx.value >= 0 && t !== 'cats') {
+              if(!confirm('貓咪資料尚未儲存，確定要離開嗎？')) return;
+              editIdx.value = -1;
+            }
+            currentTab.value = t;
+          };
 
           // ---- fetch 封裝 ----
           const apiGet = async (params) => {
@@ -377,9 +392,10 @@
 
           const loadProfile = async () => {
             statusCode.value='FETCH·0';
+            loadCalendar();  // 效能優化：日曆不需身分驗證，平行發送不等待 profile
             try {
               const res = await apiGet({ action:"getMyProfile", idToken });
-              if(res && res.success){ applyProfile(res); statusCode.value='OK·'+res.info.uid; loadCalendar(); }
+              if(res && res.success){ applyProfile(res); statusCode.value='OK·'+res.info.uid; }
               else {
                 statusCode.value='ERR·'+((res&&res.error)?res.error.substring(0,20):'null');
                 showToast('讀取失敗：'+(res?res.error:'null'), true);
@@ -416,6 +432,15 @@
               arr.push({ dateStr:dStr, dateLabel:`${m}/${d}`, isPast, isOpen, isClickable });
             }
             calendarDates.value=arr;
+          };
+          const refreshCalendar = async () => {
+            refreshing.value = true;
+            const t = new Date();
+            try {
+              const res = await apiGet({ action:"getCalendar", year:t.getFullYear(), month:t.getMonth()+1 });
+              if(res && res.scheduleMap){ scheduleCacheMap = res.scheduleMap; renderMatrix(); showToast('時段已更新'); }
+            } catch(e){ showToast('更新失敗', true); }
+            refreshing.value = false;
           };
           const selectDate = (day) => {
             if(!day.isClickable) return;
@@ -502,6 +527,18 @@
 
           onMounted(()=>{
             statusCode.value='AUTH·0';
+            // 離開確認（電腦有效；手機 LINE WebView 平台限制可能無效）
+            window.addEventListener('beforeunload', function(e) {
+              e.preventDefault(); e.returnValue = '';
+            });
+            // 補強：攔截返回鍵/手勢返回（手機支援度比 beforeunload 好）
+            history.pushState(null, '', location.href);
+            window.addEventListener('popstate', function() {
+              const hasUnsaved = bookStep.value > 1 || editIdx.value >= 0;
+              if (hasUnsaved && !confirm('尚有未完成的操作，確定要離開嗎？')) {
+                history.pushState(null, '', location.href);
+              }
+            });
             liff.init({ liffId:LIFF_ID }).then(()=>{
               if(!liff.isLoggedIn()){
                 if(liff.isInClient()){ liff.login(); return; }
@@ -517,7 +554,7 @@
           return { currentTab, myProfile, myCats, calendarDates, selectedDate, newCat, editIdx, editCat, toast, statusCode, isLineMode,
             switchTab, moveWeeks, selectDate, saveProfile, registerCat, toggleEdit, saveEditCat, removeCat,
             bookStep, selectedSlot, selectedCats, bookCatCount, bookNotes, bookLoading, availableSlots, calMonthLabel,
-            toggleCatSelect, submitBooking, resetBook };
+            toggleCatSelect, submitBooking, resetBook, refreshing, refreshCalendar };
         }
       }).mount('#app');
         </script>
