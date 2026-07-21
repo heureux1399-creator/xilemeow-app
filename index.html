@@ -15,7 +15,6 @@
     window.addEventListener('unhandledrejection',function(e){var d=document.createElement('div');d.style.cssText='position:fixed;top:0;left:0;width:100%;background:#7A7268;color:#fff;z-index:99999;padding:10px 14px;font-size:11px;font-family:monospace;';d.innerHTML='PROMISE: '+(e.reason&&e.reason.message?e.reason.message:e.reason);document.body.appendChild(d);});
   </script>
   <style>
-    /* ── 設計系統：墨與柿 ── */
     :root{
       --ink:      #2C2C2C;
       --ink-2:    #7A7268;
@@ -37,9 +36,13 @@
     body{ padding-bottom:88px; }
 
     /* ── 系統列 ── */
-    .sys-bar{ font-family:monospace; font-size:10px; padding:5px 16px; letter-spacing:.05em; color:rgba(255,255,255,.6); }
+    .sys-bar{ font-family:monospace; font-size:10px; padding:5px 16px; letter-spacing:.05em; color:rgba(255,255,255,.6); display:flex; justify-content:space-between; align-items:center; }
     .sys-bar.live{ background:#1A1A1A; }
     .sys-bar.dev{ background:var(--orange); color:rgba(255,255,255,.9); }
+
+    /* ── 業界標準：非阻塞式頂部加載列 (Loading Bar/Badge) ── */
+    .sync-badge{ display:inline-flex; align-items:center; gap:5px; background:rgba(212,98,42,.2); color:var(--orange); padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600; animation:pulse 1.2s infinite; }
+    @keyframes pulse{ 0%,100%{ opacity:1; } 50%{ opacity:0.4; } }
 
     /* ── Toast ── */
     .toast{ position:fixed; top:16px; left:50%; transform:translateX(-50%); padding:11px 18px; border-radius:8px; font-size:12px; font-weight:500; display:flex; align-items:center; gap:8px; z-index:999; max-width:86vw; box-shadow:0 4px 20px rgba(0,0,0,.18); white-space:nowrap; }
@@ -55,7 +58,7 @@
     .header-title{ font-family:'Noto Serif TC',serif; font-size:28px; font-weight:700; letter-spacing:.06em; line-height:1.1; }
     .header-sub{ font-size:12px; color:rgba(255,255,255,.45); margin-top:8px; letter-spacing:.05em; font-weight:300; }
 
-    /* ── 會員卡（浮在 header 上）── */
+    /* ── 會員卡 ── */
     .member-card-wrap{ padding:0 20px; margin-top:-28px; position:relative; z-index:10; }
     .member-card{ background:var(--card); border-radius:14px; padding:18px 20px; box-shadow:0 8px 32px rgba(44,44,44,.14); border:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
     .member-card-left .eyebrow{ font-size:9px; letter-spacing:.15em; text-transform:uppercase; color:var(--ink-3); margin-bottom:6px; }
@@ -66,116 +69,85 @@
     .member-card-right .bal-unit{ font-size:11px; color:var(--ink-2); margin-left:2px; }
     .member-loading{ font-size:13px; color:var(--ink-3); letter-spacing:.05em; }
 
-    /* ── 主內容區 ── */
     .main{ padding:20px 20px 0; max-width:480px; margin:0 auto; }
     .section-gap{ height:14px; }
 
-    /* ── 區塊標題 ── */
     .section-header{ display:flex; align-items:baseline; gap:10px; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--border); }
     .section-title{ font-family:'Noto Serif TC',serif; font-size:15px; font-weight:600; color:var(--ink); }
     .section-sub{ font-size:11px; color:var(--ink-3); }
 
-    /* ── 卡片 ── */
     .card{ background:var(--card); border-radius:12px; padding:20px; border:1px solid var(--border); margin-bottom:12px; }
     .card-accent{ border-left:2.5px solid var(--orange); }
 
-    /* ── 月份導航 ── */
     .month-nav{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
     .month-label{ font-size:13px; font-weight:500; color:var(--ink-2); letter-spacing:.04em; }
     .nav-arrow{ width:32px; height:32px; border-radius:8px; border:1px solid var(--border); background:var(--paper); display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--ink-2); transition:all .12s; }
-    .nav-arrow:active{ background:var(--warm); transform:scale(.95); }
 
-    /* ── 日曆 ── */
     .cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
     .cal-cell{ aspect-ratio:1; border-radius:8px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:11px; font-weight:500; cursor:default; border:1px solid transparent; transition:all .12s; }
     .cal-cell .date-num{ line-height:1; }
     .cal-cell .date-dot{ width:3px; height:3px; border-radius:50%; background:currentColor; margin-top:3px; opacity:.5; }
     .cal-cell.open{ background:var(--orange-l); color:var(--orange-d); border-color:rgba(212,98,42,.2); cursor:pointer; }
-    .cal-cell.open:active{ transform:scale(.93); }
     .cal-cell.selected{ background:var(--orange); color:#fff; border-color:var(--orange); }
     .cal-cell.past,.cal-cell.closed{ color:var(--ink-3); }
-    .cal-cell.past .date-num{ text-decoration:line-through; opacity:.4; }
 
-    /* ── 表單 ── */
     .field-wrap{ margin-bottom:14px; }
     .field-label{ font-size:10px; font-weight:700; color:var(--ink-2); letter-spacing:.1em; text-transform:uppercase; margin-bottom:7px; display:block; }
     .field{ width:100%; border:1px solid var(--border); border-radius:8px; padding:11px 13px; font-size:14px; font-family:'Noto Sans TC',sans-serif; color:var(--ink); background:var(--paper); transition:border-color .15s,background .15s; }
     .field:focus{ outline:none; border-color:var(--orange); background:#fff; }
-    .field::placeholder{ color:var(--ink-3); }
 
-    /* ── Checkbox（有電梯）── */
     .check-row{ display:flex; align-items:center; gap:12px; padding:12px 0; cursor:pointer; }
     .check-box{ width:22px; height:22px; border-radius:6px; border:1.5px solid var(--border); background:var(--paper); flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all .15s; }
     .check-box.checked{ background:var(--orange); border-color:var(--orange); }
-    .check-label-text{ font-size:14px; color:var(--ink); }
-    .check-label-sub{ font-size:11px; color:var(--ink-3); margin-top:1px; }
 
-    /* ── 時段選擇 ── */
     .slot-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
     .slot-btn{ padding:13px; border-radius:8px; border:1px solid var(--border); background:var(--paper); color:var(--ink); font-size:14px; font-weight:500; font-family:'Noto Sans TC',sans-serif; cursor:pointer; text-align:center; transition:all .12s; }
-    .slot-btn:active{ transform:scale(.97); }
     .slot-btn.selected{ background:var(--orange); border-color:var(--orange); color:#fff; font-weight:700; }
 
-    /* ── 按鈕 ── */
     .btn{ display:flex; align-items:center; justify-content:center; gap:7px; border:none; border-radius:8px; font-family:'Noto Sans TC',sans-serif; font-weight:700; font-size:14px; cursor:pointer; transition:all .12s; width:100%; padding:13px 20px; }
-    .btn:active:not(:disabled){ transform:scale(.98); opacity:.92; }
-    /* 🚨 新增：按鈕 Disabled 狀態的樣式 */
     .btn:disabled{ opacity:0.6; cursor:not-allowed; }
     .btn-primary{ background:var(--orange); color:#fff; }
-    .btn-primary:hover:not(:disabled){ background:var(--orange-d); }
     .btn-secondary{ background:var(--warm); color:var(--ink); }
     .btn-success{ background:var(--ok); color:#fff; }
-    .btn-ghost{ background:var(--paper); color:var(--ink-2); border:1px solid var(--border); width:auto; padding:8px 12px; }
     .btn-icon{ background:var(--paper); color:var(--ink-2); border:1px solid var(--border); width:34px; height:34px; padding:0; border-radius:8px; flex-shrink:0; }
     .btn-danger-sm{ background:transparent; color:var(--err); border:1px solid rgba(184,65,65,.2); width:auto; padding:9px 14px; font-size:13px; }
 
-    /* ── 計數器 ── */
     .counter{ display:flex; align-items:center; gap:16px; }
     .counter-val{ font-size:24px; font-weight:700; color:var(--orange); min-width:28px; text-align:center; font-family:monospace; }
     .counter-unit{ font-size:12px; color:var(--ink-3); }
 
-    /* ── 貓咪 ── */
     .cat-item{ border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:8px; }
     .cat-item-head{ display:flex; align-items:center; justify-content:space-between; padding:13px 15px; cursor:pointer; background:var(--paper); }
-    .cat-item-head:active{ background:var(--warm); }
     .cat-avatar{ width:38px; height:38px; border-radius:9px; background:var(--warm); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
     .cat-name{ font-weight:700; font-size:14px; color:var(--ink); }
     .cat-meta{ font-size:11px; color:var(--ink-2); margin-top:2px; }
     .cat-gender-tag{ display:inline-block; font-size:9px; font-weight:700; padding:2px 7px; border-radius:10px; letter-spacing:.05em; background:var(--orange-l); color:var(--orange-d); margin-left:6px; }
     .cat-body{ padding:15px; border-top:1px solid var(--border); background:#fff; }
 
-    /* ── 勾選貓咪 ── */
     .cat-select-item{ display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-radius:8px; border:1px solid var(--border); margin-bottom:7px; cursor:pointer; background:var(--paper); transition:all .12s; }
     .cat-select-item.selected{ background:var(--orange-l); border-color:rgba(212,98,42,.3); }
     .cat-check{ width:20px; height:20px; border-radius:5px; border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .15s; }
     .cat-check.checked{ background:var(--orange); border-color:var(--orange); }
 
-    /* ── 預約確認 ── */
     .confirm-table{ background:var(--paper); border-radius:8px; overflow:hidden; }
     .confirm-row{ display:flex; justify-content:space-between; align-items:flex-start; padding:11px 14px; border-bottom:1px solid var(--border); gap:12px; }
     .confirm-row:last-child{ border-bottom:none; }
     .confirm-key{ font-size:11px; color:var(--ink-3); font-weight:500; white-space:nowrap; padding-top:1px; }
     .confirm-val{ font-size:13px; font-weight:700; color:var(--ink); text-align:right; word-break:break-word; }
 
-    /* ── 成功 ── */
     .success-wrap{ text-align:center; padding:36px 20px; }
     .success-circle{ width:72px; height:72px; border-radius:50%; background:var(--ok-l); display:flex; align-items:center; justify-content:center; margin:0 auto 20px; }
     .success-title{ font-family:'Noto Serif TC',serif; font-size:19px; font-weight:600; color:var(--ink); margin-bottom:8px; }
     .success-sub{ font-size:12px; color:var(--ink-2); line-height:1.9; }
 
-    /* ── 空狀態 ── */
     .empty{ text-align:center; padding:36px 20px; color:var(--ink-3); }
     .empty-title{ font-size:13px; margin-top:10px; }
     .empty-sub{ font-size:11px; margin-top:4px; }
 
-    /* ── 分隔線 ── */
     .divider{ height:1px; background:var(--border); margin:14px 0; }
-
-    /* ── 旋轉 ── */
     .spin{ animation:spin .8s linear infinite; }
     @keyframes spin{ to{ transform:rotate(360deg); } }
 
-    /* ── 底部導航 ── */
     .bottom-nav{ position:fixed; bottom:0; left:0; width:100%; background:rgba(250,247,242,.94); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-top:1px solid var(--border); z-index:100; padding-bottom:env(safe-area-inset-bottom,0); }
     .nav-inner{ display:flex; justify-content:space-around; max-width:480px; margin:0 auto; padding:6px 0 8px; }
     .nav-item{ display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 20px; border-radius:10px; cursor:pointer; transition:all .15s; }
@@ -184,25 +156,24 @@
     .nav-icon{ color:var(--ink-3); }
     .nav-item.active .nav-icon{ color:var(--orange); }
 
-    /* ── 刷新鈕 ── */
     .refresh-btn{ background:none; border:none; font-size:11px; color:var(--ink-3); cursor:pointer; display:inline-flex; align-items:center; gap:5px; padding:5px 0; font-family:'Noto Sans TC',sans-serif; }
-
-
-    /* ── Segment Control（性別選擇）── */
     .seg-control{ display:flex; background:var(--warm); border-radius:8px; padding:3px; gap:3px; }
     .seg-btn{ flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:9px 8px; border-radius:6px; border:none; background:transparent; font-family:'Noto Sans TC',sans-serif; font-size:13px; font-weight:500; color:var(--ink-2); cursor:pointer; transition:all .15s; }
     .seg-btn.active{ background:var(--card); color:var(--ink); font-weight:700; box-shadow:0 1px 4px rgba(42,32,20,.12); }
-    .seg-btn svg{ flex-shrink:0; }
-    /* ── Grid 工具 ── */
     .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
   </style>
 </head>
 <body>
 <div id="app" v-cloak>
 
-  <!-- 系統列 -->
+  <!-- 系統列 (進版: v260721.01) -->
   <div :class="['sys-bar', isLineMode?'live':'dev']">
-    v260720.17 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}
+    <span>v260721.01 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
+    <!-- ⚡ 非阻塞連線狀態提示 -->
+    <span v-if="globalLoading" class="sync-badge">
+      <svg class="spin" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+      同步中
+    </span>
   </div>
 
   <!-- Toast -->
@@ -223,7 +194,6 @@
       <div class="member-card-left">
         <div class="eyebrow">喵星卡號</div>
         <div v-if="myProfile.uid" class="uid">{{ myProfile.uid }}</div>
-        <!-- 防呆提示：若驗證失敗顯示錯誤文字 -->
         <div v-else-if="authFailed" class="member-loading" style="color:var(--err); font-weight:700;">身分失效</div>
         <div v-else class="member-loading">驗證中⋯</div>
       </div>
@@ -238,7 +208,7 @@
   <div class="main">
     <div class="section-gap" style="height:20px;"></div>
 
-    <!-- 🚨 救援機制：身分驗證失敗 / 憑證過期畫面 -->
+    <!-- 救援機制：身分驗證失敗畫面 -->
     <div v-if="authFailed" class="card" style="border:1px solid var(--err); border-left:4px solid var(--err); text-align:center; padding:32px 20px;">
       <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="var(--err)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:12px;opacity:0.8;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       <div class="section-title" style="color:var(--err); margin-bottom:10px;">登入憑證已過期或失效</div>
@@ -406,7 +376,7 @@
         </div>
       </div>
 
-      <!-- 我的預約（只在步驟1且已登入時顯示）-->
+      <!-- 我的預約 -->
       <div v-if="bookStep===1 && myProfile.uid" style="margin-top:4px;">
         <div class="card card-accent">
           <div class="section-header" style="cursor:pointer;margin-bottom:0;" @click="apptExpanded=!apptExpanded">
@@ -443,7 +413,6 @@
 
     <!-- ════ 喵星護照 ════ -->
     <div v-if="currentTab==='cats' && !authFailed">
-      <!-- 已登記 -->
       <div v-if="myCats.length>0" class="card card-accent">
         <div class="section-header">
           <span class="section-title">已登記喵寶</span>
@@ -478,7 +447,6 @@
             </div>
             <div class="field-wrap"><label class="field-label">健康叮嚀</label><input v-model="editCat.note" class="field" placeholder="怕吹風機…"></div>
             
-            <!-- 🚨 新增：修改按鈕的處理中狀態防呆 -->
             <div style="display:flex;gap:8px;">
               <button class="btn btn-primary" style="flex:1;" @click="saveEditCat(idx)" :disabled="isSavingCat">
                 {{ isSavingCat ? '儲存中...' : '儲存變更' }}
@@ -491,7 +459,6 @@
         </div>
       </div>
 
-      <!-- 新增喵寶 -->
       <div class="card card-accent">
         <div class="section-header">
           <span class="section-title">新增喵寶護照</span>
@@ -510,7 +477,6 @@
         </div>
         <div class="field-wrap"><label class="field-label">健康叮嚀</label><input v-model="newCat.note" class="field" placeholder="怕吹風機…"></div>
         
-        <!-- 🚨 新增：按鈕防呆與狀態 -->
         <button class="btn btn-primary" @click="registerCat" :disabled="isRegisteringCat">
           {{ isRegisteringCat ? '喵寶登錄中...' : '新增這隻喵寶' }}
         </button>
@@ -527,7 +493,6 @@
         <div class="field-wrap"><label class="field-label">聯絡電話</label><input type="tel" inputmode="numeric" v-model="myProfile.phone" class="field" placeholder="0912 345 678"></div>
         <div class="field-wrap"><label class="field-label">到府地址</label><input v-model="myProfile.address" class="field" placeholder="完整地址"></div>
 
-        <!-- 電梯：checkbox 樣式 -->
         <div class="field-wrap">
           <label class="field-label">電梯資訊</label>
           <div class="check-row" @click="myProfile.elevator = myProfile.elevator==='有電梯'?'無電梯':'有電梯'">
@@ -543,7 +508,6 @@
 
         <div class="field-wrap"><label class="field-label">停車 / 到府提醒</label><input v-model="myProfile.parking" class="field" placeholder="巷口有停車場、到樓下請打電話"></div>
         
-        <!-- 🚨 新增：按鈕防呆與狀態 -->
         <button class="btn btn-primary" @click="saveProfile" :disabled="isSavingProfile">
           {{ isSavingProfile ? '資料儲存中...' : '儲存資料' }}
         </button>
@@ -575,7 +539,6 @@
   const GAS_API = "https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec";
 
       const LIFF_ID = "2010742657-DOz9QdF3";
-      // ⚙️ 唯一要維護：GAS 的 /exec 網址（重新部署若網址變了改這行）
       const { createApp, ref, onMounted } = Vue;
       createApp({
         setup() {
@@ -593,12 +556,13 @@
           const isLineMode = ref(true);
           const authFailed = ref(false);
 
-          // 🚨 新增：各個表單的 Loading (防呆) 狀態變數
+          // ⚡ 全域非阻塞式連線狀態
+          const globalLoading = ref(false);
+
           const isSavingProfile = ref(false);
           const isRegisteringCat = ref(false);
           const isSavingCat = ref(false);
 
-          // 預約流程狀態
           const bookStep = ref(1);
           const selectedSlot = ref('');
           const selectedCats = ref([]);
@@ -606,10 +570,9 @@
           const bookNotes = ref('');
           const bookLoading = ref(false);
           const refreshing = ref(false);
-          // 我的預約
           const myAppointments = ref([]);
           const apptLoading = ref(false);
-          const apptExpanded = ref(true);  // 預設展開
+          const apptExpanded = ref(true); 
           const availableSlots = ref([]);
           const calMonthLabel = ref('');
           let scheduleCacheMap = {};
@@ -636,13 +599,21 @@
             }
           };
 
+          // ---- fetch 封裝（附帶非阻塞全域 Loading 計數）----
           const apiGet = async (params) => {
-            const url = GAS_API + "?" + new URLSearchParams(params).toString();
-            const r = await fetch(url); return await r.json();
+            globalLoading.value = true;
+            try {
+              const url = GAS_API + "?" + new URLSearchParams(params).toString();
+              const r = await fetch(url); 
+              return await r.json();
+            } finally { globalLoading.value = false; }
           };
           const apiPost = async (payload) => {
-            const r = await fetch(GAS_API, { method:"POST", headers:{ "Content-Type":"text/plain;charset=utf-8" }, body:JSON.stringify(payload) });
-            return await r.json();
+            globalLoading.value = true;
+            try {
+              const r = await fetch(GAS_API, { method:"POST", headers:{ "Content-Type":"text/plain;charset=utf-8" }, body:JSON.stringify(payload) });
+              return await r.json();
+            } finally { globalLoading.value = false; }
           };
 
           const applyProfile = (res) => {
@@ -765,18 +736,16 @@
             selectedCats.value = []; bookCatCount.value = 1; bookNotes.value = '';
           };
 
-          // 🚨 加入 Loading 狀態
           const saveProfile = async () => {
             const p=myProfile.value;
-            isSavingProfile.value = true; // 反灰按鈕、變更文字
+            isSavingProfile.value = true;
             try {
               const res = await apiPost({ action:"updateMyProfile", idToken, name:p.name, address:p.address, phone:p.phone, elevator:p.elevator, parking:p.parking });
               showToast(res&&res.success?'資料儲存好囉！':'更新失敗', !(res&&res.success));
             } catch(e){ showToast('更新失敗 '+e.message, true); }
-            isSavingProfile.value = false; // 恢復按鈕
+            isSavingProfile.value = false;
           };
 
-          // 🚨 加入 Loading 狀態
           const registerCat = async () => {
             if(!newCat.value.name.trim()){ showToast('請先幫喵寶取名字～', true); return; }
             isRegisteringCat.value = true;
@@ -797,7 +766,6 @@
             editIdx.value=idx; editCat.value=JSON.parse(JSON.stringify(myCats.value[idx]));
           };
           
-         // 🚨 樂觀更新 (Optimistic UI) + 正確對接後端 oldName
           const saveEditCat = async (idx) => {
             const oldName = myCats.value[idx].name;
             const obj = JSON.parse(JSON.stringify(editCat.value));
@@ -808,7 +776,6 @@
               const res = await apiPost({ action:"updateMyCat", idToken, oldName: oldName, cat: obj });
               if(res && res.success){ 
                 showToast('喵寶資料更新好囉！'); 
-                // 瞬間更新畫面
                 myCats.value[idx] = { ...obj }; 
                 editIdx.value = -1; 
                 reloadProfile(); 
@@ -865,16 +832,14 @@
             }).catch((err)=>{ statusCode.value='LIFF·ERR'; showToast('LIFF 初始化失敗', true); });
           });
 
-          // 🚨 記得把新增的 Loading 變數 return 給模板綁定
           return { currentTab, myProfile, myCats, calendarDates, selectedDate, newCat, editIdx, editCat, toast, statusCode, isLineMode, authFailed, forceRelogin,
-            isSavingProfile, isRegisteringCat, isSavingCat,
+            globalLoading, isSavingProfile, isRegisteringCat, isSavingCat,
             switchTab, moveWeeks, selectDate, saveProfile, registerCat, toggleEdit, saveEditCat, removeCat,
             bookStep, selectedSlot, selectedCats, bookCatCount, bookNotes, bookLoading, availableSlots, calMonthLabel,
             toggleCatSelect, submitBooking, resetBook, refreshing, refreshCalendar,
             myAppointments, apptLoading, apptExpanded };
         }
       }).mount('#app');
-
 </script>
 </body>
 </html>
