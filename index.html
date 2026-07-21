@@ -68,7 +68,7 @@
 
       <!-- 診斷/模式列 -->
       <div :class="['text-[10px] font-mono px-3 py-1.5 leading-relaxed break-words tracking-wide', isLineMode ? 'bg-grape-700 text-grape-100' : 'bg-amber-300 text-amber-900']">
-        <span class="opacity-60">v260720.12</span> · <span class="font-black">{{ isLineMode ? 'LIVE' : 'DEV' }}</span> · <span class="opacity-80">{{ statusCode }}</span>
+        <span class="opacity-60">v260720.13</span> · <span class="font-black">{{ isLineMode ? 'LIVE' : 'DEV' }}</span> · <span class="opacity-80">{{ statusCode }}</span>
       </div>
 
       <!-- Toast -->
@@ -329,7 +329,7 @@
     <script>
       const LIFF_ID = "2010742657-DOz9QdF3";
       // ⚙️ 唯一要維護：GAS 的 /exec 網址（重新部署若網址變了改這行）
-      const GAS_API = "https://script.google.com/macros/s/AKfycbwPyDPNCnw1ElksUE2xXiT6lhqUJgEYzZ8iZS-y1eV46ABYBjqLBtAAqY36FPFS1V0R/exec";
+      const GAS_API = "https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec";
       const { createApp, ref, onMounted } = Vue;
       createApp({
         setup() {
@@ -541,8 +541,11 @@
             });
             liff.init({ liffId:LIFF_ID }).then(()=>{
               if(!liff.isLoggedIn()){
-                if(liff.isInClient()){ liff.login(); return; }
-                statusCode.value='ENV·ERR'; showToast('請從 LINE 開啟本頁', true); return;
+                // 不管是 LINE 內建瀏覽器還是一般瀏覽器，都觸發 liff.login()
+                // LIFF 會自動引導用戶到 LINE 網頁版登入，不強制限制只能從 LINE App 開啟
+                statusCode.value='AUTH·0';
+                liff.login({ redirectUri: location.href });
+                return;
               }
               idToken = liff.getIDToken();
               if(!idToken){ statusCode.value='AUTH·ERR'; showToast('身分驗證失敗，請重開', true); return; }
