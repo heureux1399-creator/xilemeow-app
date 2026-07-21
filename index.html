@@ -200,7 +200,7 @@
 
   <!-- 系統列 -->
   <div :class="['sys-bar', isLineMode?'live':'dev']">
-    v260720.16 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}
+    v260720.17 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}
   </div>
 
   <!-- Toast -->
@@ -212,7 +212,7 @@
   <header class="app-header">
     <div class="header-eyebrow">到府美容服務</div>
     <h1 class="header-title">洗咧喵</h1>
-    <p class="header-sub">翻閱農民曆選吉日 · 喵寶在家洗香香</p>
+    <p class="header-sub">翻閱農民曆選吉日 · 喵寶在家洗浴</p>
   </header>
 
   <!-- 會員卡 -->
@@ -371,7 +371,7 @@
           <div class="confirm-row"><span class="confirm-key">台數</span><span class="confirm-val">{{ bookCatCount }} 台</span></div>
           <div v-if="bookNotes" class="confirm-row"><span class="confirm-key">備註</span><span class="confirm-val">{{ bookNotes }}</span></div>
         </div>
-        <div style="font-size:11px;color:var(--ink-3);text-align:center;margin:14px 0 16px;line-height:1.8;">送出後由喵師傅確認時間<br>請留意 LINE 訊息通知</div>
+        <div style="font-size:11px;color:var(--ink-3);text-align:center;margin:14px 0 16px;line-height:1.8;">送出後由美容師確認時間<br>請留意 LINE 訊息通知</div>
         <button class="btn btn-success" @click="submitBooking" :disabled="bookLoading">
           {{ bookLoading?'送出中…':'送出預約申請' }}
         </button>
@@ -384,8 +384,42 @@
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
           <div class="success-title">預約申請已送出</div>
-          <div class="success-sub" style="margin-bottom:24px;">喵師傅收到後會與您確認時間<br>請留意 LINE 訊息通知</div>
+          <div class="success-sub" style="margin-bottom:24px;">美容師收到後會與您確認時間<br>請留意 LINE 訊息通知</div>
           <button class="btn btn-secondary" @click="resetBook" style="max-width:160px;margin:0 auto;">返回日曆</button>
+        </div>
+      </div>
+
+      <!-- 我的預約（只在步驟1且已登入時顯示）-->
+      <div v-if="bookStep===1 && myProfile.uid" style="margin-top:4px;">
+        <div class="card card-accent">
+          <div class="section-header" style="cursor:pointer;margin-bottom:0;" @click="apptExpanded=!apptExpanded">
+            <span class="section-title" style="font-size:13px;">我的預約</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span v-if="myAppointments.length" style="font-size:11px;color:var(--ink-3);">{{ myAppointments.length }} 筆</span>
+              <svg :style="apptExpanded?'transform:rotate(180deg)':''" style="transition:.15s;color:var(--ink-3);" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+          <div v-show="apptExpanded" style="margin-top:12px;">
+            <div v-if="apptLoading" style="text-align:center;padding:16px;">
+              <svg class="spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            </div>
+            <div v-else-if="myAppointments.length===0" style="text-align:center;padding:16px;font-size:12px;color:var(--ink-3);">近 3 個月無預約紀錄</div>
+            <div v-else>
+              <div v-for="appt in myAppointments" :key="appt.rowIndex+'_'+appt.source"
+                :style="{borderLeft: appt.status==='pending'?'3px solid var(--orange)': appt.status==='confirmed'?'3px solid var(--ok)':'3px solid var(--ink-3)'}"
+                style="padding:11px 2px;border-bottom:1px solid var(--border);">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+                  <span style="font-size:13px;font-weight:700;color:var(--ink);">{{ appt.date }} · {{ appt.time }}</span>
+                  <span :style="{background: appt.status==='pending'?'var(--orange-l)': appt.status==='confirmed'?'var(--ok-l)':'var(--warm)', color: appt.status==='pending'?'var(--orange-d)': appt.status==='confirmed'?'var(--ok)':'var(--ink-3)'}"
+                    style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;">
+                    {{ appt.status==='pending'?'待確認': appt.status==='confirmed'?'已確認':'已完成' }}
+                  </span>
+                </div>
+                <div style="font-size:11px;color:var(--ink-2);">洗浴 {{ appt.count }} 台<span v-if="appt.catDetail"> · {{ appt.catDetail }}</span></div>
+                <div v-if="appt.notes" style="font-size:11px;color:var(--ink-3);margin-top:2px;">{{ appt.notes }}</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -533,6 +567,10 @@
           const bookNotes = ref('');
           const bookLoading = ref(false);
           const refreshing = ref(false);
+          // 我的預約
+          const myAppointments = ref([]);
+          const apptLoading = ref(false);
+          const apptExpanded = ref(true);  // 預設展開
           const availableSlots = ref([]);
           const calMonthLabel = ref('');
           let scheduleCacheMap = {};
@@ -578,7 +616,7 @@
             loadCalendar();  // 效能優化：日曆不需身分驗證，平行發送不等待 profile
             try {
               const res = await apiGet({ action:"getMyProfile", idToken });
-              if(res && res.success){ applyProfile(res); statusCode.value='OK·'+res.info.uid; }
+              if(res && res.success){ applyProfile(res); statusCode.value='OK·'+res.info.uid; loadMyAppointments(); }
               else {
                 statusCode.value='ERR·'+((res&&res.error)?res.error.substring(0,20):'null');
                 showToast('讀取失敗：'+(res?res.error:'null'), true);
@@ -616,6 +654,15 @@
             }
             calendarDates.value=arr;
           };
+          const loadMyAppointments = async () => {
+            apptLoading.value = true;
+            try {
+              const res = await apiGet({ action:"getMyAppointments", idToken });
+              if(res && res.success) myAppointments.value = res.list || [];
+            } catch(e){}
+            apptLoading.value = false;
+          };
+
           const refreshCalendar = async () => {
             refreshing.value = true;
             const t = new Date();
@@ -658,7 +705,7 @@
                 dateStr: selectedDate.value, slotStr: selectedSlot.value,
                 catCount: bookCatCount.value, catDetails, notes: bookNotes.value
               });
-              if(res && res.success){ bookStep.value = 5; }
+              if(res && res.success){ bookStep.value = 5; loadMyAppointments(); }
               else showToast('送出失敗：'+(res?res.error:'null'), true);
             } catch(e){ showToast('送出失敗 '+e.message, true); }
             bookLoading.value = false;
@@ -740,7 +787,8 @@
           return { currentTab, myProfile, myCats, calendarDates, selectedDate, newCat, editIdx, editCat, toast, statusCode, isLineMode,
             switchTab, moveWeeks, selectDate, saveProfile, registerCat, toggleEdit, saveEditCat, removeCat,
             bookStep, selectedSlot, selectedCats, bookCatCount, bookNotes, bookLoading, availableSlots, calMonthLabel,
-            toggleCatSelect, submitBooking, resetBook, refreshing, refreshCalendar };
+            toggleCatSelect, submitBooking, resetBook, refreshing, refreshCalendar,
+            myAppointments, apptLoading, apptExpanded };
         }
       }).mount('#app');
 
