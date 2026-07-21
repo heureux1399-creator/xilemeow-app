@@ -1,494 +1,506 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
-  <head>
-    <base target="_top">
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>洗咧喵</title>
-    <script src="https://unpkg.com/vue@3.3.4/dist/vue.global.prod.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-    <script>
-      window.onerror = function(m,s,l){ var d=document.createElement('div'); d.style.cssText='position:fixed;top:0;left:0;width:100%;background:#7C5CBF;color:white;z-index:99999;padding:12px;font-size:11px;'; d.innerHTML='ERR: '+m+' L'+l; document.body.appendChild(d); return true; };
-      window.addEventListener('unhandledrejection',function(e){ var d=document.createElement('div'); d.style.cssText='position:fixed;top:0;left:0;width:100%;background:#C4A882;color:#2D2B38;z-index:99999;padding:12px;font-size:11px;'; d.innerHTML='PROMISE ERR: '+(e.reason&&e.reason.message?e.reason.message:e.reason); document.body.appendChild(d); });
-    </script>
-    <style>
-      :root {
-        --ink:     #2D2B38;
-        --ink-2:   #6B6880;
-        --ink-3:   #9D9AAD;
-        --paper:   #F8F5FF;
-        --purple:  #7C5CBF;
-        --purple-l:#A07FD6;
-        --purple-2:#EDE7FA;
-        --gold:    #C4A882;
-        --gold-l:  #F5EFE6;
-        --white:   #FFFFFF;
-        --ok:      #3D8A6E;
-        --ok-l:    #E6F4EE;
-        --err:     #B8415A;
-      }
-      [v-cloak]{ display:none !important; }
-      *{ -webkit-tap-highlight-color:transparent; box-sizing:border-box; }
-      html,body{ background:var(--paper); color:var(--ink); font-family:'Noto Sans TC',sans-serif; -webkit-user-select:none; user-select:none; }
-      body{ padding-bottom:96px; }
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>洗咧喵</title>
+  <script src="https://unpkg.com/vue@3.3.4/dist/vue.global.prod.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script>
+    window.onerror=function(m,s,l){var d=document.createElement('div');d.style.cssText='position:fixed;top:0;left:0;width:100%;background:#D4622A;color:#fff;z-index:99999;padding:10px 14px;font-size:11px;font-family:monospace;';d.innerHTML='ERR: '+m+' L'+l;document.body.appendChild(d);return true;};
+    window.addEventListener('unhandledrejection',function(e){var d=document.createElement('div');d.style.cssText='position:fixed;top:0;left:0;width:100%;background:#7A7268;color:#fff;z-index:99999;padding:10px 14px;font-size:11px;font-family:monospace;';d.innerHTML='PROMISE: '+(e.reason&&e.reason.message?e.reason.message:e.reason);document.body.appendChild(d);});
+  </script>
+  <style>
+    /* ── 設計系統：墨與柿 ── */
+    :root{
+      --ink:      #2C2C2C;
+      --ink-2:    #7A7268;
+      --ink-3:    #B0A89C;
+      --paper:    #FAF7F2;
+      --card:     #FFFFFF;
+      --warm:     #F3EDE4;
+      --orange:   #D4622A;
+      --orange-l: #FAEAE1;
+      --orange-d: #B0501F;
+      --ok:       #3D6B4F;
+      --ok-l:     #E8F3EC;
+      --err:      #B84141;
+      --border:   rgba(44,44,44,.1);
+    }
+    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; margin:0; padding:0; }
+    [v-cloak]{ display:none!important; }
+    html,body{ background:var(--paper); color:var(--ink); font-family:'Noto Sans TC',sans-serif; font-weight:400; -webkit-user-select:none; user-select:none; }
+    body{ padding-bottom:88px; }
 
-      /* 版本列 */
-      .sys-bar{ font-family:'SF Mono',monospace; font-size:10px; padding:5px 16px; letter-spacing:.04em; }
-      .sys-bar.live{ background:var(--purple); color:rgba(255,255,255,.75); }
-      .sys-bar.dev{ background:var(--gold); color:var(--ink); }
+    /* ── 系統列 ── */
+    .sys-bar{ font-family:monospace; font-size:10px; padding:5px 16px; letter-spacing:.05em; color:rgba(255,255,255,.6); }
+    .sys-bar.live{ background:#1A1A1A; }
+    .sys-bar.dev{ background:var(--orange); color:rgba(255,255,255,.9); }
 
-      /* Header */
-      .app-header{ background:var(--purple); color:var(--white); padding:40px 24px 52px; position:relative; overflow:hidden; }
-      .app-header::before{ content:''; position:absolute; top:-40px; right:-40px; width:160px; height:160px; border-radius:50%; background:rgba(255,255,255,.06); pointer-events:none; }
-      .app-header::after{ content:''; position:absolute; bottom:-50px; left:-30px; width:130px; height:130px; border-radius:50%; background:rgba(255,255,255,.04); pointer-events:none; }
-      .app-header h1{ font-family:'Noto Serif TC',serif; font-size:22px; font-weight:700; letter-spacing:.1em; margin:0 0 4px; position:relative; }
-      .app-header p{ font-size:12px; opacity:.7; margin:0; position:relative; letter-spacing:.06em; }
+    /* ── Toast ── */
+    .toast{ position:fixed; top:16px; left:50%; transform:translateX(-50%); padding:11px 18px; border-radius:8px; font-size:12px; font-weight:500; display:flex; align-items:center; gap:8px; z-index:999; max-width:86vw; box-shadow:0 4px 20px rgba(0,0,0,.18); white-space:nowrap; }
+    .toast.ok{ background:var(--ink); color:#fff; }
+    .toast.err{ background:var(--err); color:#fff; }
+    .fade-enter-active,.fade-leave-active{ transition:opacity .2s,transform .2s; }
+    .fade-enter-from,.fade-leave-to{ opacity:0; transform:translateX(-50%) translateY(-6px); }
 
-      /* 卡片 */
-      .card{ background:var(--white); border-radius:16px; padding:20px; margin:0 0 12px; border:1px solid rgba(124,92,191,.1); position:relative; }
-      .card::before{ content:''; position:absolute; left:0; top:16px; bottom:16px; width:2px; background:var(--gold); border-radius:0 2px 2px 0; }
-      .card-title{ font-family:'Noto Serif TC',serif; font-size:15px; font-weight:600; color:var(--purple); margin:0 0 14px; display:flex; align-items:center; gap:8px; }
-      .card-title svg{ color:var(--gold); flex-shrink:0; }
+    /* ── Header ── */
+    .app-header{ background:var(--ink); color:#fff; padding:48px 24px 64px; position:relative; overflow:hidden; }
+    .app-header::after{ content:''; position:absolute; right:-24px; bottom:-32px; width:120px; height:120px; border-radius:50%; background:rgba(212,98,42,.15); pointer-events:none; }
+    .header-eyebrow{ font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--orange); font-weight:500; margin-bottom:10px; }
+    .header-title{ font-family:'Noto Serif TC',serif; font-size:28px; font-weight:700; letter-spacing:.06em; line-height:1.1; }
+    .header-sub{ font-size:12px; color:rgba(255,255,255,.45); margin-top:8px; letter-spacing:.05em; font-weight:300; }
 
-      /* 會員卡 */
-      .member-card{ background:linear-gradient(135deg,var(--purple) 0%,#5B3FA0 100%); color:var(--white); border-radius:16px; padding:20px 20px 18px; margin:-28px 16px 0; position:relative; z-index:10; box-shadow:0 8px 32px rgba(124,92,191,.35); }
-      .member-card .label{ font-size:10px; opacity:.7; letter-spacing:.1em; text-transform:uppercase; margin-bottom:6px; }
-      .member-card .uid{ font-family:'SF Mono',monospace; font-size:18px; font-weight:600; letter-spacing:.08em; }
-      .member-card .balance{ font-size:11px; opacity:.8; margin-top:8px; display:flex; align-items:center; gap:6px; }
+    /* ── 會員卡（浮在 header 上）── */
+    .member-card-wrap{ padding:0 20px; margin-top:-28px; position:relative; z-index:10; }
+    .member-card{ background:var(--card); border-radius:14px; padding:18px 20px; box-shadow:0 8px 32px rgba(44,44,44,.14); border:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+    .member-card-left .eyebrow{ font-size:9px; letter-spacing:.15em; text-transform:uppercase; color:var(--ink-3); margin-bottom:6px; }
+    .member-card-left .uid{ font-family:monospace; font-size:17px; font-weight:700; color:var(--ink); letter-spacing:.06em; }
+    .member-card-right{ text-align:right; }
+    .member-card-right .bal-label{ font-size:9px; color:var(--ink-3); letter-spacing:.1em; text-transform:uppercase; margin-bottom:4px; }
+    .member-card-right .bal-val{ font-size:18px; font-weight:700; color:var(--orange); font-family:monospace; }
+    .member-card-right .bal-unit{ font-size:11px; color:var(--ink-2); margin-left:2px; }
+    .member-loading{ font-size:13px; color:var(--ink-3); letter-spacing:.05em; }
 
-      /* 表單欄位 */
-      .field{ width:100%; border:1.5px solid rgba(124,92,191,.2); border-radius:10px; padding:11px 14px; background:var(--paper); font-size:14px; font-family:'Noto Sans TC',sans-serif; color:var(--ink); transition:border-color .15s; }
-      .field:focus{ outline:none; border-color:var(--purple); background:var(--white); }
-      .field::placeholder{ color:var(--ink-3); }
-      .label{ display:block; font-size:11px; font-weight:700; color:var(--ink-2); margin-bottom:6px; letter-spacing:.04em; }
+    /* ── 主內容區 ── */
+    .main{ padding:20px 20px 0; max-width:480px; margin:0 auto; }
+    .section-gap{ height:14px; }
 
-      /* 按鈕 */
-      .btn{ display:flex; align-items:center; justify-content:center; gap:6px; border-radius:10px; font-weight:700; font-size:14px; font-family:'Noto Sans TC',sans-serif; cursor:pointer; border:none; transition:transform .1s, opacity .1s; -webkit-tap-highlight-color:transparent; }
-      .btn:active{ transform:scale(.97); opacity:.9; }
-      .btn-primary{ background:var(--purple); color:var(--white); padding:13px 20px; width:100%; }
-      .btn-secondary{ background:var(--purple-2); color:var(--purple); padding:11px 20px; width:100%; }
-      .btn-success{ background:var(--ok); color:var(--white); padding:13px 20px; width:100%; }
-      .btn-ghost{ background:transparent; color:var(--ink-2); padding:8px 14px; border:1.5px solid rgba(124,92,191,.2); }
-      .btn-danger{ background:#FEF2F2; color:var(--err); padding:11px 16px; border:1.5px solid #FEE2E2; }
-      .btn-icon{ background:var(--paper); color:var(--ink-2); padding:8px; border-radius:8px; border:1.5px solid rgba(124,92,191,.15); width:36px; height:36px; }
+    /* ── 區塊標題 ── */
+    .section-header{ display:flex; align-items:baseline; gap:10px; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--border); }
+    .section-title{ font-family:'Noto Serif TC',serif; font-size:15px; font-weight:600; color:var(--ink); }
+    .section-sub{ font-size:11px; color:var(--ink-3); }
 
-      /* 選擇按鈕群 */
-      .toggle-group{ display:grid; gap:8px; }
-      .toggle-group.col-2{ grid-template-columns:1fr 1fr; }
-      .toggle-btn{ padding:11px; border-radius:10px; border:1.5px solid rgba(124,92,191,.2); background:var(--paper); color:var(--ink-2); font-size:13px; font-weight:700; cursor:pointer; text-align:center; transition:all .15s; }
-      .toggle-btn.active{ background:var(--purple); border-color:var(--purple); color:var(--white); }
+    /* ── 卡片 ── */
+    .card{ background:var(--card); border-radius:12px; padding:20px; border:1px solid var(--border); margin-bottom:12px; }
+    .card-accent{ border-left:2.5px solid var(--orange); }
 
-      /* 日曆格 */
-      .cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:5px; }
-      .cal-cell{ aspect-ratio:1; border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center; border:1.5px solid transparent; cursor:default; font-size:11px; font-weight:600; }
-      .cal-cell.open{ background:var(--ok-l); border-color:rgba(61,138,110,.25); color:var(--ok); cursor:pointer; }
-      .cal-cell.open:active{ transform:scale(.95); }
-      .cal-cell.selected{ background:var(--purple); border-color:var(--purple); color:var(--white); }
-      .cal-cell.past{ background:transparent; color:var(--ink-3); }
-      .cal-cell.closed{ background:var(--paper); color:var(--ink-3); }
-      .cal-dot{ width:4px; height:4px; border-radius:50%; background:currentColor; margin-top:2px; opacity:.6; }
+    /* ── 月份導航 ── */
+    .month-nav{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+    .month-label{ font-size:13px; font-weight:500; color:var(--ink-2); letter-spacing:.04em; }
+    .nav-arrow{ width:32px; height:32px; border-radius:8px; border:1px solid var(--border); background:var(--paper); display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--ink-2); transition:all .12s; }
+    .nav-arrow:active{ background:var(--warm); transform:scale(.95); }
 
-      /* 貓咪卡片 */
-      .cat-card{ border:1.5px solid rgba(124,92,191,.15); border-radius:12px; overflow:hidden; margin-bottom:8px; }
-      .cat-card-header{ display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:var(--paper); cursor:pointer; }
-      .cat-card-body{ padding:14px; border-top:1px solid rgba(124,92,191,.1); background:var(--white); }
-      .cat-info{ display:flex; align-items:center; gap:10px; }
-      .cat-avatar{ width:36px; height:36px; border-radius:10px; background:var(--purple-2); display:flex; align-items:center; justify-content:center; color:var(--purple); flex-shrink:0; }
-      .cat-name{ font-weight:700; font-size:14px; color:var(--ink); }
-      .cat-meta{ font-size:11px; color:var(--ink-2); margin-top:1px; }
+    /* ── 日曆 ── */
+    .cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+    .cal-cell{ aspect-ratio:1; border-radius:8px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:11px; font-weight:500; cursor:default; border:1px solid transparent; transition:all .12s; }
+    .cal-cell .date-num{ line-height:1; }
+    .cal-cell .date-dot{ width:3px; height:3px; border-radius:50%; background:currentColor; margin-top:3px; opacity:.5; }
+    .cal-cell.open{ background:var(--orange-l); color:var(--orange-d); border-color:rgba(212,98,42,.2); cursor:pointer; }
+    .cal-cell.open:active{ transform:scale(.93); }
+    .cal-cell.selected{ background:var(--orange); color:#fff; border-color:var(--orange); }
+    .cal-cell.past,.cal-cell.closed{ color:var(--ink-3); }
+    .cal-cell.past .date-num{ text-decoration:line-through; opacity:.4; }
 
-      /* 標籤 */
-      .tag{ display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; }
-      .tag-purple{ background:var(--purple-2); color:var(--purple); }
-      .tag-gold{ background:var(--gold-l); color:#8B6D4A; }
-      .tag-ok{ background:var(--ok-l); color:var(--ok); }
+    /* ── 表單 ── */
+    .field-wrap{ margin-bottom:14px; }
+    .field-label{ font-size:10px; font-weight:700; color:var(--ink-2); letter-spacing:.1em; text-transform:uppercase; margin-bottom:7px; display:block; }
+    .field{ width:100%; border:1px solid var(--border); border-radius:8px; padding:11px 13px; font-size:14px; font-family:'Noto Sans TC',sans-serif; color:var(--ink); background:var(--paper); transition:border-color .15s,background .15s; }
+    .field:focus{ outline:none; border-color:var(--orange); background:#fff; }
+    .field::placeholder{ color:var(--ink-3); }
 
-      /* 預約確認卡 */
-      .confirm-row{ display:flex; justify-content:space-between; align-items:center; padding:11px 0; border-bottom:1px solid var(--paper); }
-      .confirm-row:last-child{ border-bottom:none; }
-      .confirm-label{ font-size:12px; color:var(--ink-2); }
-      .confirm-value{ font-size:14px; font-weight:700; color:var(--ink); text-align:right; }
+    /* ── Checkbox（有電梯）── */
+    .check-row{ display:flex; align-items:center; gap:12px; padding:12px 0; cursor:pointer; }
+    .check-box{ width:22px; height:22px; border-radius:6px; border:1.5px solid var(--border); background:var(--paper); flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all .15s; }
+    .check-box.checked{ background:var(--orange); border-color:var(--orange); }
+    .check-label-text{ font-size:14px; color:var(--ink); }
+    .check-label-sub{ font-size:11px; color:var(--ink-3); margin-top:1px; }
 
-      /* 步驟指示器 */
-      .step-indicator{ display:flex; align-items:center; gap:0; margin-bottom:20px; }
-      .step-dot{ width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; }
-      .step-dot.active{ background:var(--purple); color:var(--white); }
-      .step-dot.done{ background:var(--ok); color:var(--white); }
-      .step-dot.idle{ background:var(--paper); color:var(--ink-3); border:1.5px solid rgba(124,92,191,.2); }
-      .step-line{ flex:1; height:1.5px; background:rgba(124,92,191,.15); }
-      .step-line.done{ background:var(--ok); }
+    /* ── 時段選擇 ── */
+    .slot-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .slot-btn{ padding:13px; border-radius:8px; border:1px solid var(--border); background:var(--paper); color:var(--ink); font-size:14px; font-weight:500; font-family:'Noto Sans TC',sans-serif; cursor:pointer; text-align:center; transition:all .12s; }
+    .slot-btn:active{ transform:scale(.97); }
+    .slot-btn.selected{ background:var(--orange); border-color:var(--orange); color:#fff; font-weight:700; }
 
-      /* 成功畫面 */
-      .success-icon{ width:72px; height:72px; border-radius:24px; background:var(--ok-l); display:flex; align-items:center; justify-content:center; color:var(--ok); margin:0 auto 20px; }
+    /* ── 按鈕 ── */
+    .btn{ display:flex; align-items:center; justify-content:center; gap:7px; border:none; border-radius:8px; font-family:'Noto Sans TC',sans-serif; font-weight:700; font-size:14px; cursor:pointer; transition:all .12s; width:100%; padding:13px 20px; }
+    .btn:active{ transform:scale(.98); opacity:.92; }
+    .btn-primary{ background:var(--orange); color:#fff; }
+    .btn-primary:hover{ background:var(--orange-d); }
+    .btn-secondary{ background:var(--warm); color:var(--ink); }
+    .btn-success{ background:var(--ok); color:#fff; }
+    .btn-ghost{ background:var(--paper); color:var(--ink-2); border:1px solid var(--border); width:auto; padding:8px 12px; }
+    .btn-icon{ background:var(--paper); color:var(--ink-2); border:1px solid var(--border); width:34px; height:34px; padding:0; border-radius:8px; flex-shrink:0; }
+    .btn-danger-sm{ background:transparent; color:var(--err); border:1px solid rgba(184,65,65,.2); width:auto; padding:9px 14px; font-size:13px; }
 
-      /* 底部導航 */
-      .bottom-nav{ position:fixed; bottom:0; left:0; width:100%; z-index:100; padding:8px 16px 28px; background:rgba(248,245,255,.92); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-top:1px solid rgba(124,92,191,.12); }
-      .bottom-nav-inner{ display:flex; justify-content:space-around; max-width:480px; margin:0 auto; }
-      .nav-item{ display:flex; flex-direction:column; align-items:center; gap:4px; padding:6px 16px; border-radius:12px; cursor:pointer; color:var(--ink-3); font-size:10px; font-weight:700; letter-spacing:.04em; transition:all .15s; }
-      .nav-item.active{ color:var(--purple); background:var(--purple-2); }
-      .nav-item svg{ transition:all .15s; }
+    /* ── 計數器 ── */
+    .counter{ display:flex; align-items:center; gap:16px; }
+    .counter-val{ font-size:24px; font-weight:700; color:var(--orange); min-width:28px; text-align:center; font-family:monospace; }
+    .counter-unit{ font-size:12px; color:var(--ink-3); }
 
-      /* Toast */
-      .toast{ position:fixed; top:20px; left:50%; transform:translateX(-50%); padding:12px 20px; border-radius:12px; font-size:13px; font-weight:700; display:flex; align-items:center; gap:8px; z-index:1000; max-width:88vw; box-shadow:0 8px 32px rgba(0,0,0,.15); }
-      .toast.ok{ background:var(--ink); color:var(--white); }
-      .toast.err{ background:var(--err); color:var(--white); }
+    /* ── 貓咪 ── */
+    .cat-item{ border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:8px; }
+    .cat-item-head{ display:flex; align-items:center; justify-content:space-between; padding:13px 15px; cursor:pointer; background:var(--paper); }
+    .cat-item-head:active{ background:var(--warm); }
+    .cat-avatar{ width:38px; height:38px; border-radius:9px; background:var(--warm); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .cat-name{ font-weight:700; font-size:14px; color:var(--ink); }
+    .cat-meta{ font-size:11px; color:var(--ink-2); margin-top:2px; }
+    .cat-gender-tag{ display:inline-block; font-size:9px; font-weight:700; padding:2px 7px; border-radius:10px; letter-spacing:.05em; background:var(--orange-l); color:var(--orange-d); margin-left:6px; }
+    .cat-body{ padding:15px; border-top:1px solid var(--border); background:#fff; }
 
-      /* 輔助 */
-      .main-wrap{ max-width:480px; margin:0 auto; padding:0 16px; }
-      .field-group{ margin-bottom:14px; }
-      .divider{ height:1px; background:rgba(124,92,191,.1); margin:16px 0; }
-      .text-sm{ font-size:12px; color:var(--ink-2); line-height:1.6; }
-      .empty-state{ text-align:center; padding:40px 20px; color:var(--ink-3); }
-      .empty-state svg{ margin:0 auto 12px; opacity:.4; }
-      .spin{ animation:spin 1s linear infinite; }
-      @keyframes spin{ to{ transform:rotate(360deg); } }
-      .section-spacing{ height:16px; }
-    </style>
-  </head>
-  <body>
-    <div id="app" v-cloak>
-      <!-- 系統列 -->
-      <div :class="['sys-bar', isLineMode?'live':'dev']">
-        <span style="opacity:.6">v260720.13</span> · <b>{{ isLineMode?'LIVE':'DEV' }}</b> · {{ statusCode }}
+    /* ── 勾選貓咪 ── */
+    .cat-select-item{ display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-radius:8px; border:1px solid var(--border); margin-bottom:7px; cursor:pointer; background:var(--paper); transition:all .12s; }
+    .cat-select-item.selected{ background:var(--orange-l); border-color:rgba(212,98,42,.3); }
+    .cat-check{ width:20px; height:20px; border-radius:5px; border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .15s; }
+    .cat-check.checked{ background:var(--orange); border-color:var(--orange); }
+
+    /* ── 預約確認 ── */
+    .confirm-table{ background:var(--paper); border-radius:8px; overflow:hidden; }
+    .confirm-row{ display:flex; justify-content:space-between; align-items:flex-start; padding:11px 14px; border-bottom:1px solid var(--border); gap:12px; }
+    .confirm-row:last-child{ border-bottom:none; }
+    .confirm-key{ font-size:11px; color:var(--ink-3); font-weight:500; white-space:nowrap; padding-top:1px; }
+    .confirm-val{ font-size:13px; font-weight:700; color:var(--ink); text-align:right; word-break:break-word; }
+
+    /* ── 成功 ── */
+    .success-wrap{ text-align:center; padding:36px 20px; }
+    .success-circle{ width:72px; height:72px; border-radius:50%; background:var(--ok-l); display:flex; align-items:center; justify-content:center; margin:0 auto 20px; }
+    .success-title{ font-family:'Noto Serif TC',serif; font-size:19px; font-weight:600; color:var(--ink); margin-bottom:8px; }
+    .success-sub{ font-size:12px; color:var(--ink-2); line-height:1.9; }
+
+    /* ── 空狀態 ── */
+    .empty{ text-align:center; padding:36px 20px; color:var(--ink-3); }
+    .empty-title{ font-size:13px; margin-top:10px; }
+    .empty-sub{ font-size:11px; margin-top:4px; }
+
+    /* ── 分隔線 ── */
+    .divider{ height:1px; background:var(--border); margin:14px 0; }
+
+    /* ── 旋轉 ── */
+    .spin{ animation:spin .8s linear infinite; }
+    @keyframes spin{ to{ transform:rotate(360deg); } }
+
+    /* ── 底部導航 ── */
+    .bottom-nav{ position:fixed; bottom:0; left:0; width:100%; background:rgba(250,247,242,.94); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-top:1px solid var(--border); z-index:100; padding-bottom:env(safe-area-inset-bottom,0); }
+    .nav-inner{ display:flex; justify-content:space-around; max-width:480px; margin:0 auto; padding:6px 0 8px; }
+    .nav-item{ display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 20px; border-radius:10px; cursor:pointer; transition:all .15s; }
+    .nav-label{ font-size:10px; font-weight:700; letter-spacing:.04em; color:var(--ink-3); }
+    .nav-item.active .nav-label{ color:var(--orange); }
+    .nav-icon{ color:var(--ink-3); }
+    .nav-item.active .nav-icon{ color:var(--orange); }
+
+    /* ── 刷新鈕 ── */
+    .refresh-btn{ background:none; border:none; font-size:11px; color:var(--ink-3); cursor:pointer; display:inline-flex; align-items:center; gap:5px; padding:5px 0; font-family:'Noto Sans TC',sans-serif; }
+
+    /* ── Grid 工具 ── */
+    .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  </style>
+</head>
+<body>
+<div id="app" v-cloak>
+
+  <!-- 系統列 -->
+  <div :class="['sys-bar', isLineMode?'live':'dev']">
+    v260720.14 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}
+  </div>
+
+  <!-- Toast -->
+  <transition name="fade">
+    <div v-if="toast.show" :class="['toast', toast.isError?'err':'ok']">{{ toast.message }}</div>
+  </transition>
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-eyebrow">到府美容服務</div>
+    <h1 class="header-title">洗咧喵</h1>
+    <p class="header-sub">翻閱農民曆選吉日 · 喵寶在家洗香香</p>
+  </header>
+
+  <!-- 會員卡 -->
+  <div class="member-card-wrap">
+    <div class="member-card">
+      <div class="member-card-left">
+        <div class="eyebrow">喵星卡號</div>
+        <div v-if="myProfile.uid" class="uid">{{ myProfile.uid }}</div>
+        <div v-else class="member-loading">驗證中⋯</div>
+      </div>
+      <div v-if="myProfile.uid" class="member-card-right">
+        <div class="bal-label">儲值餘額</div>
+        <div><span class="bal-val">{{ myProfile.balance }}</span><span class="bal-unit">元</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主內容 -->
+  <div class="main">
+    <div class="section-gap" style="height:20px;"></div>
+
+    <!-- ════ 良辰吉日 ════ -->
+    <div v-if="currentTab==='booking'">
+
+      <!-- 步驟1：選日期 -->
+      <div v-if="bookStep===1" class="card card-accent">
+        <div class="section-header">
+          <span class="section-title">良辰吉日</span>
+          <span class="section-sub">橙色格子可選</span>
+        </div>
+        <div class="month-nav">
+          <button class="nav-arrow btn-icon" @click="moveWeeks(-28)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <span class="month-label">{{ calMonthLabel }}</span>
+          <button class="nav-arrow btn-icon" @click="moveWeeks(28)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+        <div v-if="calendarDates.length===0" style="text-align:center;padding:28px 0;">
+          <svg class="spin" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+        </div>
+        <div v-else class="cal-grid">
+          <div v-for="d in calendarDates" :key="d.dateStr"
+            :class="['cal-cell', selectedDate===d.dateStr?'selected':d.isClickable?'open':d.isPast?'past':'closed']"
+            @click="selectDate(d)">
+            <span class="date-num">{{ d.dateLabel }}</span>
+            <span class="date-dot" v-if="d.isClickable && selectedDate!==d.dateStr"></span>
+          </div>
+        </div>
+        <div v-if="selectedDate" style="margin-top:16px;">
+          <button class="btn btn-primary" @click="bookStep=2">
+            {{ selectedDate }} — 選擇時辰
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+        <div style="margin-top:10px;text-align:center;" v-if="myProfile.uid">
+          <button class="refresh-btn" @click="refreshCalendar" :disabled="refreshing">
+            <svg :class="refreshing?'spin':''" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            {{ refreshing?'更新中…':'更新時段' }}
+          </button>
+        </div>
       </div>
 
-      <!-- Toast -->
-      <transition name="fade">
-        <div v-if="toast.show" :class="['toast', toast.isError?'err':'ok']">
-          <svg v-if="toast.isError" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <svg v-else xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          {{ toast.message }}
-        </div>
-      </transition>
-
-      <!-- Header -->
-      <header class="app-header">
-        <h1>洗咧喵</h1>
-        <p>到府美容預約護照</p>
-      </header>
-
-      <!-- 會員卡 -->
-      <div class="main-wrap">
-        <div class="member-card">
-          <div class="label">喵星卡號</div>
-          <div class="uid">{{ myProfile.uid || '—' }}</div>
-          <div class="balance">
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-            <span v-if="myProfile.uid">儲值餘額 {{ myProfile.balance }} 元</span>
-            <span v-else style="opacity:.5">驗證中…</span>
+      <!-- 步驟2：選時辰 -->
+      <div v-if="bookStep===2" class="card card-accent">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <button class="btn btn-icon" @click="bookStep=1">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <div>
+            <div class="section-title">選擇時辰</div>
+            <div style="font-size:11px;color:var(--ink-3);margin-top:2px;">{{ selectedDate }}</div>
           </div>
+        </div>
+        <div v-if="availableSlots.length===0" class="empty">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto;opacity:.35;"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          <div class="empty-title">此日暫無可選時段</div>
+        </div>
+        <div v-else class="slot-grid">
+          <div v-for="slot in availableSlots" :key="slot"
+            :class="['slot-btn', selectedSlot===slot?'selected':'']"
+            @click="selectedSlot=slot; bookStep=3">{{ slot }}</div>
         </div>
       </div>
 
-      <div class="section-spacing" style="height:20px"></div>
-
-      <!-- 主內容 -->
-      <div class="main-wrap">
-
-        <!-- ── 頁籤：良辰吉日 ── -->
-        <div v-if="currentTab==='booking'">
-
-          <!-- 步驟1：選日期 -->
-          <div v-if="bookStep===1">
-            <div class="card">
-              <div class="card-title">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                良辰吉日
-              </div>
-              <!-- 月份導航 -->
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-                <button class="btn btn-ghost btn-icon" @click="moveWeeks(-28)">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-                </button>
-                <span style="font-size:13px;font-weight:700;color:var(--ink-2);">{{ calMonthLabel }}</span>
-                <button class="btn btn-ghost btn-icon" @click="moveWeeks(28)">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-                </button>
-              </div>
-              <!-- 日曆 -->
-              <div v-if="calendarDates.length===0" style="text-align:center;padding:32px 0;">
-                <svg class="spin" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--purple-l)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto;display:block;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-              </div>
-              <div v-else class="cal-grid">
-                <div v-for="d in calendarDates" :key="d.dateStr"
-                  :class="['cal-cell', selectedDate===d.dateStr?'selected': d.isClickable?'open': d.isPast?'past':'closed']"
-                  @click="selectDate(d)">
-                  <span>{{ d.dateLabel }}</span>
-                  <div class="cal-dot" v-if="d.isClickable && selectedDate!==d.dateStr"></div>
-                </div>
-              </div>
-              <!-- 選好後的操作 -->
-              <div v-if="selectedDate" style="margin-top:16px;">
-                <button class="btn btn-primary" @click="bookStep=2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-                  {{ selectedDate }} · 選擇時辰
-                </button>
-              </div>
-            </div>
-            <!-- 更新按鈕 -->
-            <div v-if="myProfile.uid" style="text-align:center;margin-top:4px;">
-              <button @click="refreshCalendar" :disabled="refreshing" style="background:none;border:none;font-size:12px;color:var(--ink-3);cursor:pointer;display:inline-flex;align-items:center;gap:4px;padding:6px;">
-                <svg :class="refreshing?'spin':''" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-                {{ refreshing?'更新中…':'更新時段' }}
-              </button>
-            </div>
+      <!-- 步驟3：選喵寶 -->
+      <div v-if="bookStep===3" class="card card-accent">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <button class="btn btn-icon" @click="bookStep=2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <div>
+            <div class="section-title">選擇喵寶</div>
+            <div style="font-size:11px;color:var(--ink-3);margin-top:2px;">{{ selectedDate }} · {{ selectedSlot }}</div>
           </div>
-
-          <!-- 步驟2：選時辰 -->
-          <div v-if="bookStep===2">
-            <div class="card">
-              <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-                <button class="btn btn-ghost btn-icon" @click="bookStep=1">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-                </button>
-                <div>
-                  <div class="card-title" style="margin:0 0 2px;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    選擇時辰
-                  </div>
-                  <div style="font-size:11px;color:var(--ink-3);">{{ selectedDate }}</div>
-                </div>
+        </div>
+        <div v-if="myCats.length===0" class="empty">
+          <div class="empty-title">尚未登記喵寶</div>
+          <div class="empty-sub">請先至「護照」頁新增</div>
+        </div>
+        <div v-else style="margin-bottom:16px;">
+          <div v-for="cat in myCats" :key="cat.name"
+            :class="['cat-select-item', selectedCats.includes(cat.name)?'selected':'']"
+            @click="toggleCatSelect(cat.name)">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="cat-avatar" style="width:32px;height:32px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" :stroke="selectedCats.includes(cat.name)?'var(--orange)':'var(--ink-3)'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
               </div>
-              <div v-if="availableSlots.length===0" class="empty-state">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-                <div style="font-size:13px;margin-top:8px;">此日暫無可預約時段</div>
-              </div>
-              <div v-else class="toggle-group col-2">
-                <div v-for="slot in availableSlots" :key="slot"
-                  class="toggle-btn"
-                  @click="selectedSlot=slot; bookStep=3">{{ slot }}</div>
+              <div>
+                <div style="font-weight:700;font-size:13px;">{{ cat.name }}</div>
+                <div style="font-size:11px;color:var(--ink-2);">{{ cat.breed }}·{{ cat.weight }}kg</div>
               </div>
             </div>
-          </div>
-
-          <!-- 步驟3：選喵寶 -->
-          <div v-if="bookStep===3">
-            <div class="card">
-              <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-                <button class="btn btn-ghost btn-icon" @click="bookStep=2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-                </button>
-                <div>
-                  <div class="card-title" style="margin:0 0 2px;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                    選擇喵寶
-                  </div>
-                  <div style="font-size:11px;color:var(--ink-3);">{{ selectedDate }} · {{ selectedSlot }}</div>
-                </div>
-              </div>
-              <div v-if="myCats.length===0" class="empty-state">
-                <div style="font-size:13px;">尚未登記喵寶</div>
-                <div style="font-size:11px;margin-top:4px;">請先至「護照」頁新增</div>
-              </div>
-              <div v-else style="margin-bottom:16px;">
-                <div v-for="cat in myCats" :key="cat.name"
-                  @click="toggleCatSelect(cat.name)"
-                  :style="selectedCats.includes(cat.name)?'border-color:var(--purple);background:var(--purple-2);':''"
-                  style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:10px;border:1.5px solid rgba(124,92,191,.15);margin-bottom:8px;cursor:pointer;transition:all .15s;">
-                  <div style="display:flex;align-items:center;gap:10px;">
-                    <div :style="selectedCats.includes(cat.name)?'background:var(--purple);':''" style="width:32px;height:32px;border-radius:8px;background:var(--paper);display:flex;align-items:center;justify-content:center;transition:all .15s;">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" :stroke="selectedCats.includes(cat.name)?'white':'var(--ink-2)'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                    </div>
-                    <div>
-                      <div style="font-weight:700;font-size:14px;">{{ cat.name }}</div>
-                      <div style="font-size:11px;color:var(--ink-2);">{{ cat.breed }} · {{ cat.weight }}kg</div>
-                    </div>
-                  </div>
-                  <div :style="selectedCats.includes(cat.name)?'background:var(--purple);border-color:var(--purple);':''" style="width:20px;height:20px;border-radius:50%;border:1.5px solid rgba(124,92,191,.3);display:flex;align-items:center;justify-content:center;transition:all .15s;">
-                    <svg v-if="selectedCats.includes(cat.name)" xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                  </div>
-                </div>
-              </div>
-              <div class="divider"></div>
-              <div class="field-group">
-                <label class="label">洗浴台數</label>
-                <div style="display:flex;align-items:center;gap:16px;">
-                  <button class="btn btn-ghost btn-icon" @click="bookCatCount=Math.max(1,bookCatCount-1)">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                  </button>
-                  <span style="font-size:24px;font-weight:700;color:var(--purple);min-width:32px;text-align:center;">{{ bookCatCount }}</span>
-                  <button class="btn btn-ghost btn-icon" @click="bookCatCount++">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                  </button>
-                  <span style="font-size:12px;color:var(--ink-3);">台　已勾 {{ selectedCats.length }} 隻</span>
-                </div>
-              </div>
-              <div class="field-group">
-                <label class="label">備註（選填）</label>
-                <input v-model="bookNotes" class="field" placeholder="特殊需求或叮嚀">
-              </div>
-              <button class="btn btn-primary" @click="bookStep=4">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-                下一步 · 確認預約
-              </button>
-            </div>
-          </div>
-
-          <!-- 步驟4：最終確認 -->
-          <div v-if="bookStep===4">
-            <div class="card">
-              <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-                <button class="btn btn-ghost btn-icon" @click="bookStep=3">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-                </button>
-                <div class="card-title" style="margin:0;">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                  確認預約資訊
-                </div>
-              </div>
-              <div style="background:var(--paper);border-radius:10px;padding:4px 14px;">
-                <div class="confirm-row"><span class="confirm-label">日期</span><span class="confirm-value">{{ selectedDate }}</span></div>
-                <div class="confirm-row"><span class="confirm-label">時辰</span><span class="confirm-value">{{ selectedSlot }}</span></div>
-                <div class="confirm-row"><span class="confirm-label">喵寶</span><span class="confirm-value">{{ selectedCats.join('、') || '未指定' }}</span></div>
-                <div class="confirm-row"><span class="confirm-label">台數</span><span class="confirm-value">{{ bookCatCount }} 台</span></div>
-                <div v-if="bookNotes" class="confirm-row"><span class="confirm-label">備註</span><span class="confirm-value" style="max-width:60%;word-break:break-word;">{{ bookNotes }}</span></div>
-              </div>
-              <div style="margin:14px 0 16px;font-size:11px;color:var(--ink-3);text-align:center;">送出後由喵師傅確認時間，請留意 LINE 訊息</div>
-              <button class="btn btn-success" @click="submitBooking" :disabled="bookLoading">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                {{ bookLoading?'送出中…':'送出預約申請' }}
-              </button>
-            </div>
-          </div>
-
-          <!-- 步驟5：送出成功 -->
-          <div v-if="bookStep===5">
-            <div class="card" style="text-align:center;padding:40px 20px;">
-              <div class="success-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              </div>
-              <div style="font-family:'Noto Serif TC',serif;font-size:18px;font-weight:600;color:var(--purple);margin-bottom:8px;">預約申請已送出</div>
-              <div style="font-size:13px;color:var(--ink-2);line-height:1.8;margin-bottom:24px;">喵師傅收到後會與您確認時間<br>請留意 LINE 訊息通知</div>
-              <button class="btn btn-secondary" @click="resetBook">返回日曆</button>
+            <div :class="['cat-check', selectedCats.includes(cat.name)?'checked':'']">
+              <svg v-if="selectedCats.includes(cat.name)" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             </div>
           </div>
         </div>
-
-        <!-- ── 頁籤：喵星護照 ── -->
-        <div v-if="currentTab==='cats'">
-          <!-- 已登記的貓 -->
-          <div class="card" v-if="myCats.length>0">
-            <div class="card-title">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-              已登記喵寶 ({{ myCats.length }})
-            </div>
-            <div>
-              <div v-for="(cat,idx) in myCats" :key="idx" class="cat-card">
-                <div class="cat-card-header" @click="toggleEdit(idx)">
-                  <div class="cat-info">
-                    <div class="cat-avatar">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                    </div>
-                    <div>
-                      <div class="cat-name">{{ cat.name }}</div>
-                      <div class="cat-meta">{{ cat.breed || '品種未填' }} · {{ cat.weight || '?' }}kg · <span class="tag tag-purple" style="padding:1px 6px;font-size:10px;">{{ cat.gender }}</span></div>
-                    </div>
-                  </div>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline :points="editIdx===idx?'18 15 12 9 6 15':'6 9 12 15 18 9'"/></svg>
-                </div>
-                <div v-if="editIdx===idx" class="cat-card-body">
-                  <div class="field-group"><label class="label">名字</label><input v-model="editCat.name" class="field"></div>
-                  <div class="field-group">
-                    <label class="label">性別</label>
-                    <div class="toggle-group col-2">
-                      <div :class="['toggle-btn', editCat.gender==='男生'?'active':'']" @click="editCat.gender='男生'">男生</div>
-                      <div :class="['toggle-btn', editCat.gender==='女生'?'active':'']" @click="editCat.gender='女生'">女生</div>
-                    </div>
-                  </div>
-                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;" class="field-group">
-                    <div><label class="label">品種</label><input v-model="editCat.breed" class="field" placeholder="米克斯"></div>
-                    <div><label class="label">體重(kg)</label><input type="number" step="0.1" inputmode="decimal" v-model="editCat.weight" class="field" placeholder="4.5"></div>
-                  </div>
-                  <div class="field-group"><label class="label">健康叮嚀</label><input v-model="editCat.note" class="field" placeholder="怕吹風機…"></div>
-                  <div style="display:flex;gap:8px;">
-                    <button class="btn btn-primary" style="flex:1;" @click="saveEditCat(idx)">儲存</button>
-                    <button class="btn btn-danger" @click="removeCat(idx)" style="flex:0 0 auto;">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 新增貓 -->
-          <div class="card">
-            <div class="card-title">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-              新增喵寶護照
-            </div>
-            <div class="field-group"><label class="label">名字 <span style="color:var(--err)">*</span></label><input v-model="newCat.name" class="field" placeholder="咪咪"></div>
-            <div class="field-group">
-              <label class="label">性別</label>
-              <div class="toggle-group col-2">
-                <div :class="['toggle-btn', newCat.gender==='男生'?'active':'']" @click="newCat.gender='男生'">男生</div>
-                <div :class="['toggle-btn', newCat.gender==='女生'?'active':'']" @click="newCat.gender='女生'">女生</div>
-              </div>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;" class="field-group">
-              <div><label class="label">品種</label><input v-model="newCat.breed" class="field" placeholder="布偶貓"></div>
-              <div><label class="label">體重(kg)</label><input type="number" step="0.1" inputmode="decimal" v-model="newCat.weight" class="field" placeholder="4.5"></div>
-            </div>
-            <div class="field-group"><label class="label">健康叮嚀</label><input v-model="newCat.note" class="field" placeholder="怕吹風機…"></div>
-            <button class="btn btn-success" @click="registerCat">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-              新增這隻喵寶
+        <div class="divider"></div>
+        <div class="field-wrap">
+          <label class="field-label">洗浴台數</label>
+          <div class="counter">
+            <button class="btn btn-icon" @click="bookCatCount=Math.max(1,bookCatCount-1)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
             </button>
-          </div>
-        </div>
-
-        <!-- ── 頁籤：家長中心 ── -->
-        <div v-if="currentTab==='member'">
-          <div class="card">
-            <div class="card-title">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              家長資料
-            </div>
-            <div class="field-group"><label class="label">姓名 / 暱稱</label><input v-model="myProfile.name" class="field" placeholder="怎麼稱呼您"></div>
-            <div class="field-group"><label class="label">聯絡電話</label><input type="tel" inputmode="numeric" v-model="myProfile.phone" class="field" placeholder="0912345678"></div>
-            <div class="field-group"><label class="label">到府地址</label><input v-model="myProfile.address" class="field" placeholder="完整地址"></div>
-            <div class="field-group">
-              <label class="label">電梯資訊</label>
-              <div class="toggle-group col-2">
-                <div :class="['toggle-btn', myProfile.elevator==='有電梯'?'active':'']" @click="myProfile.elevator='有電梯'">有電梯</div>
-                <div :class="['toggle-btn', myProfile.elevator==='無電梯'?'active':'']" @click="myProfile.elevator='無電梯'">無電梯</div>
-              </div>
-            </div>
-            <div class="field-group"><label class="label">停車 / 到府提醒</label><input v-model="myProfile.parking" class="field" placeholder="巷口有停車場、到樓下請打電話"></div>
-            <button class="btn btn-primary" @click="saveProfile">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-              儲存資料
+            <span class="counter-val">{{ bookCatCount }}</span>
+            <button class="btn btn-icon" @click="bookCatCount++">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             </button>
+            <span class="counter-unit">台　已勾 {{ selectedCats.length }} 隻</span>
           </div>
         </div>
-
-      </div><!-- /main-wrap -->
-
-      <!-- 底部導航 -->
-      <nav class="bottom-nav">
-        <div class="bottom-nav-inner">
-          <div :class="['nav-item', currentTab==='booking'?'active':'']" @click="switchTab('booking')">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            良辰吉日
-          </div>
-          <div :class="['nav-item', currentTab==='cats'?'active':'']" @click="switchTab('cats')">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-            喵星護照
-          </div>
-          <div :class="['nav-item', currentTab==='member'?'active':'']" @click="switchTab('member')">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            家長中心
-          </div>
+        <div class="field-wrap">
+          <label class="field-label">備註（選填）</label>
+          <input v-model="bookNotes" class="field" placeholder="特殊需求或叮嚀">
         </div>
-      </nav>
+        <button class="btn btn-primary" @click="bookStep=4">
+          下一步 — 確認預約
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+
+      <!-- 步驟4：確認 -->
+      <div v-if="bookStep===4" class="card card-accent">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <button class="btn btn-icon" @click="bookStep=3">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <div class="section-title">確認預約資訊</div>
+        </div>
+        <div class="confirm-table">
+          <div class="confirm-row"><span class="confirm-key">良辰吉日</span><span class="confirm-val">{{ selectedDate }}</span></div>
+          <div class="confirm-row"><span class="confirm-key">時辰</span><span class="confirm-val">{{ selectedSlot }}</span></div>
+          <div class="confirm-row"><span class="confirm-key">喵寶</span><span class="confirm-val">{{ selectedCats.join('、') || '（未指定）' }}</span></div>
+          <div class="confirm-row"><span class="confirm-key">台數</span><span class="confirm-val">{{ bookCatCount }} 台</span></div>
+          <div v-if="bookNotes" class="confirm-row"><span class="confirm-key">備註</span><span class="confirm-val">{{ bookNotes }}</span></div>
+        </div>
+        <div style="font-size:11px;color:var(--ink-3);text-align:center;margin:14px 0 16px;line-height:1.8;">送出後由喵師傅確認時間<br>請留意 LINE 訊息通知</div>
+        <button class="btn btn-success" @click="submitBooking" :disabled="bookLoading">
+          {{ bookLoading?'送出中…':'送出預約申請' }}
+        </button>
+      </div>
+
+      <!-- 步驟5：完成 -->
+      <div v-if="bookStep===5" class="card">
+        <div class="success-wrap">
+          <div class="success-circle">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="success-title">預約申請已送出</div>
+          <div class="success-sub" style="margin-bottom:24px;">喵師傅收到後會與您確認時間<br>請留意 LINE 訊息通知</div>
+          <button class="btn btn-secondary" @click="resetBook" style="max-width:160px;margin:0 auto;">返回日曆</button>
+        </div>
+      </div>
     </div>
 
-    <script>
-      const GAS_API = "https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec";
+    <!-- ════ 喵星護照 ════ -->
+    <div v-if="currentTab==='cats'">
+      <!-- 已登記 -->
+      <div v-if="myCats.length>0" class="card card-accent">
+        <div class="section-header">
+          <span class="section-title">已登記喵寶</span>
+          <span class="section-sub">{{ myCats.length }} 隻</span>
+        </div>
+        <div v-for="(cat,idx) in myCats" :key="idx" class="cat-item">
+          <div class="cat-item-head" @click="toggleEdit(idx)">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="cat-avatar">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              </div>
+              <div>
+                <span class="cat-name">{{ cat.name }}</span>
+                <span class="cat-gender-tag">{{ cat.gender }}</span>
+                <div class="cat-meta">{{ cat.breed||'品種未填' }} · {{ cat.weight||'?' }}kg</div>
+              </div>
+            </div>
+            <svg :style="editIdx===idx?'transform:rotate(180deg)':''" style="transition:.15s;flex-shrink:0;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div v-if="editIdx===idx" class="cat-body">
+            <div class="field-wrap"><label class="field-label">名字</label><input v-model="editCat.name" class="field"></div>
+            <div class="field-wrap">
+              <label class="field-label">性別</label>
+              <div class="slot-grid">
+                <div :class="['slot-btn', editCat.gender==='男生'?'selected':'']" @click="editCat.gender='男生'">男生</div>
+                <div :class="['slot-btn', editCat.gender==='女生'?'selected':'']" @click="editCat.gender='女生'">女生</div>
+              </div>
+            </div>
+            <div class="grid-2 field-wrap">
+              <div><label class="field-label">品種</label><input v-model="editCat.breed" class="field" placeholder="米克斯"></div>
+              <div><label class="field-label">體重 kg</label><input type="number" step="0.1" inputmode="decimal" v-model="editCat.weight" class="field" placeholder="4.5"></div>
+            </div>
+            <div class="field-wrap"><label class="field-label">健康叮嚀</label><input v-model="editCat.note" class="field" placeholder="怕吹風機…"></div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-primary" style="flex:1;" @click="saveEditCat(idx)">儲存變更</button>
+              <button class="btn btn-danger-sm" @click="removeCat(idx)">刪除</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 新增 -->
+      <div class="card card-accent">
+        <div class="section-header">
+          <span class="section-title">新增喵寶護照</span>
+        </div>
+        <div class="field-wrap"><label class="field-label">名字 <span style="color:var(--err)">*</span></label><input v-model="newCat.name" class="field" placeholder="咪咪"></div>
+        <div class="field-wrap">
+          <label class="field-label">性別</label>
+          <div class="slot-grid">
+            <div :class="['slot-btn', newCat.gender==='男生'?'selected':'']" @click="newCat.gender='男生'">男生</div>
+            <div :class="['slot-btn', newCat.gender==='女生'?'selected':'']" @click="newCat.gender='女生'">女生</div>
+          </div>
+        </div>
+        <div class="grid-2 field-wrap">
+          <div><label class="field-label">品種</label><input v-model="newCat.breed" class="field" placeholder="布偶貓"></div>
+          <div><label class="field-label">體重 kg</label><input type="number" step="0.1" inputmode="decimal" v-model="newCat.weight" class="field" placeholder="4.5"></div>
+        </div>
+        <div class="field-wrap"><label class="field-label">健康叮嚀</label><input v-model="newCat.note" class="field" placeholder="怕吹風機…"></div>
+        <button class="btn btn-primary" @click="registerCat">新增這隻喵寶</button>
+      </div>
+    </div>
+
+    <!-- ════ 家長中心 ════ -->
+    <div v-if="currentTab==='member'">
+      <div class="card card-accent">
+        <div class="section-header">
+          <span class="section-title">家長資料</span>
+        </div>
+        <div class="field-wrap"><label class="field-label">姓名 / 暱稱</label><input v-model="myProfile.name" class="field" placeholder="怎麼稱呼您"></div>
+        <div class="field-wrap"><label class="field-label">聯絡電話</label><input type="tel" inputmode="numeric" v-model="myProfile.phone" class="field" placeholder="0912 345 678"></div>
+        <div class="field-wrap"><label class="field-label">到府地址</label><input v-model="myProfile.address" class="field" placeholder="完整地址"></div>
+
+        <!-- 電梯：checkbox 樣式 -->
+        <div class="field-wrap">
+          <label class="field-label">電梯資訊</label>
+          <div class="check-row" @click="myProfile.elevator = myProfile.elevator==='有電梯'?'無電梯':'有電梯'">
+            <div :class="['check-box', myProfile.elevator==='有電梯'?'checked':'']">
+              <svg v-if="myProfile.elevator==='有電梯'" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div>
+              <div class="check-label-text">有電梯</div>
+              <div class="check-label-sub">{{ myProfile.elevator==='有電梯'?'已勾選，感謝告知':'未勾選 = 無電梯' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-wrap"><label class="field-label">停車 / 到府提醒</label><input v-model="myProfile.parking" class="field" placeholder="巷口有停車場、到樓下請打電話"></div>
+        <button class="btn btn-primary" @click="saveProfile">儲存資料</button>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+
+  <!-- 底部導航 -->
+  <nav class="bottom-nav">
+    <div class="nav-inner">
+      <div :class="['nav-item', currentTab==='booking'?'active':'']" @click="switchTab('booking')">
+        <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span class="nav-label">良辰吉日</span>
+      </div>
+      <div :class="['nav-item', currentTab==='cats'?'active':'']" @click="switchTab('cats')">
+        <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <span class="nav-label">喵星護照</span>
+      </div>
+      <div :class="['nav-item', currentTab==='member'?'active':'']" @click="switchTab('member')">
+        <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span class="nav-label">家長中心</span>
+      </div>
+    </div>
+  </nav>
+</div>
+
+<script>
+  const GAS_API = "https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec";
 
       const LIFF_ID = "2010742657-DOz9QdF3";
       // ⚙️ 唯一要維護：GAS 的 /exec 網址（重新部署若網址變了改這行）
@@ -723,6 +735,6 @@
         }
       }).mount('#app');
 
-    </script>
-  </body>
+</script>
+</body>
 </html>
