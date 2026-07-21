@@ -118,9 +118,11 @@
 
     /* ── 按鈕 ── */
     .btn{ display:flex; align-items:center; justify-content:center; gap:7px; border:none; border-radius:8px; font-family:'Noto Sans TC',sans-serif; font-weight:700; font-size:14px; cursor:pointer; transition:all .12s; width:100%; padding:13px 20px; }
-    .btn:active{ transform:scale(.98); opacity:.92; }
+    .btn:active:not(:disabled){ transform:scale(.98); opacity:.92; }
+    /* 🚨 新增：按鈕 Disabled 狀態的樣式 */
+    .btn:disabled{ opacity:0.6; cursor:not-allowed; }
     .btn-primary{ background:var(--orange); color:#fff; }
-    .btn-primary:hover{ background:var(--orange-d); }
+    .btn-primary:hover:not(:disabled){ background:var(--orange-d); }
     .btn-secondary{ background:var(--warm); color:var(--ink); }
     .btn-success{ background:var(--ok); color:#fff; }
     .btn-ghost{ background:var(--paper); color:var(--ink-2); border:1px solid var(--border); width:auto; padding:8px 12px; }
@@ -221,7 +223,7 @@
       <div class="member-card-left">
         <div class="eyebrow">喵星卡號</div>
         <div v-if="myProfile.uid" class="uid">{{ myProfile.uid }}</div>
-        <!-- 🚨 新增防呆提示：若驗證失敗顯示錯誤文字 -->
+        <!-- 防呆提示：若驗證失敗顯示錯誤文字 -->
         <div v-else-if="authFailed" class="member-loading" style="color:var(--err); font-weight:700;">身分失效</div>
         <div v-else class="member-loading">驗證中⋯</div>
       </div>
@@ -475,14 +477,21 @@
               <div><label class="field-label">體重 kg</label><input type="number" step="0.1" inputmode="decimal" v-model="editCat.weight" class="field" placeholder="4.5"></div>
             </div>
             <div class="field-wrap"><label class="field-label">健康叮嚀</label><input v-model="editCat.note" class="field" placeholder="怕吹風機…"></div>
+            
+            <!-- 🚨 新增：修改按鈕的處理中狀態防呆 -->
             <div style="display:flex;gap:8px;">
-              <button class="btn btn-primary" style="flex:1;" @click="saveEditCat(idx)">儲存變更</button>
-              <button class="btn btn-danger-sm" @click="removeCat(idx)">刪除</button>
+              <button class="btn btn-primary" style="flex:1;" @click="saveEditCat(idx)" :disabled="isSavingCat">
+                {{ isSavingCat ? '儲存中...' : '儲存變更' }}
+              </button>
+              <button class="btn btn-danger-sm" @click="removeCat(idx)" :disabled="isSavingCat">
+                {{ isSavingCat ? '刪除中...' : '刪除' }}
+              </button>
             </div>
           </div>
         </div>
       </div>
-      <!-- 新增 -->
+
+      <!-- 新增喵寶 -->
       <div class="card card-accent">
         <div class="section-header">
           <span class="section-title">新增喵寶護照</span>
@@ -500,7 +509,11 @@
           <div><label class="field-label">體重 kg</label><input type="number" step="0.1" inputmode="decimal" v-model="newCat.weight" class="field" placeholder="4.5"></div>
         </div>
         <div class="field-wrap"><label class="field-label">健康叮嚀</label><input v-model="newCat.note" class="field" placeholder="怕吹風機…"></div>
-        <button class="btn btn-primary" @click="registerCat">新增這隻喵寶</button>
+        
+        <!-- 🚨 新增：按鈕防呆與狀態 -->
+        <button class="btn btn-primary" @click="registerCat" :disabled="isRegisteringCat">
+          {{ isRegisteringCat ? '喵寶登錄中...' : '新增這隻喵寶' }}
+        </button>
       </div>
     </div>
 
@@ -529,7 +542,11 @@
         </div>
 
         <div class="field-wrap"><label class="field-label">停車 / 到府提醒</label><input v-model="myProfile.parking" class="field" placeholder="巷口有停車場、到樓下請打電話"></div>
-        <button class="btn btn-primary" @click="saveProfile">儲存資料</button>
+        
+        <!-- 🚨 新增：按鈕防呆與狀態 -->
+        <button class="btn btn-primary" @click="saveProfile" :disabled="isSavingProfile">
+          {{ isSavingProfile ? '資料儲存中...' : '儲存資料' }}
+        </button>
       </div>
     </div>
 
@@ -574,8 +591,12 @@
           const toast = ref({ show:false, message:'', isError:false });
           const statusCode = ref('INIT');
           const isLineMode = ref(true);
-          // 🚨 救援機制核心狀態
           const authFailed = ref(false);
+
+          // 🚨 新增：各個表單的 Loading (防呆) 狀態變數
+          const isSavingProfile = ref(false);
+          const isRegisteringCat = ref(false);
+          const isSavingCat = ref(false);
 
           // 預約流程狀態
           const bookStep = ref(1);
@@ -596,9 +617,7 @@
 
           const showToast = (m, e=false) => { toast.value={ show:true, message:m, isError:e }; setTimeout(()=>toast.value.show=false, 3000); };
           const switchTab = (t) => {
-            if (authFailed.value) return; // 憑證失效時禁止切換頁籤
-            
-            // 預約進行中（步驟2以後）或有未儲存的貓編輯，切頁籤前提示
+            if (authFailed.value) return; 
             if(bookStep.value > 1 && t !== 'booking') {
               if(!confirm('預約尚未完成，確定要離開嗎？')) return;
               resetBook();
@@ -610,7 +629,6 @@
             currentTab.value = t;
           };
 
-          // 🚨 強制重新登入函式
           const forceRelogin = () => {
             if (typeof liff !== 'undefined') {
               liff.logout();
@@ -618,7 +636,6 @@
             }
           };
 
-          // ---- fetch 封裝 ----
           const apiGet = async (params) => {
             const url = GAS_API + "?" + new URLSearchParams(params).toString();
             const r = await fetch(url); return await r.json();
@@ -641,20 +658,19 @@
 
           const loadProfile = async () => {
             statusCode.value='FETCH·0';
-            loadCalendar();  // 效能優化：日曆不需身分驗證，平行發送不等待 profile
+            loadCalendar();  
             try {
               const res = await apiGet({ action:"getMyProfile", idToken });
               if(res && res.success){ 
                 applyProfile(res); 
                 statusCode.value='OK·'+res.info.uid; 
                 loadMyAppointments(); 
-                authFailed.value = false; // 驗證成功，確保隱藏救援畫面
+                authFailed.value = false; 
               }
               else {
                 statusCode.value='ERR·'+((res&&res.error)?res.error.substring(0,20):'null');
                 showToast('讀取失敗：'+(res?res.error:'null'), true);
-                authFailed.value = true; // 🚨 觸發驗證失敗救援機制
-                // 🧪 驗證失敗時，自動撈詳細原因顯示出來
+                authFailed.value = true; 
                 try {
                   const dbg = await apiGet({ action:"debugVerify", idToken });
                   statusCode.value = 'DBG·'+dbg.httpCode+'·'+(dbg.rawResponse?dbg.rawResponse.substring(0,40):'');
@@ -678,7 +694,6 @@
             const today = new Date(); today.setHours(0,0,0,0);
             const cd=today.getDay(), toMon=cd===0?-6:1-cd;
             const start=new Date(today); start.setDate(today.getDate()+toMon+weekOffset.value);
-            // 更新月份標籤
             calMonthLabel.value = `${start.getFullYear()}年${start.getMonth()+1}月`;
             const arr=[];
             for(let i=0;i<28;i++){
@@ -715,13 +730,11 @@
             selectedSlot.value = '';
             selectedCats.value = [];
             bookCatCount.value = 1;
-            // 取得該日可用時段
             const dm = scheduleCacheMap[day.dateStr] || {};
             availableSlots.value = Object.keys(dm).filter(s => String(dm[s]).trim() === '開放');
           };
           const moveWeeks = (days) => {
             weekOffset.value += days;
-            // 更新月份標籤
             const today = new Date();
             const d = new Date(today);
             d.setDate(d.getDate() + weekOffset.value);
@@ -752,53 +765,82 @@
             selectedCats.value = []; bookCatCount.value = 1; bookNotes.value = '';
           };
 
+          // 🚨 加入 Loading 狀態
           const saveProfile = async () => {
             const p=myProfile.value;
+            isSavingProfile.value = true; // 反灰按鈕、變更文字
             try {
               const res = await apiPost({ action:"updateMyProfile", idToken, name:p.name, address:p.address, phone:p.phone, elevator:p.elevator, parking:p.parking });
               showToast(res&&res.success?'資料儲存好囉！':'更新失敗', !(res&&res.success));
             } catch(e){ showToast('更新失敗 '+e.message, true); }
+            isSavingProfile.value = false; // 恢復按鈕
           };
 
+          // 🚨 加入 Loading 狀態
           const registerCat = async () => {
             if(!newCat.value.name.trim()){ showToast('請先幫喵寶取名字～', true); return; }
+            isRegisteringCat.value = true;
             try {
               const res = await apiPost({ action:"registerMyCat", idToken, cat:JSON.parse(JSON.stringify(newCat.value)) });
-              if(res&&res.success){ showToast('喵寶護照新增成功！'); newCat.value={ name:'', breed:'', weight:'', gender:'男生', note:'' }; reloadProfile(); }
+              if(res&&res.success){ 
+                showToast('喵寶護照新增成功！'); 
+                newCat.value={ name:'', breed:'', weight:'', gender:'男生', note:'' }; 
+                reloadProfile(); 
+              }
               else showToast('新增失敗', true);
             } catch(e){ showToast('新增失敗 '+e.message, true); }
+            isRegisteringCat.value = false;
           };
 
           const toggleEdit = (idx) => {
             if(editIdx.value===idx){ editIdx.value=-1; return; }
             editIdx.value=idx; editCat.value=JSON.parse(JSON.stringify(myCats.value[idx]));
           };
+          
+          // 🚨 加入 Loading 狀態 + 樂觀更新 (Optimistic UI)
           const saveEditCat = async (idx) => {
             const oldName=myCats.value[idx].name;
             const obj=JSON.parse(JSON.stringify(editCat.value));
             if(!obj.name.trim()){ showToast('名字不能空白喔', true); return; }
+            
+            isSavingCat.value = true; // 反灰按鈕
             try {
               const res = await apiPost({ action:"updateMyCat", idToken, oldName, cat:obj });
-              if(res&&res.success){ showToast('喵寶資料更新好囉！'); editIdx.value=-1; reloadProfile(); }
+              if(res&&res.success){ 
+                showToast('喵寶資料更新好囉！'); 
+                // ⭐️ 樂觀更新：立刻修改畫面變數，不等待緩慢的 reloadProfile
+                myCats.value[idx] = { ...obj }; 
+                editIdx.value = -1; // 瞬間收合表單
+                reloadProfile(); // 背景靜默同步
+              }
               else showToast('更新失敗', true);
             } catch(e){ showToast('更新失敗 '+e.message, true); }
+            isSavingCat.value = false; // 恢復按鈕
           };
+          
+          // 🚨 加入 Loading 狀態 + 樂觀更新 (Optimistic UI)
           const removeCat = async (idx) => {
             const name=myCats.value[idx].name;
+            isSavingCat.value = true;
             try {
               const res = await apiPost({ action:"deleteMyCat", idToken, catName:name });
-              if(res&&res.success){ showToast('已刪除 '+name); editIdx.value=-1; reloadProfile(); }
+              if(res&&res.success){ 
+                showToast('已刪除 '+name); 
+                // ⭐️ 樂觀更新：瞬間從畫面上移除這隻貓
+                myCats.value.splice(idx, 1);
+                editIdx.value = -1; 
+                reloadProfile(); // 背景靜默同步
+              }
               else showToast('刪除失敗', true);
             } catch(e){ showToast('刪除失敗 '+e.message, true); }
+            isSavingCat.value = false;
           };
 
           onMounted(()=>{
             statusCode.value='AUTH·0';
-            // 離開確認（電腦有效；手機 LINE WebView 平台限制可能無效）
             window.addEventListener('beforeunload', function(e) {
               e.preventDefault(); e.returnValue = '';
             });
-            // 補強：攔截返回鍵/手勢返回（手機支援度比 beforeunload 好）
             history.pushState(null, '', location.href);
             window.addEventListener('popstate', function() {
               const hasUnsaved = bookStep.value > 1 || editIdx.value >= 0;
@@ -808,8 +850,6 @@
             });
             liff.init({ liffId:LIFF_ID }).then(()=>{
               if(!liff.isLoggedIn()){
-                // 不管是 LINE 內建瀏覽器還是一般瀏覽器，都觸發 liff.login()
-                // LIFF 會自動引導用戶到 LINE 網頁版登入，不強制限制只能從 LINE App 開啟
                 statusCode.value='AUTH·0';
                 liff.login({ redirectUri: location.href });
                 return;
@@ -818,7 +858,7 @@
               if(!idToken){ 
                 statusCode.value='AUTH·ERR'; 
                 showToast('身分驗證失敗，請重開', true); 
-                authFailed.value = true; // 🚨 觸發驗證失敗救援機制
+                authFailed.value = true; 
                 return; 
               }
               statusCode.value='AUTH·1';
@@ -826,7 +866,9 @@
             }).catch((err)=>{ statusCode.value='LIFF·ERR'; showToast('LIFF 初始化失敗', true); });
           });
 
+          // 🚨 記得把新增的 Loading 變數 return 給模板綁定
           return { currentTab, myProfile, myCats, calendarDates, selectedDate, newCat, editIdx, editCat, toast, statusCode, isLineMode, authFailed, forceRelogin,
+            isSavingProfile, isRegisteringCat, isSavingCat,
             switchTab, moveWeeks, selectDate, saveProfile, registerCat, toggleEdit, saveEditCat, removeCat,
             bookStep, selectedSlot, selectedCats, bookCatCount, bookNotes, bookLoading, availableSlots, calMonthLabel,
             toggleCatSelect, submitBooking, resetBook, refreshing, refreshCalendar,
