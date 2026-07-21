@@ -221,6 +221,8 @@
       <div class="member-card-left">
         <div class="eyebrow">喵星卡號</div>
         <div v-if="myProfile.uid" class="uid">{{ myProfile.uid }}</div>
+        <!-- 🚨 新增防呆提示：若驗證失敗顯示錯誤文字 -->
+        <div v-else-if="authFailed" class="member-loading" style="color:var(--err); font-weight:700;">身分失效</div>
         <div v-else class="member-loading">驗證中⋯</div>
       </div>
       <div v-if="myProfile.uid" class="member-card-right">
@@ -234,8 +236,21 @@
   <div class="main">
     <div class="section-gap" style="height:20px;"></div>
 
+    <!-- 🚨 救援機制：身分驗證失敗 / 憑證過期畫面 -->
+    <div v-if="authFailed" class="card" style="border:1px solid var(--err); border-left:4px solid var(--err); text-align:center; padding:32px 20px;">
+      <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="var(--err)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:12px;opacity:0.8;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div class="section-title" style="color:var(--err); margin-bottom:10px;">登入憑證已過期或失效</div>
+      <div style="font-size:12px; color:var(--ink-2); margin-bottom:24px; line-height:1.7;">
+        為保護您的資料安全，我們阻擋了異常的連線。<br>請點擊下方按鈕重新驗證 LINE 身分。
+      </div>
+      <button class="btn btn-primary" @click="forceRelogin" style="background:var(--err); margin:0 auto; max-width:220px; box-shadow:0 4px 14px rgba(184,65,65,.25);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v6h6"/><path d="M21 12A9 9 0 0 0 6 5.3L3 8"/><path d="M21 22v-6h-6"/><path d="M3 12a9 9 0 0 0 15 6.7l3-2.7"/></svg>
+        重新登入 LINE
+      </button>
+    </div>
+
     <!-- ════ 良辰吉日 ════ -->
-    <div v-if="currentTab==='booking'">
+    <div v-if="currentTab==='booking' && !authFailed">
 
       <!-- 步驟1：選日期 -->
       <div v-if="bookStep===1" class="card card-accent">
@@ -343,7 +358,7 @@
             <button class="btn btn-icon" @click="bookCatCount++">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             </button>
-            <span class="counter-unit">台　已勾 {{ selectedCats.length }} 隻</span>
+            <span class="counter-unit">台 已勾 {{ selectedCats.length }} 隻</span>
           </div>
         </div>
         <div class="field-wrap">
@@ -425,7 +440,7 @@
     </div>
 
     <!-- ════ 喵星護照 ════ -->
-    <div v-if="currentTab==='cats'">
+    <div v-if="currentTab==='cats' && !authFailed">
       <!-- 已登記 -->
       <div v-if="myCats.length>0" class="card card-accent">
         <div class="section-header">
@@ -490,7 +505,7 @@
     </div>
 
     <!-- ════ 家長中心 ════ -->
-    <div v-if="currentTab==='member'">
+    <div v-if="currentTab==='member' && !authFailed">
       <div class="card card-accent">
         <div class="section-header">
           <span class="section-title">家長資料</span>
@@ -559,6 +574,9 @@
           const toast = ref({ show:false, message:'', isError:false });
           const statusCode = ref('INIT');
           const isLineMode = ref(true);
+          // 🚨 救援機制核心狀態
+          const authFailed = ref(false);
+
           // 預約流程狀態
           const bookStep = ref(1);
           const selectedSlot = ref('');
@@ -578,6 +596,8 @@
 
           const showToast = (m, e=false) => { toast.value={ show:true, message:m, isError:e }; setTimeout(()=>toast.value.show=false, 3000); };
           const switchTab = (t) => {
+            if (authFailed.value) return; // 憑證失效時禁止切換頁籤
+            
             // 預約進行中（步驟2以後）或有未儲存的貓編輯，切頁籤前提示
             if(bookStep.value > 1 && t !== 'booking') {
               if(!confirm('預約尚未完成，確定要離開嗎？')) return;
@@ -588,6 +608,14 @@
               editIdx.value = -1;
             }
             currentTab.value = t;
+          };
+
+          // 🚨 強制重新登入函式
+          const forceRelogin = () => {
+            if (typeof liff !== 'undefined') {
+              liff.logout();
+              liff.login({ redirectUri: location.href });
+            }
           };
 
           // ---- fetch 封裝 ----
@@ -616,17 +644,26 @@
             loadCalendar();  // 效能優化：日曆不需身分驗證，平行發送不等待 profile
             try {
               const res = await apiGet({ action:"getMyProfile", idToken });
-              if(res && res.success){ applyProfile(res); statusCode.value='OK·'+res.info.uid; loadMyAppointments(); }
+              if(res && res.success){ 
+                applyProfile(res); 
+                statusCode.value='OK·'+res.info.uid; 
+                loadMyAppointments(); 
+                authFailed.value = false; // 驗證成功，確保隱藏救援畫面
+              }
               else {
                 statusCode.value='ERR·'+((res&&res.error)?res.error.substring(0,20):'null');
                 showToast('讀取失敗：'+(res?res.error:'null'), true);
+                authFailed.value = true; // 🚨 觸發驗證失敗救援機制
                 // 🧪 驗證失敗時，自動撈詳細原因顯示出來
                 try {
                   const dbg = await apiGet({ action:"debugVerify", idToken });
                   statusCode.value = 'DBG·'+dbg.httpCode+'·'+(dbg.rawResponse?dbg.rawResponse.substring(0,40):'');
                 } catch(e2) { statusCode.value += '·DBG·FAIL'; }
               }
-            } catch(e){ statusCode.value='NET·ERR'; showToast('連線出錯了 '+e.message, true); }
+            } catch(e){ 
+              statusCode.value='NET·ERR'; 
+              showToast('連線出錯了 '+e.message, true); 
+            }
           };
           const reloadProfile = async () => {
             try { const res = await apiGet({ action:"getMyProfile", idToken }); if(res && res.success) applyProfile(res); } catch(e){}
@@ -778,13 +815,18 @@
                 return;
               }
               idToken = liff.getIDToken();
-              if(!idToken){ statusCode.value='AUTH·ERR'; showToast('身分驗證失敗，請重開', true); return; }
+              if(!idToken){ 
+                statusCode.value='AUTH·ERR'; 
+                showToast('身分驗證失敗，請重開', true); 
+                authFailed.value = true; // 🚨 觸發驗證失敗救援機制
+                return; 
+              }
               statusCode.value='AUTH·1';
               loadProfile();
             }).catch((err)=>{ statusCode.value='LIFF·ERR'; showToast('LIFF 初始化失敗', true); });
           });
 
-          return { currentTab, myProfile, myCats, calendarDates, selectedDate, newCat, editIdx, editCat, toast, statusCode, isLineMode,
+          return { currentTab, myProfile, myCats, calendarDates, selectedDate, newCat, editIdx, editCat, toast, statusCode, isLineMode, authFailed, forceRelogin,
             switchTab, moveWeeks, selectDate, saveProfile, registerCat, toggleEdit, saveEditCat, removeCat,
             bookStep, selectedSlot, selectedCats, bookCatCount, bookNotes, bookLoading, availableSlots, calMonthLabel,
             toggleCatSelect, submitBooking, resetBook, refreshing, refreshCalendar,
