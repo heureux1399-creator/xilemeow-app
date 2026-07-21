@@ -17,7 +17,7 @@
   <style>
     /* ── 設計系統：墨與柿 ── */
     :root{
-      --ink:      #2C2C2C;
+      --ink:      #2A2520;
       --ink-2:    #7A7268;
       --ink-3:    #B0A89C;
       --paper:    #FAF7F2;
@@ -38,7 +38,7 @@
 
     /* ── 系統列 ── */
     .sys-bar{ font-family:monospace; font-size:10px; padding:5px 16px; letter-spacing:.05em; color:rgba(255,255,255,.6); }
-    .sys-bar.live{ background:#1A1A1A; }
+    .sys-bar.live{ background:#1E1A15; }
     .sys-bar.dev{ background:var(--orange); color:rgba(255,255,255,.9); }
 
     /* ── Toast ── */
@@ -49,7 +49,7 @@
     .fade-enter-from,.fade-leave-to{ opacity:0; transform:translateX(-50%) translateY(-6px); }
 
     /* ── Header ── */
-    .app-header{ background:var(--ink); color:#fff; padding:48px 24px 64px; position:relative; overflow:hidden; }
+    .app-header{ background:#1E1A15; color:#fff; padding:48px 24px 64px; position:relative; overflow:hidden; }
     .app-header::after{ content:''; position:absolute; right:-24px; bottom:-32px; width:120px; height:120px; border-radius:50%; background:rgba(212,98,42,.15); pointer-events:none; }
     .header-eyebrow{ font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--orange); font-weight:500; margin-bottom:10px; }
     .header-title{ font-family:'Noto Serif TC',serif; font-size:28px; font-weight:700; letter-spacing:.06em; line-height:1.1; }
@@ -185,6 +185,12 @@
     /* ── 刷新鈕 ── */
     .refresh-btn{ background:none; border:none; font-size:11px; color:var(--ink-3); cursor:pointer; display:inline-flex; align-items:center; gap:5px; padding:5px 0; font-family:'Noto Sans TC',sans-serif; }
 
+
+    /* ── Segment Control（性別選擇）── */
+    .seg-control{ display:flex; background:var(--warm); border-radius:8px; padding:3px; gap:3px; }
+    .seg-btn{ flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:9px 8px; border-radius:6px; border:none; background:transparent; font-family:'Noto Sans TC',sans-serif; font-size:13px; font-weight:500; color:var(--ink-2); cursor:pointer; transition:all .15s; }
+    .seg-btn.active{ background:var(--card); color:var(--ink); font-weight:700; box-shadow:0 1px 4px rgba(42,32,20,.12); }
+    .seg-btn svg{ flex-shrink:0; }
     /* ── Grid 工具 ── */
     .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
   </style>
@@ -194,7 +200,7 @@
 
   <!-- 系統列 -->
   <div :class="['sys-bar', isLineMode?'live':'dev']">
-    v260720.14 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}
+    v260720.15 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}
   </div>
 
   <!-- Toast -->
@@ -410,9 +416,9 @@
             <div class="field-wrap"><label class="field-label">名字</label><input v-model="editCat.name" class="field"></div>
             <div class="field-wrap">
               <label class="field-label">性別</label>
-              <div class="slot-grid">
-                <div :class="['slot-btn', editCat.gender==='男生'?'selected':'']" @click="editCat.gender='男生'">男生</div>
-                <div :class="['slot-btn', editCat.gender==='女生'?'selected':'']" @click="editCat.gender='女生'">女生</div>
+              <div class="seg-control">
+                <button :class="['seg-btn', editCat.gender==='男'?'active':'']" @click="editCat.gender='男'"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="14" r="5"/><line x1="19" y1="5" x2="14.14" y2="9.86"/><polyline points="15 5 19 5 19 9"/></svg> 男</button>
+                <button :class="['seg-btn', editCat.gender==='女'?'active':'']" @click="editCat.gender='女'"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="6"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="9" y1="19" x2="15" y2="19"/></svg> 女</button>
               </div>
             </div>
             <div class="grid-2 field-wrap">
@@ -435,9 +441,9 @@
         <div class="field-wrap"><label class="field-label">名字 <span style="color:var(--err)">*</span></label><input v-model="newCat.name" class="field" placeholder="咪咪"></div>
         <div class="field-wrap">
           <label class="field-label">性別</label>
-          <div class="slot-grid">
-            <div :class="['slot-btn', newCat.gender==='男生'?'selected':'']" @click="newCat.gender='男生'">男生</div>
-            <div :class="['slot-btn', newCat.gender==='女生'?'selected':'']" @click="newCat.gender='女生'">女生</div>
+          <div class="seg-control">
+            <button :class="['seg-btn', newCat.gender==='男'?'active':'']" @click="newCat.gender='男'"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="14" r="5"/><line x1="19" y1="5" x2="14.14" y2="9.86"/><polyline points="15 5 19 5 19 9"/></svg> 男</button>
+            <button :class="['seg-btn', newCat.gender==='女'?'active':'']" @click="newCat.gender='女'"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="6"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="9" y1="19" x2="15" y2="19"/></svg> 女</button>
           </div>
         </div>
         <div class="grid-2 field-wrap">
@@ -561,7 +567,10 @@
             myProfile.value.phone=res.info.phone; myProfile.value.address=res.info.address;
             myProfile.value.elevator=res.info.elevator||'有電梯'; myProfile.value.parking=res.info.parking||'';
             myProfile.value.balance=res.info.balance; myProfile.value.note=res.info.note;
-            myCats.value=res.cats||[];
+            myCats.value=(res.cats||[]).map(c=>({
+              ...c,
+              gender: c.gender==='男生'?'男': c.gender==='女生'?'女': c.gender
+            }));
           };
 
           const loadProfile = async () => {
