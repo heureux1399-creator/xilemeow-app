@@ -40,7 +40,7 @@
     .sys-bar.live{ background:#1A1A1A; }
     .sys-bar.dev{ background:var(--orange); color:rgba(255,255,255,.9); }
 
-    /* ── 業界標準：非阻塞式頂部加載列 (Loading Bar/Badge) ── */
+    /* ── 頂部非阻塞 Sync Badge ── */
     .sync-badge{ display:inline-flex; align-items:center; gap:5px; background:rgba(212,98,42,.2); color:var(--orange); padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600; animation:pulse 1.2s infinite; }
     @keyframes pulse{ 0%,100%{ opacity:1; } 50%{ opacity:0.4; } }
 
@@ -166,7 +166,7 @@
 <body>
 <div id="app" v-cloak>
 
-  <!-- 系統列 (進版: v260721.01) -->
+  <!-- 系統列 (正式進版: v260721.01) -->
   <div :class="['sys-bar', isLineMode?'live':'dev']">
     <span>v260721.01 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
     <!-- ⚡ 非阻塞連線狀態提示 -->
@@ -766,6 +766,7 @@
             editIdx.value=idx; editCat.value=JSON.parse(JSON.stringify(myCats.value[idx]));
           };
           
+          // ⭐️ 關鍵修復：正確帶入 oldName: oldName 參數，並進行樂觀更新 (Optimistic UI)
           const saveEditCat = async (idx) => {
             const oldName = myCats.value[idx].name;
             const obj = JSON.parse(JSON.stringify(editCat.value));
@@ -785,6 +786,7 @@
             isSavingCat.value = false;
           };
           
+          // ⭐️ 關鍵修復：正確帶入 catName 刪除參數，並進行樂觀更新
           const removeCat = async (idx) => {
             const name = myCats.value[idx].name;
             if (!confirm(`確定要刪除「${name}」的護照嗎？`)) return;
