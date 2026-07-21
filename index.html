@@ -797,41 +797,40 @@
             editIdx.value=idx; editCat.value=JSON.parse(JSON.stringify(myCats.value[idx]));
           };
           
-          // 🚨 加入 Loading 狀態 + 樂觀更新 (Optimistic UI)
+         // 🚨 樂觀更新 (Optimistic UI) + 正確對接後端 oldName
           const saveEditCat = async (idx) => {
-            const oldName=myCats.value[idx].name;
-            const obj=JSON.parse(JSON.stringify(editCat.value));
+            const oldName = myCats.value[idx].name;
+            const obj = JSON.parse(JSON.stringify(editCat.value));
             if(!obj.name.trim()){ showToast('名字不能空白喔', true); return; }
             
-            isSavingCat.value = true; // 反灰按鈕
-            try {
-              const res = await apiPost({ action:"updateMyCat", idToken, oldName, cat:obj });
-              if(res&&res.success){ 
-                showToast('喵寶資料更新好囉！'); 
-                // ⭐️ 樂觀更新：立刻修改畫面變數，不等待緩慢的 reloadProfile
-                myCats.value[idx] = { ...obj }; 
-                editIdx.value = -1; // 瞬間收合表單
-                reloadProfile(); // 背景靜默同步
-              }
-              else showToast('更新失敗', true);
-            } catch(e){ showToast('更新失敗 '+e.message, true); }
-            isSavingCat.value = false; // 恢復按鈕
-          };
-          
-          // 🚨 加入 Loading 狀態 + 樂觀更新 (Optimistic UI)
-          const removeCat = async (idx) => {
-            const name=myCats.value[idx].name;
             isSavingCat.value = true;
             try {
-              const res = await apiPost({ action:"deleteMyCat", idToken, catName:name });
-              if(res&&res.success){ 
-                showToast('已刪除 '+name); 
-                // ⭐️ 樂觀更新：瞬間從畫面上移除這隻貓
+              const res = await apiPost({ action:"updateMyCat", idToken, oldName: oldName, cat: obj });
+              if(res && res.success){ 
+                showToast('喵寶資料更新好囉！'); 
+                // 瞬間更新畫面
+                myCats.value[idx] = { ...obj }; 
+                editIdx.value = -1; 
+                reloadProfile(); 
+              }
+              else showToast('更新失敗，請再試一次', true);
+            } catch(e){ showToast('更新失敗 '+e.message, true); }
+            isSavingCat.value = false;
+          };
+          
+          const removeCat = async (idx) => {
+            const name = myCats.value[idx].name;
+            if (!confirm(`確定要刪除「${name}」的護照嗎？`)) return;
+            isSavingCat.value = true;
+            try {
+              const res = await apiPost({ action:"deleteMyCat", idToken, catName: name });
+              if(res && res.success){ 
+                showToast('已刪除 ' + name); 
                 myCats.value.splice(idx, 1);
                 editIdx.value = -1; 
-                reloadProfile(); // 背景靜默同步
+                reloadProfile(); 
               }
-              else showToast('刪除失敗', true);
+              else showToast('刪除失敗，請再試一次', true);
             } catch(e){ showToast('刪除失敗 '+e.message, true); }
             isSavingCat.value = false;
           };
