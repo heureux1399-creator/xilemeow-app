@@ -166,7 +166,7 @@
 <body>
 <div id="app" v-cloak>
 
-  <!-- 系統列 (進版: v260721.02) -->
+  <!-- 系統列 (正式進版: v260721.02) -->
   <div :class="['sys-bar', isLineMode?'live':'dev']">
     <span>v260721.02 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
     <!-- ⚡ 非阻塞連線狀態提示 -->
@@ -547,7 +547,7 @@
       createApp({
         setup() {
           const currentTab = ref('booking');
-          // ⚡ 優化：balance 預設 null，未載入時畫面顯示 ──，避免閃出 0 元
+          // balance 預設 null，未載入時畫面顯示 ──，避免閃出 0 元
           const myProfile = ref({ uid:'', name:'', balance: null, address:'', phone:'', elevator:'有電梯', parking:'', note:'' });
           const myCats = ref([]);
           const calendarDates = ref([]);
@@ -769,7 +769,6 @@
             editIdx.value=idx; editCat.value=JSON.parse(JSON.stringify(myCats.value[idx]));
           };
           
-          // ⭐️ 關鍵修復：正確指定 key 為 oldName，轉換性別格式，並樂觀更新 (Optimistic UI)
           const saveEditCat = async (idx) => {
             const oldName = myCats.value[idx].name;
             const obj = JSON.parse(JSON.stringify(editCat.value));
@@ -789,7 +788,6 @@
             isSavingCat.value = false;
           };
           
-          // ⭐️ 關鍵修復：正確指定 key 為 catName
           const removeCat = async (idx) => {
             const name = myCats.value[idx].name;
             if (!confirm(`確定要刪除「${name}」的護照嗎？`)) return;
