@@ -420,6 +420,17 @@
           </div>
         </div>
       </div>
+
+      <!-- 文案公告板（我的預約下方）-->
+      <div v-if="bookStep===1 && myProfile.uid && contentItems.length > 0" style="margin-top:4px;">
+        <div v-for="item in contentItems" :key="item.rowIndex" class="card card-accent" style="margin-bottom:8px;">
+          <div class="section-header" style="cursor:pointer;margin-bottom:0;" @click="toggleContentItem(item.rowIndex)">
+            <span class="section-title" style="font-size:13px;">{{ item.title }}</span>
+            <svg :style="expandedContentIds.includes(item.rowIndex)?'transform:rotate(180deg)':''" style="transition:.15s;color:var(--ink-3);flex-shrink:0;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div v-show="expandedContentIds.includes(item.rowIndex)" style="margin-top:12px;font-size:13px;color:var(--ink-2);line-height:1.9;white-space:pre-line;">{{ item.body }}</div>
+        </div>
+      </div>
     </div>
 
     <!-- ════ 喵星護照 ════ -->
@@ -581,7 +592,21 @@
           const refreshing = ref(false);
           const myAppointments = ref([]);
           const apptLoading = ref(false);
-          const apptExpanded = ref(true); 
+          const apptExpanded = ref(true);
+          // 文案公告板
+          const contentItems = ref([]);
+          const expandedContentIds = ref([]);
+          const toggleContentItem = (id) => {
+            const idx = expandedContentIds.value.indexOf(id);
+            if(idx >= 0) expandedContentIds.value.splice(idx, 1);
+            else expandedContentIds.value.push(id);
+          };
+          const loadContentItems = async () => {
+            try {
+              const res = await apiGet({ action: 'getContentList' });
+              if(res && res.success) contentItems.value = res.list || [];
+            } catch(e) {}
+          }; 
           const availableSlots = ref([]);
           const calMonthLabel = ref('');
           let scheduleCacheMap = {};
@@ -644,7 +669,8 @@
               if(res && res.success){ 
                 applyProfile(res); 
                 statusCode.value='OK·'+res.info.uid; 
-                loadMyAppointments(); 
+                loadMyAppointments();
+                loadContentItems();
                 authFailed.value = false; 
               }
               else {
@@ -867,7 +893,8 @@
             switchTab, moveWeeks, selectDate, saveProfile, registerCat, toggleEdit, saveEditCat, removeCat,
             bookStep, selectedSlot, selectedCats, bookCatCount, bookNotes, bookLoading, availableSlots, calMonthLabel,
             toggleCatSelect, submitBooking, resetBook, refreshing, refreshCalendar,
-            myAppointments, apptLoading, apptExpanded, cancelMyAppointment };
+            myAppointments, apptLoading, apptExpanded, cancelMyAppointment,
+            contentItems, expandedContentIds, toggleContentItem };
         }
       }).mount('#app');
 </script>
