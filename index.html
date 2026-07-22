@@ -40,25 +40,21 @@
     .sys-bar.live{ background:#1A1A1A; }
     .sys-bar.dev{ background:var(--orange); color:rgba(255,255,255,.9); }
 
-    /* ── 頂部非阻塞 Sync Badge ── */
     .sync-badge{ display:inline-flex; align-items:center; gap:5px; background:rgba(212,98,42,.2); color:var(--orange); padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600; animation:pulse 1.2s infinite; }
     @keyframes pulse{ 0%,100%{ opacity:1; } 50%{ opacity:0.4; } }
 
-    /* ── Toast ── */
     .toast{ position:fixed; top:16px; left:50%; transform:translateX(-50%); padding:11px 18px; border-radius:8px; font-size:12px; font-weight:500; display:flex; align-items:center; gap:8px; z-index:999; max-width:86vw; box-shadow:0 4px 20px rgba(0,0,0,.18); white-space:nowrap; }
     .toast.ok{ background:var(--ink); color:#fff; }
     .toast.err{ background:var(--err); color:#fff; }
     .fade-enter-active,.fade-leave-active{ transition:opacity .2s,transform .2s; }
     .fade-enter-from,.fade-leave-to{ opacity:0; transform:translateX(-50%) translateY(-6px); }
 
-    /* ── Header ── */
     .app-header{ background:#1A1A1A; color:#fff; padding:48px 24px 64px; position:relative; overflow:hidden; }
     .app-header::after{ content:''; position:absolute; right:-24px; bottom:-32px; width:120px; height:120px; border-radius:50%; background:rgba(212,98,42,.15); pointer-events:none; }
     .header-eyebrow{ font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--orange); font-weight:500; margin-bottom:10px; }
     .header-title{ font-family:'Noto Serif TC',serif; font-size:28px; font-weight:700; letter-spacing:.06em; line-height:1.1; }
     .header-sub{ font-size:12px; color:rgba(255,255,255,.45); margin-top:8px; letter-spacing:.05em; font-weight:300; }
 
-    /* ── 會員卡 ── */
     .member-card-wrap{ padding:0 20px; margin-top:-28px; position:relative; z-index:10; }
     .member-card{ background:var(--card); border-radius:14px; padding:18px 20px; box-shadow:0 8px 32px rgba(44,44,44,.14); border:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
     .member-card-left .eyebrow{ font-size:9px; letter-spacing:.15em; text-transform:uppercase; color:var(--ink-3); margin-bottom:6px; }
@@ -111,6 +107,10 @@
     .btn-success{ background:var(--ok); color:#fff; }
     .btn-icon{ background:var(--paper); color:var(--ink-2); border:1px solid var(--border); width:34px; height:34px; padding:0; border-radius:8px; flex-shrink:0; }
     .btn-danger-sm{ background:transparent; color:var(--err); border:1px solid rgba(184,65,65,.2); width:auto; padding:9px 14px; font-size:13px; }
+
+    /* 🚨 顧客端取消預約按鈕樣式 */
+    .btn-cancel-appt{ display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:6px; background:rgba(184,65,65,.08); color:var(--err); border:1px solid rgba(184,65,65,.2); font-size:10px; font-weight:700; cursor:pointer; font-family:'Noto Sans TC',sans-serif; transition:all .12s; }
+    .btn-cancel-appt:active{ transform:scale(.94); background:var(--err); color:#fff; }
 
     .counter{ display:flex; align-items:center; gap:16px; }
     .counter-val{ font-size:24px; font-weight:700; color:var(--orange); min-width:28px; text-align:center; font-family:monospace; }
@@ -166,10 +166,9 @@
 <body>
 <div id="app" v-cloak>
 
-  <!-- 系統列 (正式進版: v260721.02) -->
+  <!-- 系統列 (正式進版: v260721.03) -->
   <div :class="['sys-bar', isLineMode?'live':'dev']">
-    <span>v260721.02 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
-    <!-- ⚡ 非阻塞連線狀態提示 -->
+    <span>v260721.03 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
     <span v-if="globalLoading" class="sync-badge">
       <svg class="spin" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
       同步中
@@ -197,7 +196,6 @@
         <div v-else-if="authFailed" class="member-loading" style="color:var(--err); font-weight:700;">身分失效</div>
         <div v-else class="member-loading">驗證中⋯</div>
       </div>
-      <!-- ⚡ 防呆優化：未載入資料前顯示 ──，防止客人誤以為餘額是 0 元 -->
       <div class="member-card-right">
         <div class="bal-label">儲值餘額</div>
         <div>
@@ -212,7 +210,6 @@
   <div class="main">
     <div class="section-gap" style="height:20px;"></div>
 
-    <!-- 救援機制：身分驗證失敗畫面 -->
     <div v-if="authFailed" class="card" style="border:1px solid var(--err); border-left:4px solid var(--err); text-align:center; padding:32px 20px;">
       <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="var(--err)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:12px;opacity:0.8;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       <div class="section-title" style="color:var(--err); margin-bottom:10px;">登入憑證已過期或失效</div>
@@ -332,7 +329,7 @@
             </button>
             <span class="counter-val">{{ bookCatCount }}</span>
             <button class="btn btn-icon" @click="bookCatCount++">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="12" y2="12"/></svg>
             </button>
             <span class="counter-unit">台 已勾 {{ selectedCats.length }} 隻</span>
           </div>
@@ -380,7 +377,7 @@
         </div>
       </div>
 
-      <!-- 我的預約 -->
+      <!-- 我的預約（加入待確認刪除功能）-->
       <div v-if="bookStep===1 && myProfile.uid" style="margin-top:4px;">
         <div class="card card-accent">
           <div class="section-header" style="cursor:pointer;margin-bottom:0;" @click="apptExpanded=!apptExpanded">
@@ -401,10 +398,16 @@
                 style="padding:11px 2px;border-bottom:1px solid var(--border);">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
                   <span style="font-size:13px;font-weight:700;color:var(--ink);">{{ appt.date }} · {{ appt.time }}</span>
-                  <span :style="{background: appt.status==='pending'?'var(--orange-l)': appt.status==='confirmed'?'var(--ok-l)':'var(--warm)', color: appt.status==='pending'?'var(--orange-d)': appt.status==='confirmed'?'var(--ok)':'var(--ink-3)'}"
-                    style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;">
-                    {{ appt.status==='pending'?'待確認': appt.status==='confirmed'?'已確認':'已完成' }}
-                  </span>
+                  <div style="display:flex;align-items:center;gap:6px;">
+                    <!-- 🚨 新增：只有待確認狀態，才顯示『× 取消』按鈕 -->
+                    <button v-if="appt.status==='pending'" class="btn-cancel-appt" @click.stop="cancelMyAppointment(appt)">
+                      × 取消
+                    </button>
+                    <span :style="{background: appt.status==='pending'?'var(--orange-l)': appt.status==='confirmed'?'var(--ok-l)':'var(--warm)', color: appt.status==='pending'?'var(--orange-d)': appt.status==='confirmed'?'var(--ok)':'var(--ink-3)'}"
+                      style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;">
+                      {{ appt.status==='pending'?'待確認': appt.status==='confirmed'?'已確認':'已完成' }}
+                    </span>
+                  </div>
                 </div>
                 <div style="font-size:11px;color:var(--ink-2);">洗浴 {{ appt.count }} 台<span v-if="appt.catDetail"> · {{ appt.catDetail }}</span></div>
                 <div v-if="appt.notes" style="font-size:11px;color:var(--ink-3);margin-top:2px;">{{ appt.notes }}</div>
@@ -547,7 +550,6 @@
       createApp({
         setup() {
           const currentTab = ref('booking');
-          // balance 預設 null，未載入時畫面顯示 ──，避免閃出 0 元
           const myProfile = ref({ uid:'', name:'', balance: null, address:'', phone:'', elevator:'有電梯', parking:'', note:'' });
           const myCats = ref([]);
           const calendarDates = ref([]);
@@ -687,6 +689,27 @@
               if(res && res.success) myAppointments.value = res.list || [];
             } catch(e){}
             apptLoading.value = false;
+          };
+
+          // 🚨 新增：顧客主動取消自己的預約 (含二次彈窗確認 + 樂觀更新)
+          const cancelMyAppointment = async (appt) => {
+            if (!confirm(`確定要取消「${appt.date} ${appt.time}」的預約申請嗎？`)) return;
+            try {
+              const res = await apiPost({
+                action: 'deleteMyAppointment',
+                idToken,
+                rowIndex: appt.rowIndex,
+                dateStr: appt.date
+              });
+              if (res && res.success) {
+                showToast('已成功取消該筆預約！');
+                // 樂觀更新：立刻從前端清單中剔除該筆預約
+                myAppointments.value = myAppointments.value.filter(a => a.rowIndex !== appt.rowIndex);
+                loadCalendar(); // 背景刷新日曆
+              } else {
+                showToast('取消失敗：' + (res ? res.error : '未知錯誤'), true);
+              }
+            } catch(e) { showToast('取消失敗 ' + e.message, true); }
           };
 
           const refreshCalendar = async () => {
@@ -840,7 +863,7 @@
             switchTab, moveWeeks, selectDate, saveProfile, registerCat, toggleEdit, saveEditCat, removeCat,
             bookStep, selectedSlot, selectedCats, bookCatCount, bookNotes, bookLoading, availableSlots, calMonthLabel,
             toggleCatSelect, submitBooking, resetBook, refreshing, refreshCalendar,
-            myAppointments, apptLoading, apptExpanded };
+            myAppointments, apptLoading, apptExpanded, cancelMyAppointment };
         }
       }).mount('#app');
 </script>
