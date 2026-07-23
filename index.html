@@ -177,9 +177,9 @@
 <body>
 <div id="app" v-cloak>
 
-  <!-- 系統列 (正式進版: v260723.23) -->
+  <!-- 系統列 (正式進版: v260723.24) -->
   <div :class="['sys-bar', isLineMode?'live':'dev']">
-    <span>v260723.23 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
+    <span>v260723.24 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
     <span v-if="globalLoading" class="sync-badge">
       <svg class="spin" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
       同步中
@@ -637,7 +637,6 @@
           const editIdx = ref(-1);
           const editCat = ref({ name:'', breed:'', weight:'', gender:'男生', note:'' });
           const _cn=new Date(); const calYear=ref(_cn.getFullYear()); const calMonth=ref(_cn.getMonth()+1);
-          const weekOffset = ref(0);
           const toast = ref({ show:false, message:'', isError:false });
           const statusCode = ref('INIT');
           const isLineMode = ref(true);
@@ -846,13 +845,17 @@
             const dm = scheduleCacheMap[day.dateStr] || {};
             availableSlots.value = Object.keys(dm).filter(s => String(dm[s]).trim() === '開放');
           };
-          const moveCalMonth = (dir) => {
+          const moveCalMonth = async (dir) => {
             calMonth.value += dir;
             if(calMonth.value > 12){ calMonth.value=1; calYear.value++; }
             if(calMonth.value < 1){ calMonth.value=12; calYear.value--; }
+            // 抓新月份的開放資料再渲染
+            try {
+              const res = await apiGet({ action:'getCalendar', year:calYear.value, month:calMonth.value });
+              if(res && res.scheduleMap) scheduleCacheMap = res.scheduleMap;
+            } catch(e) {}
             renderMonth();
           };
-          const moveWeeks = moveCalMonth; // 相容舊呼叫
           const toggleCatSelect = (name) => {
             const i = selectedCats.value.indexOf(name);
             if(i >= 0) selectedCats.value.splice(i,1);
@@ -975,7 +978,7 @@
 
           return { currentTab, myProfile, myCats, calendarDates, selectedDate, newCat, editIdx, editCat, toast, statusCode, isLineMode, authFailed, forceRelogin,
             globalLoading, isSavingProfile, isRegisteringCat, isSavingCat,
-            switchTab, moveWeeks, selectDate, saveProfile, registerCat, toggleEdit, saveEditCat, removeCat,
+            switchTab, moveCalMonth, selectDate, saveProfile, registerCat, toggleEdit, saveEditCat, removeCat,
             bookStep, selectedSlot, selectedCats, bookCatCount, bookNotes, bookLoading, availableSlots, calMonthLabel,
             toggleCatSelect, submitBooking, resetBook, refreshing, refreshCalendar,
             myAppointments, apptLoading, apptExpanded, cancelMyAppointment, moveCalMonth, calYear, calMonth, clientHolidayData,
