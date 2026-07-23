@@ -166,7 +166,7 @@
 <body>
 <div id="app" v-cloak>
 
-  <!-- 系統列 (正式進版: v260721.03) -->
+  <!-- 系統列 (正式進版: v260723.09) -->
   <div :class="['sys-bar', isLineMode?'live':'dev']">
     <span>v260721.03 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
     <span v-if="globalLoading" class="sync-badge">
@@ -422,13 +422,32 @@
       </div>
 
       <!-- 文案公告板（我的預約下方）-->
-      <div v-if="bookStep===1 && myProfile.uid && contentItems.length > 0" style="margin-top:4px;">
-        <div v-for="item in contentItems" :key="item.rowIndex" class="card card-accent" style="margin-bottom:8px;">
-          <div class="section-header" style="cursor:pointer;margin-bottom:0;" @click="toggleContentItem(item.rowIndex)">
-            <span class="section-title" style="font-size:13px;">{{ item.title }}</span>
-            <svg :style="expandedContentIds.includes(item.rowIndex)?'transform:rotate(180deg)':''" style="transition:.15s;color:var(--ink-3);flex-shrink:0;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      <div v-if="bookStep===1 && myProfile.uid && contentItems.length > 0" style="margin-top:12px;">
+        <div class="card card-accent" style="padding:0;overflow:hidden;">
+          <!-- 公告欄標題 -->
+          <div style="display:flex;align-items:center;gap:8px;padding:14px 16px 12px;border-bottom:1px solid var(--border);">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            <span style="font-family:'Noto Serif TC',serif;font-size:14px;font-weight:700;color:var(--ink);letter-spacing:.04em;">公告欄</span>
           </div>
-          <div v-show="expandedContentIds.includes(item.rowIndex)" style="margin-top:12px;font-size:13px;color:var(--ink-2);line-height:1.9;white-space:pre-line;">{{ item.body }}</div>
+          <!-- 文案清單 -->
+          <div v-for="(item, idx) in contentItems" :key="item.rowIndex"
+            :style="{borderBottom: idx < contentItems.length-1 ? '1px solid var(--border)' : 'none'}">
+            <!-- 標題列，點擊展開 -->
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;"
+              @click="toggleContentItem(item.rowIndex)">
+              <span style="font-size:13px;font-weight:600;color:var(--ink);letter-spacing:.02em;">{{ item.title }}</span>
+              <svg :style="expandedContentIds.includes(item.rowIndex)?'transform:rotate(180deg)':''"
+                style="transition:.2s;color:var(--ink-3);flex-shrink:0;"
+                width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </div>
+            <!-- 展開內容 -->
+            <div v-show="expandedContentIds.includes(item.rowIndex)"
+              style="padding:0 16px 14px 16px;font-size:13px;color:var(--ink-2);line-height:1.9;white-space:pre-line;border-top:1px solid var(--border);">
+              {{ item.body }}
+            </div>
+          </div>
         </div>
       </div>
     </div>
