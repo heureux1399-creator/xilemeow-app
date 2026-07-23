@@ -80,12 +80,22 @@
     .nav-arrow{ width:32px; height:32px; border-radius:8px; border:1px solid var(--border); background:var(--paper); display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--ink-2); transition:all .12s; }
 
     .cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
-    .cal-cell{ aspect-ratio:1; border-radius:8px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:11px; font-weight:500; cursor:default; border:1px solid transparent; transition:all .12s; }
+    .cal-cell{ aspect-ratio:1; border-radius:8px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:12px; font-weight:600; cursor:default; border:1px solid transparent; transition:all .12s; position:relative; }
     .cal-cell .date-num{ line-height:1; }
     .cal-cell .date-dot{ width:3px; height:3px; border-radius:50%; background:currentColor; margin-top:3px; opacity:.5; }
     .cal-cell.open{ background:var(--orange-l); color:var(--orange-d); border-color:rgba(212,98,42,.2); cursor:pointer; }
+    .cal-cell.open.is-sun{ color:var(--err); }
+    .cal-cell.open.is-sat{ color:var(--orange-d); }
+    .cal-cell.open.is-holiday{ color:var(--err); }
     .cal-cell.selected{ background:var(--orange); color:#fff; border-color:var(--orange); }
     .cal-cell.past,.cal-cell.closed{ color:var(--ink-3); }
+    .cal-cell.is-sun:not(.open):not(.past):not(.selected){ color:var(--err); }
+    .cal-cell.is-sat:not(.open):not(.past):not(.selected){ color:var(--orange); }
+    .cal-cell.is-holiday:not(.open):not(.past):not(.selected){ color:var(--err); font-weight:700; }
+    .cal-cell.is-workday{ color:var(--ink) !important; }
+    .cal-day-header{ font-size:9px; font-weight:700; color:var(--ink-3); text-align:center; padding:4px 0; }
+    .cal-day-header.sun{ color:var(--err); }
+    .cal-day-header.sat{ color:var(--orange); }
 
     .field-wrap{ margin-bottom:14px; }
     .field-label{ font-size:10px; font-weight:700; color:var(--ink-2); letter-spacing:.1em; text-transform:uppercase; margin-bottom:7px; display:block; }
@@ -166,7 +176,7 @@
 <body>
 <div id="app" v-cloak>
 
-  <!-- 系統列 (正式進版: v260723.09) -->
+  <!-- 系統列 (正式進版: v260723.21) -->
   <div :class="['sys-bar', isLineMode?'live':'dev']">
     <span>v260721.03 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
     <span v-if="globalLoading" class="sync-badge">
@@ -232,23 +242,46 @@
           <span class="section-sub">橙色格子可選</span>
         </div>
         <div class="month-nav">
-          <button class="nav-arrow btn-icon" @click="moveWeeks(-28)">
+          <button class="nav-arrow btn-icon" @click="moveCalMonth(-1)">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
           </button>
           <span class="month-label">{{ calMonthLabel }}</span>
-          <button class="nav-arrow btn-icon" @click="moveWeeks(28)">
+          <button class="nav-arrow btn-icon" @click="moveCalMonth(1)">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
         </div>
         <div v-if="calendarDates.length===0" style="text-align:center;padding:28px 0;">
           <svg class="spin" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
         </div>
-        <div v-else class="cal-grid">
-          <div v-for="d in calendarDates" :key="d.dateStr"
-            :class="['cal-cell', selectedDate===d.dateStr?'selected':d.isClickable?'open':d.isPast?'past':'closed']"
-            @click="selectDate(d)">
-            <span class="date-num">{{ d.dateLabel }}</span>
-            <span class="date-dot" v-if="d.isClickable && selectedDate!==d.dateStr"></span>
+        <div v-else>
+          <!-- 星期標題列 -->
+          <div class="cal-grid" style="margin-bottom:4px;">
+            <div class="cal-day-header sun">日</div>
+            <div class="cal-day-header">一</div>
+            <div class="cal-day-header">二</div>
+            <div class="cal-day-header">三</div>
+            <div class="cal-day-header">四</div>
+            <div class="cal-day-header">五</div>
+            <div class="cal-day-header sat">六</div>
+          </div>
+          <!-- 空白填充 -->
+          <div class="cal-grid">
+            <div v-for="e in calendarDates[0].emptyBefore" :key="'e'+e" class="cal-cell" style="border-color:transparent;background:transparent;"></div>
+            <div v-for="d in calendarDates" :key="d.dateStr"
+              :class="['cal-cell',
+                selectedDate===d.dateStr?'selected':d.isClickable?'open':d.isPast?'past':'closed',
+                d.isSunday?'is-sun':'',
+                d.isSaturday?'is-sat':'',
+                d.isHolidayMark?'is-holiday':'',
+                d.isWorkday?'is-workday':''
+              ]"
+              @click="selectDate(d)">
+              <span class="date-num" style="position:relative;">
+                {{ d.dayNum }}
+                <span v-if="d.isToday" style="position:absolute;top:-5px;right:-8px;font-size:7px;color:var(--orange-d);">★</span>
+              </span>
+              <span class="date-dot" v-if="d.isClickable && selectedDate!==d.dateStr"></span>
+            </div>
           </div>
         </div>
         <div v-if="selectedDate" style="margin-top:16px;">
@@ -587,10 +620,22 @@
           const myProfile = ref({ uid:'', name:'', balance: null, address:'', phone:'', elevator:'有電梯', parking:'', note:'' });
           const myCats = ref([]);
           const calendarDates = ref([]);
+          const clientHolidayData = ref({ holidays:{}, workdays:{} });
+          const loadClientHolidays = async () => {
+            try {
+              const res = await apiGet({ action:'getHolidays' });
+              if(res && res.holidays) clientHolidayData.value = res.holidays;
+            } catch(e) {}
+          };
+          const inHolidaySet = (year, md, dict) => {
+            var yStr = String(year);
+            return dict && dict[yStr] && dict[yStr].indexOf(md) >= 0;
+          };
           const selectedDate = ref('');
           const newCat = ref({ name:'', breed:'', weight:'', gender:'男生', note:'' });
           const editIdx = ref(-1);
           const editCat = ref({ name:'', breed:'', weight:'', gender:'男生', note:'' });
+          const _cn=new Date(); const calYear=ref(_cn.getFullYear()); const calMonth=ref(_cn.getMonth()+1);
           const weekOffset = ref(0);
           const toast = ref({ show:false, message:'', isError:false });
           const statusCode = ref('INIT');
@@ -690,6 +735,7 @@
                 statusCode.value='OK·'+res.info.uid; 
                 loadMyAppointments();
                 loadContentItems();
+                loadClientHolidays();
                 authFailed.value = false; 
               }
               else {
@@ -715,22 +761,42 @@
             try { const res = await apiGet({ action:"getCalendar", year:t.getFullYear(), month:t.getMonth()+1 }); if(res && res.scheduleMap) scheduleCacheMap=res.scheduleMap; } catch(e){}
             renderMatrix();
           };
-          const renderMatrix = () => {
+          const renderMonth = () => {
             const today = new Date(); today.setHours(0,0,0,0);
-            const cd=today.getDay(), toMon=cd===0?-6:1-cd;
-            const start=new Date(today); start.setDate(today.getDate()+toMon+weekOffset.value);
-            calMonthLabel.value = `${start.getFullYear()}年${start.getMonth()+1}月`;
+            const tomorrow = new Date(today); tomorrow.setDate(today.getDate()+1);
+            const todayStr = today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
+            // 用 calYear/calMonth 決定顯示哪個月
+            const firstDay = new Date(calYear.value, calMonth.value-1, 1);
+            const total = new Date(calYear.value, calMonth.value, 0).getDate();
+            const emptyBefore = firstDay.getDay(); // 0=日，第一天前要填幾個空格
+            calMonthLabel.value = calYear.value+'年'+String(calMonth.value).padStart(2,'0')+'月';
             const arr=[];
-            for(let i=0;i<28;i++){
-              let t=new Date(start); t.setDate(start.getDate()+i);
-              let y=t.getFullYear(),m=t.getMonth()+1,d=t.getDate();
-              let dStr=`${y}-${m<10?'0'+m:m}-${d<10?'0'+d:d}`;
+            // 只在第一個格子放 emptyBefore，其他格子不用
+            for(let d=1;d<=total;d++){
+              let fm=String(calMonth.value).padStart(2,'0'), fd=String(d).padStart(2,'0');
+              let dStr=calYear.value+'-'+fm+'-'+fd;
+              let t=new Date(calYear.value, calMonth.value-1, d);
+              let weekDay=t.getDay();
+              let isSunday=weekDay===0, isSaturday=weekDay===6;
+              let isToday=(dStr===todayStr);
+              // 只能選明天以後
               let isPast=(t.getTime()<=today.getTime()), isOpen=false, isClickable=false;
-              if(!isPast && scheduleCacheMap[dStr]){ let dm=scheduleCacheMap[dStr]; if(Object.keys(dm).some(s=>String(dm[s]).trim()==='開放')){ isOpen=true; isClickable=true; } }
-              arr.push({ dateStr:dStr, dateLabel:`${m}/${d}`, isPast, isOpen, isClickable });
+              if(!isPast && scheduleCacheMap[dStr]){
+                let dm=scheduleCacheMap[dStr];
+                if(Object.keys(dm).some(s=>String(dm[s]).trim()==='開放')){ isOpen=true; isClickable=true; }
+              }
+              let md=fm+'-'+fd;
+              let hd=clientHolidayData.value.holidays||{};
+              let wd=clientHolidayData.value.workdays||{};
+              let isHolidayMark=inHolidaySet(calYear.value, md, hd);
+              let isWorkday=inHolidaySet(calYear.value, md, wd);
+              arr.push({ dateStr:dStr, dayNum:d, emptyBefore:(d===1?emptyBefore:0),
+                isPast, isOpen, isClickable, isToday,
+                isSunday, isSaturday, isHolidayMark, isWorkday });
             }
             calendarDates.value=arr;
           };
+          const renderMatrix = renderMonth; // 相容舊呼叫
           const loadMyAppointments = async () => {
             apptLoading.value = true;
             try {
@@ -779,14 +845,13 @@
             const dm = scheduleCacheMap[day.dateStr] || {};
             availableSlots.value = Object.keys(dm).filter(s => String(dm[s]).trim() === '開放');
           };
-          const moveWeeks = (days) => {
-            weekOffset.value += days;
-            const today = new Date();
-            const d = new Date(today);
-            d.setDate(d.getDate() + weekOffset.value);
-            calMonthLabel.value = `${d.getFullYear()}年${d.getMonth()+1}月`;
-            renderMatrix();
+          const moveCalMonth = (dir) => {
+            calMonth.value += dir;
+            if(calMonth.value > 12){ calMonth.value=1; calYear.value++; }
+            if(calMonth.value < 1){ calMonth.value=12; calYear.value--; }
+            renderMonth();
           };
+          const moveWeeks = moveCalMonth; // 相容舊呼叫
           const toggleCatSelect = (name) => {
             const i = selectedCats.value.indexOf(name);
             if(i >= 0) selectedCats.value.splice(i,1);
@@ -912,7 +977,7 @@
             switchTab, moveWeeks, selectDate, saveProfile, registerCat, toggleEdit, saveEditCat, removeCat,
             bookStep, selectedSlot, selectedCats, bookCatCount, bookNotes, bookLoading, availableSlots, calMonthLabel,
             toggleCatSelect, submitBooking, resetBook, refreshing, refreshCalendar,
-            myAppointments, apptLoading, apptExpanded, cancelMyAppointment,
+            myAppointments, apptLoading, apptExpanded, cancelMyAppointment, moveCalMonth, calYear, calMonth, clientHolidayData,
             contentItems, expandedContentIds, toggleContentItem };
         }
       }).mount('#app');
