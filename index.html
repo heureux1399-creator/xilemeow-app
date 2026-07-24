@@ -177,9 +177,9 @@
 <body>
 <div id="app" v-cloak>
 
-  <!-- 系統列 (正式進版: v260723.27) -->
+  <!-- 系統列 (正式進版: v260723.28) -->
   <div :class="['sys-bar', isLineMode?'live':'dev']">
-    <span>v260723.27 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
+    <span>v260723.28 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
     <span v-if="globalLoading" class="sync-badge">
       <svg class="spin" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
       同步中
@@ -626,7 +626,10 @@
           const loadAdvanceDays = async () => {
             try {
               const res = await apiGet({ action:'getAdvanceDays' });
-              if(res && res.success) advanceDays.value = res.days;
+              if(res && res.success){
+                advanceDays.value = res.days;
+                renderMonth(); // 更新後重新渲染月曆套用新提前天數
+              }
             } catch(e) {}
           };
           const loadClientHolidays = async () => {
@@ -839,10 +842,16 @@
 
           const refreshCalendar = async () => {
             refreshing.value = true;
-            const t = new Date();
             try {
-              const res = await apiGet({ action:"getCalendar", year:t.getFullYear(), month:t.getMonth()+1 });
-              if(res && res.scheduleMap){ scheduleCacheMap = res.scheduleMap; renderMatrix(); showToast('時段已更新'); }
+              // 同時重新抓時段和提前天數
+              const [calRes, advRes] = await Promise.all([
+                apiGet({ action:"getCalendar", year:calYear.value, month:calMonth.value }),
+                apiGet({ action:'getAdvanceDays' })
+              ]);
+              if(calRes && calRes.scheduleMap) scheduleCacheMap = calRes.scheduleMap;
+              if(advRes && advRes.success) advanceDays.value = advRes.days;
+              renderMonth();
+              showToast('時段已更新');
             } catch(e){ showToast('更新失敗', true); }
             refreshing.value = false;
           };
