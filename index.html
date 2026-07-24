@@ -1,4 +1,15 @@
 <!DOCTYPE html>
+<!--
+  ╔══════════════════════════════════════════════════════════════════════════════╗
+  ║  🔧 洗咧喵 客端 維護資料                                                     ║
+  ╠══════════════════════════════════════════════════════════════════════════════╣
+  ║  版本號      : v260724.01                                                       ║
+  ║  GAS API     : https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec ║
+  ║  客端 URL    : https://jemin0819.github.io/xilemeow/                                          ║
+  ║  LIFF ID     : 2010742657-DOz9QdF3                                                  ║
+  ║  LINE Ch.ID  : 2010742657                                                        ║
+  ╚══════════════════════════════════════════════════════════════════════════════╝
+-->
 <html lang="zh-Hant">
 <head>
   <base target="_top">
@@ -177,9 +188,9 @@
 <body>
 <div id="app" v-cloak>
 
-  <!-- 系統列 (正式進版: v260723.31) -->
+  <!-- 系統列 (正式進版: v260724.01) -->
   <div :class="['sys-bar', isLineMode?'live':'dev']">
-    <span>v260723.31 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
+    <span>v260724.01 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
     <span v-if="globalLoading" class="sync-badge">
       <svg class="spin" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
       同步中
@@ -611,9 +622,15 @@
 </div>
 
 <script>
-  const GAS_API = "https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec";
+  // ══════════════════════════════════════════════════════
+  // 🔧 維護資料（每次更新請修改這裡）
+  // ══════════════════════════════════════════════════════
+  const VERSION          = 'v260724.01';                    // 版本號
+  const GAS_API          = "https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec"; // GAS 部署網址
+  const LIFF_ID          = '2010742657-DOz9QdF3';           // LINE LIFF ID
+  const LINE_CHANNEL_ID  = '2010742657';                    // LINE Login Channel ID（idToken 驗證用）
+  // ══════════════════════════════════════════════════════
 
-      const LIFF_ID = "2010742657-DOz9QdF3";
       const { createApp, ref, onMounted } = Vue;
       createApp({
         setup() {
