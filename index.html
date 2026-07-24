@@ -177,9 +177,9 @@
 <body>
 <div id="app" v-cloak>
 
-  <!-- 系統列 (正式進版: v260723.24) -->
+  <!-- 系統列 (正式進版: v260723.27) -->
   <div :class="['sys-bar', isLineMode?'live':'dev']">
-    <span>v260723.24 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
+    <span>v260723.27 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
     <span v-if="globalLoading" class="sync-badge">
       <svg class="spin" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
       同步中
@@ -622,6 +622,13 @@
           const myCats = ref([]);
           const calendarDates = ref([]);
           const clientHolidayData = ref({ holidays:{}, workdays:{} });
+          const advanceDays = ref(1); // 從後端讀取的提前天數
+          const loadAdvanceDays = async () => {
+            try {
+              const res = await apiGet({ action:'getAdvanceDays' });
+              if(res && res.success) advanceDays.value = res.days;
+            } catch(e) {}
+          };
           const loadClientHolidays = async () => {
             try {
               const res = await apiGet({ action:'getHolidays' });
@@ -736,6 +743,7 @@
                 loadMyAppointments();
                 loadContentItems();
                 loadClientHolidays();
+                loadAdvanceDays();
                 authFailed.value = false; 
               }
               else {
@@ -780,7 +788,9 @@
               let isSunday=weekDay===0, isSaturday=weekDay===6;
               let isToday=(dStr===todayStr);
               // 只能選明天以後
-              let isPast=(t.getTime()<=today.getTime()), isOpen=false, isClickable=false;
+              // 提前天數：今天 + advanceDays.value 天後才可選
+              const minDate = new Date(today); minDate.setDate(today.getDate() + advanceDays.value);
+              let isPast=(t.getTime()<minDate.getTime()), isOpen=false, isClickable=false;
               if(!isPast && scheduleCacheMap[dStr]){
                 let dm=scheduleCacheMap[dStr];
                 if(Object.keys(dm).some(s=>String(dm[s]).trim()==='開放')){ isOpen=true; isClickable=true; }
@@ -976,7 +986,7 @@
             switchTab, moveCalMonth, selectDate, saveProfile, registerCat, toggleEdit, saveEditCat, removeCat,
             bookStep, selectedSlot, selectedCats, bookCatCount, bookNotes, bookLoading, availableSlots, calMonthLabel,
             toggleCatSelect, submitBooking, resetBook, refreshing, refreshCalendar,
-            myAppointments, apptLoading, apptExpanded, cancelMyAppointment, moveCalMonth, calYear, calMonth, clientHolidayData,
+            myAppointments, apptLoading, apptExpanded, cancelMyAppointment, moveCalMonth, calYear, calMonth, clientHolidayData, advanceDays,
             contentItems, expandedContentIds, toggleContentItem };
         }
       }).mount('#app');
