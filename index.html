@@ -1,200 +1,261 @@
 <!DOCTYPE html>
 <!--
   ╔══════════════════════════════════════════════════════════════════════════════╗
-  ║  🔧 洗咧喵 客端 維護資料                                                     ║
+  ║  🔧 洗咧喵 Admin 維護資料                                                    ║
   ╠══════════════════════════════════════════════════════════════════════════════╣
-  ║  版本號      : v260724.02                                                       ║
-  ║  GAS API     : https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec ║
-  ║  客端 URL    : https://liff.line.me/2010742657-DOz9QdF3                                      ║
-  ║  LIFF ID     : 2010742657-DOz9QdF3                                                  ║
-  ║  LINE Ch.ID  : 2010742657                                                        ║
+  ║  版本號      : v260724.05                                                       ║
+  ║  GAS URL     : https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec ║
+  ║  LINE OA     : https://manager.line.biz/account/%40605isdpd/chat              ║
+  ║  GitHub URL  : https://jemin0819.github.io/xilemeow/                                         ║
+  ║  LIFF URL    : https://liff.line.me/2010742657-DOz9QdF3                              ║
+  ║  GitHub URL  : https://jemin0819.github.io/xilemeow/                                         ║
+  ║  LIFF URL    : https://liff.line.me/2010742657-DOz9QdF3                                      ║
+  ║  密碼金鑰    : jemin_admin_pwd（localStorage key）                              ║
   ╚══════════════════════════════════════════════════════════════════════════════╝
 -->
 <html lang="zh-Hant">
 <head>
-  <base target="_top">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>洗咧喵</title>
-  <script src="https://unpkg.com/vue@3.3.4/dist/vue.global.prod.js"></script>
+  <title>洗咧喵・後台</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script>
-    window.onerror=function(m,s,l){var d=document.createElement('div');d.style.cssText='position:fixed;top:0;left:0;width:100%;background:#D4622A;color:#fff;z-index:99999;padding:10px 14px;font-size:11px;font-family:monospace;';d.innerHTML='ERR: '+m+' L'+l;document.body.appendChild(d);return true;};
-    window.addEventListener('unhandledrejection',function(e){var d=document.createElement('div');d.style.cssText='position:fixed;top:0;left:0;width:100%;background:#7A7268;color:#fff;z-index:99999;padding:10px 14px;font-size:11px;font-family:monospace;';d.innerHTML='PROMISE: '+(e.reason&&e.reason.message?e.reason.message:e.reason);document.body.appendChild(d);});
-  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
   <style>
     :root{
-      --ink:      #2C2C2C;
-      --ink-2:    #7A7268;
-      --ink-3:    #B0A89C;
-      --paper:    #FAF7F2;
-      --card:     #FFFFFF;
-      --warm:     #F3EDE4;
-      --orange:   #D4622A;
-      --orange-l: #FAEAE1;
-      --orange-d: #B0501F;
-      --ok:       #3D6B4F;
-      --ok-l:     #E8F3EC;
-      --err:      #B84141;
-      --border:   rgba(44,44,44,.1);
+      --bg:      #F4F6F8;
+      --card:    #FFFFFF;
+      --warm:    #EEF1F5;
+      --indigo:  #1C3252;
+      --indigo-m:#2D4E78;
+      --indigo-l:#5B7FA6;
+      --indigo-x:#E8EEF5;
+      --orange:  #D4622A;
+      --orange-l:#FAEAE1;
+      --orange-d:#B0501F;
+      --ink:     #1A2332;
+      --ink-2:   #6B7A8D;
+      --ink-3:   #A8B4C0;
+      --border:  rgba(28,50,82,.1);
+      --ok:      #2D6A4F;
+      --ok-l:    #E6F3EC;
+      --err:     #B84141;
+      --err-l:   #FEF0F0;
+      --amber:   #C47C1A;
+      --amber-l: #FDF3E1;
     }
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; margin:0; padding:0; }
     [v-cloak]{ display:none!important; }
-    html,body{ background:var(--paper); color:var(--ink); font-family:'Noto Sans TC',sans-serif; font-weight:400; -webkit-user-select:none; user-select:none; }
-    body{ padding-bottom:88px; }
+    html,body{ background:var(--bg); color:var(--ink); font-family:'Noto Sans TC',sans-serif; -webkit-user-select:none; user-select:none; }
+    body{ padding-bottom:80px; }
 
-    /* ── 系統列 ── */
-    .sys-bar{ font-family:monospace; font-size:10px; padding:5px 16px; letter-spacing:.05em; color:rgba(255,255,255,.6); display:flex; justify-content:space-between; align-items:center; }
-    .sys-bar.live{ background:#1A1A1A; }
-    .sys-bar.dev{ background:var(--orange); color:rgba(255,255,255,.9); }
+    /* ── 登入畫面 ── */
+    .login-screen{ position:fixed; inset:0; background:var(--indigo); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:200; padding:32px; }
+    .login-logo{ font-family:'Noto Serif TC',serif; font-size:28px; font-weight:700; color:#fff; letter-spacing:.1em; margin-bottom:6px; }
+    .login-sub{ font-size:12px; color:rgba(255,255,255,.4); letter-spacing:.1em; margin-bottom:40px; }
+    .login-box{ background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:14px; padding:24px; width:100%; max-width:320px; }
+    .login-label{ font-size:10px; color:rgba(255,255,255,.5); letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px; display:block; }
+    .login-input{ width:100%; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15); border-radius:8px; padding:13px 15px; font-size:18px; font-family:monospace; color:#fff; text-align:center; letter-spacing:.2em; margin-bottom:14px; }
+    .login-input:focus{ outline:none; border-color:var(--orange); }
+    .login-input::placeholder{ color:rgba(255,255,255,.25); letter-spacing:.1em; }
+    .login-btn{ width:100%; background:var(--orange); color:#fff; border:none; border-radius:8px; padding:13px; font-size:14px; font-weight:700; font-family:'Noto Sans TC',sans-serif; cursor:pointer; }
+    .login-btn:active{ opacity:.88; }
 
-    .sync-badge{ display:inline-flex; align-items:center; gap:5px; background:rgba(212,98,42,.2); color:var(--orange); padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600; animation:pulse 1.2s infinite; }
+    /* ── ⚡ 頂部非阻塞 Sync Badge ── */
+    .sync-pill{ display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,.15); color:#fff; padding:3px 10px; border-radius:12px; font-size:10px; font-weight:600; animation:pulse 1.2s infinite; }
     @keyframes pulse{ 0%,100%{ opacity:1; } 50%{ opacity:0.4; } }
-
-    .toast{ position:fixed; top:16px; left:50%; transform:translateX(-50%); padding:11px 18px; border-radius:8px; font-size:12px; font-weight:500; display:flex; align-items:center; gap:8px; z-index:999; max-width:86vw; box-shadow:0 4px 20px rgba(0,0,0,.18); white-space:nowrap; }
-    .toast.ok{ background:var(--ink); color:#fff; }
-    .toast.err{ background:var(--err); color:#fff; }
-    .fade-enter-active,.fade-leave-active{ transition:opacity .2s,transform .2s; }
-    .fade-enter-from,.fade-leave-to{ opacity:0; transform:translateX(-50%) translateY(-6px); }
-
-    .app-header{ background:#1A1A1A; color:#fff; padding:48px 24px 64px; position:relative; overflow:hidden; }
-    .app-header::after{ content:''; position:absolute; right:-24px; bottom:-32px; width:120px; height:120px; border-radius:50%; background:rgba(212,98,42,.15); pointer-events:none; }
-    .header-eyebrow{ font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--orange); font-weight:500; margin-bottom:10px; }
-    .header-title{ font-family:'Noto Serif TC',serif; font-size:28px; font-weight:700; letter-spacing:.06em; line-height:1.1; }
-    .header-sub{ font-size:12px; color:rgba(255,255,255,.45); margin-top:8px; letter-spacing:.05em; font-weight:300; }
-
-    .member-card-wrap{ padding:0 20px; margin-top:-28px; position:relative; z-index:10; }
-    .member-card{ background:var(--card); border-radius:14px; padding:18px 20px; box-shadow:0 8px 32px rgba(44,44,44,.14); border:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
-    .member-card-left .eyebrow{ font-size:9px; letter-spacing:.15em; text-transform:uppercase; color:var(--ink-3); margin-bottom:6px; }
-    .member-card-left .uid{ font-family:monospace; font-size:17px; font-weight:700; color:var(--ink); letter-spacing:.06em; }
-    .member-card-right{ text-align:right; }
-    .member-card-right .bal-label{ font-size:9px; color:var(--ink-3); letter-spacing:.1em; text-transform:uppercase; margin-bottom:4px; }
-    .member-card-right .bal-val{ font-size:18px; font-weight:700; color:var(--orange); font-family:monospace; }
-    .member-card-right .bal-unit{ font-size:11px; color:var(--ink-2); margin-left:2px; }
-    .member-loading{ font-size:13px; color:var(--ink-3); letter-spacing:.05em; }
-
-    .main{ padding:20px 20px 0; max-width:480px; margin:0 auto; }
-    .section-gap{ height:14px; }
-
-    .section-header{ display:flex; align-items:baseline; gap:10px; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--border); }
-    .section-title{ font-family:'Noto Serif TC',serif; font-size:15px; font-weight:600; color:var(--ink); }
-    .section-sub{ font-size:11px; color:var(--ink-3); }
-
-    .card{ background:var(--card); border-radius:12px; padding:20px; border:1px solid var(--border); margin-bottom:12px; }
-    .card-accent{ border-left:2.5px solid var(--orange); }
-
-    .month-nav{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
-    .month-label{ font-size:13px; font-weight:500; color:var(--ink-2); letter-spacing:.04em; }
-    .nav-arrow{ width:32px; height:32px; border-radius:8px; border:1px solid var(--border); background:var(--paper); display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--ink-2); transition:all .12s; }
-
-    .cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
-    .cal-cell{ aspect-ratio:1; border-radius:8px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:12px; font-weight:600; cursor:default; border:1px solid transparent; transition:all .12s; position:relative; }
-    .cal-cell .date-num{ line-height:1; }
-    .cal-cell .date-dot{ width:3px; height:3px; border-radius:50%; background:currentColor; margin-top:3px; opacity:.5; }
-    .cal-cell.open{ background:var(--orange-l); color:var(--ok); border-color:rgba(212,98,42,.2); cursor:pointer; }
-    .cal-cell.open.is-sun{ color:var(--err); }
-    .cal-cell.open.is-sat{ color:var(--orange-d); }
-    .cal-cell.open.is-holiday{ color:var(--err); font-weight:700; }
-    .cal-cell.open.is-workday{ color:var(--ink) !important; }
-    .cal-cell.selected{ background:var(--orange); color:#fff; border-color:var(--orange); }
-    .cal-cell.past,.cal-cell.closed{ color:var(--ink-3); }
-    .cal-cell.is-sun:not(.open):not(.past):not(.selected){ color:var(--err); }
-    .cal-cell.is-sat:not(.open):not(.past):not(.selected){ color:var(--orange); }
-    .cal-cell.is-holiday:not(.open):not(.past):not(.selected){ color:var(--err); font-weight:700; }
-    .cal-cell.is-workday{ color:var(--ink) !important; }
-    .cal-day-header{ font-size:9px; font-weight:700; color:var(--ink-3); text-align:center; padding:4px 0; }
-    .cal-day-header.sun{ color:var(--err); }
-    .cal-day-header.sat{ color:var(--orange); }
-
-    .field-wrap{ margin-bottom:14px; }
-    .field-label{ font-size:10px; font-weight:700; color:var(--ink-2); letter-spacing:.1em; text-transform:uppercase; margin-bottom:7px; display:block; }
-    .field{ width:100%; border:1px solid var(--border); border-radius:8px; padding:11px 13px; font-size:14px; font-family:'Noto Sans TC',sans-serif; color:var(--ink); background:var(--paper); transition:border-color .15s,background .15s; }
-    .field:focus{ outline:none; border-color:var(--orange); background:#fff; }
-
-    .check-row{ display:flex; align-items:center; gap:12px; padding:12px 0; cursor:pointer; }
-    .check-box{ width:22px; height:22px; border-radius:6px; border:1.5px solid var(--border); background:var(--paper); flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all .15s; }
-    .check-box.checked{ background:var(--orange); border-color:var(--orange); }
-
-    .slot-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-    .slot-btn{ padding:13px; border-radius:8px; border:1px solid var(--border); background:var(--paper); color:var(--ink); font-size:14px; font-weight:500; font-family:'Noto Sans TC',sans-serif; cursor:pointer; text-align:center; transition:all .12s; }
-    .slot-btn.selected{ background:var(--orange); border-color:var(--orange); color:#fff; font-weight:700; }
-
-    .btn{ display:flex; align-items:center; justify-content:center; gap:7px; border:none; border-radius:8px; font-family:'Noto Sans TC',sans-serif; font-weight:700; font-size:14px; cursor:pointer; transition:all .12s; width:100%; padding:13px 20px; }
-    .btn:disabled{ opacity:0.6; cursor:not-allowed; }
-    .btn-primary{ background:var(--orange); color:#fff; }
-    .btn-secondary{ background:var(--warm); color:var(--ink); }
-    .btn-success{ background:var(--ok); color:#fff; }
-    .btn-icon{ background:var(--paper); color:var(--ink-2); border:1px solid var(--border); width:34px; height:34px; padding:0; border-radius:8px; flex-shrink:0; }
-    .btn-danger-sm{ background:transparent; color:var(--err); border:1px solid rgba(184,65,65,.2); width:auto; padding:9px 14px; font-size:13px; }
-
-    /* 🚨 顧客端取消預約按鈕樣式 */
-    .btn-cancel-appt{ display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:6px; background:rgba(184,65,65,.08); color:var(--err); border:1px solid rgba(184,65,65,.2); font-size:10px; font-weight:700; cursor:pointer; font-family:'Noto Sans TC',sans-serif; transition:all .12s; }
-    .btn-cancel-appt:active{ transform:scale(.94); background:var(--err); color:#fff; }
-
-    .counter{ display:flex; align-items:center; gap:16px; }
-    .counter-val{ font-size:24px; font-weight:700; color:var(--orange); min-width:28px; text-align:center; font-family:monospace; }
-    .counter-unit{ font-size:12px; color:var(--ink-3); }
-
-    .cat-item{ border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:8px; }
-    .cat-item-head{ display:flex; align-items:center; justify-content:space-between; padding:13px 15px; cursor:pointer; background:var(--paper); }
-    .cat-avatar{ width:38px; height:38px; border-radius:9px; background:var(--warm); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-    .cat-name{ font-weight:700; font-size:14px; color:var(--ink); }
-    .cat-meta{ font-size:11px; color:var(--ink-2); margin-top:2px; }
-    .cat-gender-tag{ display:inline-block; font-size:9px; font-weight:700; padding:2px 7px; border-radius:10px; letter-spacing:.05em; background:var(--orange-l); color:var(--orange-d); margin-left:6px; }
-    .cat-body{ padding:15px; border-top:1px solid var(--border); background:#fff; }
-
-    .cat-select-item{ display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-radius:8px; border:1px solid var(--border); margin-bottom:7px; cursor:pointer; background:var(--paper); transition:all .12s; }
-    .cat-select-item.selected{ background:var(--orange-l); border-color:rgba(212,98,42,.3); }
-    .cat-check{ width:20px; height:20px; border-radius:5px; border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .15s; }
-    .cat-check.checked{ background:var(--orange); border-color:var(--orange); }
-
-    .confirm-table{ background:var(--paper); border-radius:8px; overflow:hidden; }
-    .confirm-row{ display:flex; justify-content:space-between; align-items:flex-start; padding:11px 14px; border-bottom:1px solid var(--border); gap:12px; }
-    .confirm-row:last-child{ border-bottom:none; }
-    .confirm-key{ font-size:11px; color:var(--ink-3); font-weight:500; white-space:nowrap; padding-top:1px; }
-    .confirm-val{ font-size:13px; font-weight:700; color:var(--ink); text-align:right; word-break:break-word; }
-
-    .success-wrap{ text-align:center; padding:36px 20px; }
-    .success-circle{ width:72px; height:72px; border-radius:50%; background:var(--ok-l); display:flex; align-items:center; justify-content:center; margin:0 auto 20px; }
-    .success-title{ font-family:'Noto Serif TC',serif; font-size:19px; font-weight:600; color:var(--ink); margin-bottom:8px; }
-    .success-sub{ font-size:12px; color:var(--ink-2); line-height:1.9; }
-
-    .empty{ text-align:center; padding:36px 20px; color:var(--ink-3); }
-    .empty-title{ font-size:13px; margin-top:10px; }
-    .empty-sub{ font-size:11px; margin-top:4px; }
-
-    .divider{ height:1px; background:var(--border); margin:14px 0; }
-    .spin{ animation:spin .8s linear infinite; }
+    .spin{ animation:spin .7s linear infinite; }
     @keyframes spin{ to{ transform:rotate(360deg); } }
 
-    .bottom-nav{ position:fixed; bottom:0; left:0; width:100%; background:rgba(250,247,242,.94); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-top:1px solid var(--border); z-index:100; padding-bottom:env(safe-area-inset-bottom,0); }
-    .nav-inner{ display:flex; justify-content:space-around; max-width:480px; margin:0 auto; padding:6px 0 8px; }
-    .nav-item{ display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 20px; border-radius:10px; cursor:pointer; transition:all .15s; }
-    .nav-label{ font-size:10px; font-weight:700; letter-spacing:.04em; color:var(--ink-3); }
-    .nav-item.active .nav-label{ color:var(--orange); }
-    .nav-icon{ color:var(--ink-3); }
-    .nav-item.active .nav-icon{ color:var(--orange); }
+    /* ── Toast ── */
+    .toast{ position:fixed; top:16px; left:50%; transform:translateX(-50%); padding:10px 18px; border-radius:8px; font-size:12px; font-weight:600; z-index:160; white-space:nowrap; box-shadow:0 4px 16px rgba(0,0,0,.15); }
+    .toast.ok{ background:var(--ink); color:#fff; }
+    .toast.err{ background:var(--err); color:#fff; }
+    .fade-enter-active,.fade-leave-active{ transition:opacity .18s,transform .18s; }
+    .fade-enter-from,.fade-leave-to{ opacity:0; transform:translateX(-50%) translateY(-6px); }
 
-    .refresh-btn{ background:none; border:none; font-size:11px; color:var(--ink-3); cursor:pointer; display:inline-flex; align-items:center; gap:5px; padding:5px 0; font-family:'Noto Sans TC',sans-serif; }
-    .seg-control{ display:flex; background:var(--warm); border-radius:8px; padding:3px; gap:3px; }
-    .seg-btn{ flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:9px 8px; border-radius:6px; border:none; background:transparent; font-family:'Noto Sans TC',sans-serif; font-size:13px; font-weight:500; color:var(--ink-2); cursor:pointer; transition:all .15s; }
-    .seg-btn.active{ background:var(--card); color:var(--ink); font-weight:700; box-shadow:0 1px 4px rgba(42,32,20,.12); }
+    /* ── Confirm Modal ── */
+    .modal-bg{ position:fixed; inset:0; background:rgba(26,35,50,.55); backdrop-filter:blur(4px); z-index:180; display:flex; align-items:flex-end; justify-content:center; padding:0 0 env(safe-area-inset-bottom,0); }
+    .modal-box{ background:var(--card); border-radius:18px 18px 0 0; padding:24px 20px 32px; width:100%; max-width:480px; }
+    .modal-title{ font-family:'Noto Serif TC',serif; font-size:16px; font-weight:600; color:var(--ink); margin-bottom:8px; }
+    .modal-msg{ font-size:13px; color:var(--ink-2); line-height:1.7; margin-bottom:22px; }
+    .modal-actions{ display:flex; gap:10px; }
+
+    /* ── Header ── */
+    .app-header{ background:var(--indigo); color:#fff; padding:20px 20px 56px; }
+    .header-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+    .header-brand{ font-family:'Noto Serif TC',serif; font-size:16px; font-weight:700; letter-spacing:.08em; color:#fff; }
+    .header-badge{ font-size:9px; background:var(--orange); color:#fff; padding:2px 8px; border-radius:10px; font-weight:700; letter-spacing:.06em; }
+    .header-logout{ font-size:11px; color:rgba(255,255,255,.4); background:none; border:none; cursor:pointer; font-family:'Noto Sans TC',sans-serif; }
+    .stat-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+    .stat-card{ background:rgba(255,255,255,.08); border-radius:10px; padding:12px 14px; border:1px solid rgba(255,255,255,.1); }
+    .stat-label{ font-size:9px; color:rgba(255,255,255,.45); letter-spacing:.1em; text-transform:uppercase; margin-bottom:5px; }
+    .stat-val{ font-size:20px; font-weight:700; color:#fff; font-family:monospace; line-height:1; }
+    .stat-unit{ font-size:10px; color:rgba(255,255,255,.45); margin-left:2px; }
+    .stat-accent .stat-val{ color:var(--orange); }
+
+    .main{ padding:0 16px; max-width:480px; margin:0 auto; }
+    .pull-up{ margin-top:-28px; }
+
+    /* ── 卡片 ── */
+    .card{ background:var(--card); border-radius:12px; border:1px solid var(--border); margin-bottom:12px; overflow:hidden; }
+    .card-head{ padding:14px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+    .card-title{ font-size:13px; font-weight:700; color:var(--ink); display:flex; align-items:center; gap:7px; }
+    .card-title svg{ color:var(--indigo-l); flex-shrink:0; }
+    .card-body{ padding:14px 16px; }
+    .card-accent-indigo{ border-left:3px solid var(--indigo); }
+    .card-accent-amber{ border-left:3px solid var(--amber); }
+    .card-accent-ok{ border-left:3px solid var(--ok); }
+
+    /* ── Badge ── */
+    .badge{ display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; border-radius:9px; font-size:10px; font-weight:700; padding:0 5px; }
+    .badge-orange{ background:var(--orange); color:#fff; }
+
+    /* ── 列表項目 ── */
+    .list-item{ padding:13px 16px; border-bottom:1px solid var(--border); display:flex; align-items:flex-start; gap:10px; cursor:pointer; transition:background .12s; }
+    .list-item:last-child{ border-bottom:none; }
+    .list-item:active{ background:var(--warm); }
+    .list-item-main{ flex:1; min-width:0; }
+    .list-date{ font-size:13px; font-weight:700; color:var(--ink); margin-bottom:3px; }
+    .list-meta{ font-size:11px; color:var(--ink-2); line-height:1.6; }
+    .list-name{ font-size:12px; font-weight:600; color:var(--indigo); }
+    .list-actions{ display:flex; gap:6px; align-items:center; flex-shrink:0; }
+
+    /* ── 按鈕 ── */
+    .btn{ display:inline-flex; align-items:center; justify-content:center; gap:6px; border:none; border-radius:8px; font-family:'Noto Sans TC',sans-serif; font-weight:700; cursor:pointer; transition:all .12s; }
+    .btn:active:not(:disabled){ transform:scale(.97); opacity:.9; }
+    .btn:disabled{ opacity:0.55; cursor:not-allowed; }
+    .btn-primary{ background:var(--indigo); color:#fff; padding:12px 16px; font-size:13px; width:100%; }
+    .btn-ok{ background:var(--ok); color:#fff; padding:12px 16px; font-size:13px; width:100%; }
+    .btn-ghost{ background:transparent; color:var(--ink-2); border:1px solid var(--border); padding:9px 14px; font-size:12px; }
+    .btn-danger{ background:var(--err-l); color:var(--err); border:1px solid rgba(184,65,65,.2); padding:9px 14px; font-size:12px; }
+    .btn-icon{ background:var(--warm); color:var(--ink-2); border:1px solid var(--border); width:32px; height:32px; border-radius:7px; padding:0; flex-shrink:0; }
+    .btn-sm{ padding:7px 12px; font-size:11px; border-radius:6px; }
+    .btn-link{ background:none; color:var(--orange); font-size:11px; font-weight:700; border:none; padding:4px 0; cursor:pointer; font-family:'Noto Sans TC',sans-serif; }
+    .btn-chat{ background:var(--ok-l); color:var(--ok); border:none; width:28px; height:28px; border-radius:7px; padding:0; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; font-size:13px; }
+    .btn-money{ background:var(--orange-l); color:var(--orange); border:none; width:28px; height:28px; border-radius:7px; padding:0; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; font-size:12px; font-weight:700; font-family:monospace; transition:all .12s; }
+    .btn-money:active{ background:var(--orange); color:#fff; transform:scale(.93); }
+
+    /* ── 表單 ── */
+    .field-wrap{ margin-bottom:13px; }
+    .field-label{ font-size:10px; font-weight:700; color:var(--ink-2); letter-spacing:.1em; text-transform:uppercase; margin-bottom:6px; display:block; }
+    .field{ width:100%; border:1px solid var(--border); border-radius:8px; padding:10px 12px; font-size:13px; font-family:'Noto Sans TC',sans-serif; color:var(--ink); background:var(--bg); transition:border-color .15s,background .15s; }
+    .field:focus{ outline:none; border-color:var(--indigo); background:#fff; }
+    .field::placeholder{ color:var(--ink-3); }
+    select.field{ appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7A8D' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; padding-right:32px; }
     .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+    .seg{ display:flex; background:var(--warm); border-radius:8px; padding:3px; gap:3px; }
+    .seg-btn{ flex:1; padding:9px 8px; border-radius:6px; border:none; background:transparent; font-family:'Noto Sans TC',sans-serif; font-size:12px; font-weight:500; color:var(--ink-2); cursor:pointer; transition:all .15s; display:flex; align-items:center; justify-content:center; gap:5px; }
+    .seg-btn.active-ok{ background:var(--ok-l); color:var(--ok); font-weight:700; box-shadow:0 1px 4px rgba(45,106,79,.12); border: 1px solid rgba(45,106,79,.15); }
+    .seg-btn.active-err{ background:var(--err-l); color:var(--err); font-weight:700; box-shadow:0 1px 4px rgba(184,65,65,.12); border: 1px solid rgba(184,65,65,.15); }
+
+    .client-card{ padding:13px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; cursor:pointer; }
+    .client-card:last-child{ border-bottom:none; }
+    .client-card:active{ background:var(--warm); }
+    .client-avatar{ width:40px; height:40px; border-radius:10px; background:var(--indigo-x); display:flex; align-items:center; justify-content:center; flex-shrink:0; color:var(--indigo-l); font-weight:700; font-size:14px; }
+    .client-name{ font-size:14px; font-weight:700; color:var(--ink); }
+    .client-uid{ font-size:10px; font-family:monospace; color:var(--ink-3); margin-top:2px; }
+    .client-bal{ font-size:13px; font-weight:700; font-family:monospace; }
+    .client-bal.pos{ color:var(--ok); }
+    .client-bal.zero{ color:var(--ink-3); }
+
+    .tag{ display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; }
+    .tag-past{ background:var(--warm); color:var(--ink-3); }
+
+    .cal-admin{ display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
+    .cal-admin-cell{ border-radius:6px; padding:4px 2px; min-height:52px; background:var(--card); border:1px solid var(--border); }
+    .cal-admin-day{ font-size:10px; font-weight:700; color:var(--ink-2); padding:2px 4px; }
+    .cal-admin-slot{ font-size:9px; padding:1px 4px; border-radius:3px; margin-top:2px; text-align:center; font-weight:700; }
+    .cal-admin-slot.open{ background:var(--ok-l); color:var(--ok); }
+    .cal-admin-slot.closed{ color:var(--ink-3); }
+    .cal-admin-today{ background:rgba(212,98,42,.06); border-color:rgba(212,98,42,.25); }
+    .cal-admin-holiday .cal-admin-day{ color:var(--err); }
+    .cal-admin-past .cal-admin-cell-inner{ opacity:.6; }
+    .cal-slot-past{ background:rgba(150,150,150,.1); color:#aaa; }
+    .cal-slot-past-dot{ color:#bbb; }
+
+    .month-nav{ display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--border); }
+    .month-label{ font-size:13px; font-weight:600; color:var(--ink); }
+
+    .search-input{ flex:1; border:1px solid var(--border); border-radius:7px; padding:8px 11px; font-size:13px; font-family:'Noto Sans TC',sans-serif; color:var(--ink); background:var(--bg); }
+    .search-input:focus{ outline:none; border-color:var(--indigo); }
+
+    .tab-row{ display:flex; border-bottom:1px solid var(--border); }
+    .tab-btn{ flex:1; padding:11px 8px; font-size:12px; font-weight:700; font-family:'Noto Sans TC',sans-serif; border:none; background:transparent; color:var(--ink-3); cursor:pointer; border-bottom:2px solid transparent; transition:all .15s; }
+    .tab-btn.active{ color:var(--indigo); border-bottom-color:var(--indigo); }
+
+    .info-table{ background:var(--bg); border-radius:8px; overflow:hidden; margin-bottom:14px; }
+    .info-row{ display:flex; justify-content:space-between; align-items:flex-start; padding:10px 13px; border-bottom:1px solid var(--border); gap:10px; }
+    .info-row:last-child{ border-bottom:none; }
+    .info-key{ font-size:11px; color:var(--ink-3); white-space:nowrap; padding-top:1px; }
+    .info-val{ font-size:13px; font-weight:600; color:var(--ink); text-align:right; word-break:break-word; }
+
+    .quick-tags{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+    .quick-tag{ font-size:11px; padding:4px 10px; border-radius:14px; border:1px solid var(--border); background:var(--bg); color:var(--ink-2); cursor:pointer; font-family:'Noto Sans TC',sans-serif; transition:all .12s; }
+    .quick-tag:active{ background:var(--indigo-x); border-color:var(--indigo); color:var(--indigo); }
+
+    .fin-hero-card{ background:var(--indigo); color:#fff; border-radius:12px; padding:20px; margin-bottom:12px; position:relative; overflow:hidden; }
+    .fin-hero-label{ font-size:11px; color:rgba(255,255,255,.6); letter-spacing:.1em; text-transform:uppercase; margin-bottom:6px; }
+    .fin-hero-val{ font-size:32px; font-weight:700; font-family:monospace; color:#fff; line-height:1.2; }
+    .fin-hero-unit{ font-size:14px; color:rgba(255,255,255,.6); margin-left:4px; font-weight:400; }
+    
+    .fin-grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
+    .fin-sub-card{ background:var(--card); border-radius:10px; padding:14px 16px; border:1px solid var(--border); }
+    .fin-sub-label{ font-size:10px; color:var(--ink-3); letter-spacing:.08em; margin-bottom:4px; display:flex; align-items:center; gap:4px; }
+    .fin-sub-val{ font-size:18px; font-weight:700; font-family:monospace; color:var(--ink); }
+    
+    .val-pos{ color:var(--ok); }
+    .val-neg{ color:var(--err); }
+    .val-neutral{ color:var(--ink-3); }
+
+    .log-item{ display:flex; justify-content:space-between; align-items:center; padding:11px 16px; border-bottom:1px solid var(--border); }
+    .log-item:last-child{ border-bottom:none; }
+    .log-desc{ font-size:13px; color:var(--ink); font-weight:500; }
+    .log-time{ font-size:10px; color:var(--ink-3); margin-top:2px; font-family:monospace; }
+    .log-amount{ font-size:14px; font-weight:700; font-family:monospace; }
+    .log-amount.pos{ color:var(--ok); }
+    .log-amount.neg{ color:var(--err); }
+
+    .empty{ text-align:center; padding:32px 16px; color:var(--ink-3); }
+    .empty-title{ font-size:13px; margin-top:10px; }
+
+    .bottom-nav{ position:fixed; bottom:0; left:0; width:100%; background:rgba(244,246,248,.95); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-top:1px solid var(--border); z-index:100; padding-bottom:env(safe-area-inset-bottom,0); }
+    .nav-inner{ display:flex; justify-content:space-around; max-width:480px; margin:0 auto; padding:6px 0 8px; }
+    .nav-item{ display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 14px; border-radius:10px; cursor:pointer; position: relative; }
+    .nav-label{ font-size:10px; font-weight:700; color:var(--ink-3); letter-spacing:.03em; }
+    .nav-icon{ color:var(--ink-3); }
+    .nav-item.active .nav-label{ color:var(--indigo); }
+    .nav-item.active .nav-icon{ color:var(--indigo); }
+
+    .slot-chip{ display:inline-flex; align-items:center; gap:5px; padding:5px 10px; border-radius:14px; border:1px solid var(--border); background:var(--bg); font-size:11px; font-weight:600; cursor:grab; color:var(--ink-2); transition:all .15s; margin:3px; user-select:none; }
+    .slot-chip.dragging{ opacity:.4; cursor:grabbing; }
+    .slot-chip.drag-over{ border-color:var(--indigo); background:var(--indigo-x); }
+    .slot-chip.active{ background:var(--indigo); border-color:var(--indigo); color:#fff; }
+    .slot-chip-del{ font-size:14px; line-height:1; color:var(--err); opacity:.6; }
+
+    .form-card{ background:var(--card); border-radius:12px; border:1px solid var(--border); border-top:3px solid var(--indigo); padding:16px; margin-bottom:12px; }
+    .form-title{ font-size:13px; font-weight:700; color:var(--indigo); margin-bottom:4px; }
+    .form-desc{ font-size:11px; color:var(--ink-3); margin-bottom:14px; }
+
+    .back-row{ display:flex; align-items:center; gap:10px; padding:12px 16px; border-bottom:1px solid var(--border); }
+    .back-title{ font-size:14px; font-weight:700; color:var(--ink); }
+    .back-sub{ font-size:11px; color:var(--ink-3); margin-top:2px; }
   </style>
 </head>
 <body>
 <div id="app" v-cloak>
 
-  <!-- 系統列 (正式進版: v260724.02) -->
-  <div :class="['sys-bar', isLineMode?'live':'dev']">
-    <span>v260724.02 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
-    <span v-if="globalLoading" class="sync-badge">
-      <svg class="spin" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-      同步中
-    </span>
+  <!-- 登入畫面 -->
+  <div v-if="!isAuthenticated" class="login-screen">
+    <div class="login-logo">洗咧喵</div>
+    <div class="login-sub">後台管理系統</div>
+    <div class="login-box">
+      <label class="login-label">管理密碼</label>
+      <input type="password" v-model="passwordInput" @keyup.enter="verifyPassword" class="login-input" placeholder="••••••">
+      <button class="login-btn" @click="verifyPassword" :disabled="loading">{{ loading ? '驗證中...' : '進入後台' }}</button>
+    </div>
   </div>
 
   <!-- Toast -->
@@ -202,836 +263,1330 @@
     <div v-if="toast.show" :class="['toast', toast.isError?'err':'ok']">{{ toast.message }}</div>
   </transition>
 
-  <!-- Header -->
-  <header class="app-header">
-    <div class="header-eyebrow">到府美容服務</div>
-    <h1 class="header-title">洗咧喵</h1>
-    <p class="header-sub">翻閱農民曆選吉日 · 喵寶在家洗浴</p>
-  </header>
-
-  <!-- 會員卡 -->
-  <div class="member-card-wrap">
-    <div class="member-card">
-      <div class="member-card-left">
-        <div class="eyebrow">喵星卡號</div>
-        <div v-if="myProfile.uid" class="uid">{{ myProfile.uid }}</div>
-        <div v-else-if="authFailed" class="member-loading" style="color:var(--err); font-weight:700;">身分失效</div>
-        <div v-else class="member-loading">驗證中⋯</div>
-      </div>
-      <div class="member-card-right">
-        <div class="bal-label">儲值餘額</div>
-        <div>
-          <span class="bal-val">{{ myProfile.balance !== null ? myProfile.balance : '──' }}</span>
-          <span class="bal-unit">元</span>
-        </div>
+  <!-- Confirm Modal -->
+  <div v-if="confirmModal.show" class="modal-bg" @click.self="confirmModal.show=false">
+    <div class="modal-box">
+      <div class="modal-title">{{ confirmModal.title }}</div>
+      <div class="modal-msg">{{ confirmModal.message }}</div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" style="flex:1;" @click="confirmModal.show=false">取消</button>
+        <button class="btn btn-danger" style="flex:1;" @click="executeConfirmAction">確認</button>
       </div>
     </div>
   </div>
 
-  <!-- 主內容 -->
-  <div class="main">
-    <div class="section-gap" style="height:20px;"></div>
+  <template v-if="isAuthenticated">
 
-    <div v-if="authFailed" class="card" style="border:1px solid var(--err); border-left:4px solid var(--err); text-align:center; padding:32px 20px;">
-      <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="var(--err)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:12px;opacity:0.8;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      <div class="section-title" style="color:var(--err); margin-bottom:10px;">登入憑證已過期或失效</div>
-      <div style="font-size:12px; color:var(--ink-2); margin-bottom:24px; line-height:1.7;">
-        為保護您的資料安全，我們阻擋了異常的連線。<br>請點擊下方按鈕重新驗證 LINE 身分。
+    <!-- Header -->
+    <header class="app-header">
+      <div style="font-family:monospace;font-size:10px;color:rgba(255,255,255,.4);margin-bottom:12px;letter-spacing:.04em;">
+        v260724.05 · ADMIN · {{ activeTab }}
       </div>
-      <button class="btn btn-primary" @click="forceRelogin" style="background:var(--err); margin:0 auto; max-width:220px; box-shadow:0 4px 14px rgba(184,65,65,.25);">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v6h6"/><path d="M21 12A9 9 0 0 0 6 5.3L3 8"/><path d="M21 22v-6h-6"/><path d="M3 12a9 9 0 0 0 15 6.7l3-2.7"/></svg>
-        重新登入 LINE
-      </button>
-    </div>
-
-    <!-- ════ 良辰吉日 ════ -->
-    <div v-if="currentTab==='booking' && !authFailed">
-
-      <!-- 步驟1：選日期 -->
-      <div v-if="bookStep===1" class="card card-accent">
-        <div class="section-header">
-          <span class="section-title">良辰吉日</span>
-          <span class="section-sub">橙色格子可選</span>
+      <div class="header-top">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span class="header-brand">洗咧喵</span>
+          <!-- ⚡ 頂部非阻塞 Sync Pill -->
+          <span v-if="loading" class="sync-pill">
+            <svg class="spin" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            連線中
+          </span>
         </div>
-        <div class="month-nav">
-          <button class="nav-arrow btn-icon" @click="moveCalMonth(-1)">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-          </button>
-          <span class="month-label">{{ calMonthLabel }}</span>
-          <button class="nav-arrow btn-icon" @click="moveCalMonth(1)">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-          </button>
-        </div>
-        <div v-if="calendarDates.length===0" style="text-align:center;padding:28px 0;">
-          <svg class="spin" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-        </div>
-        <div v-else>
-          <!-- 星期標題列 -->
-          <div class="cal-grid" style="margin-bottom:4px;">
-            <div class="cal-day-header sun">日</div>
-            <div class="cal-day-header">一</div>
-            <div class="cal-day-header">二</div>
-            <div class="cal-day-header">三</div>
-            <div class="cal-day-header">四</div>
-            <div class="cal-day-header">五</div>
-            <div class="cal-day-header sat">六</div>
-          </div>
-          <!-- 空白填充 -->
-          <div class="cal-grid">
-            <div v-for="e in calendarDates[0].emptyBefore" :key="'e'+e" class="cal-cell" style="border-color:transparent;background:transparent;"></div>
-            <div v-for="d in calendarDates" :key="d.dateStr"
-              :class="['cal-cell',
-                selectedDate===d.dateStr?'selected':d.isClickable?'open':d.isPast?'past':'closed',
-                d.isSunday?'is-sun':'',
-                d.isSaturday?'is-sat':'',
-                d.isHolidayMark?'is-holiday':'',
-                d.isWorkday?'is-workday':''
-              ]"
-              @click="selectDate(d)">
-              <span class="date-num" style="position:relative;">
-                {{ d.dayNum }}
-                <span v-if="d.isToday" style="position:absolute;top:-5px;right:-8px;font-size:7px;color:var(--orange-d);">★</span>
-              </span>
-              <span class="date-dot" v-if="d.isClickable && selectedDate!==d.dateStr"></span>
-            </div>
-          </div>
-        </div>
-        <div v-if="selectedDate" style="margin-top:16px;">
-          <button class="btn btn-primary" @click="bookStep=2">
-            {{ selectedDate }} — 選擇時辰
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-          </button>
-        </div>
-        <div style="margin-top:10px;text-align:center;" v-if="myProfile.uid">
-          <button class="refresh-btn" @click="refreshCalendar" :disabled="refreshing">
-            <svg :class="refreshing?'spin':''" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-            {{ refreshing?'更新中…':'更新時段' }}
-          </button>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="header-badge">後台</span>
+          <button class="header-logout" @click="logout">登出</button>
         </div>
       </div>
 
-      <!-- 步驟2：選時辰 -->
-      <div v-if="bookStep===2" class="card card-accent">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-          <button class="btn btn-icon" @click="bookStep=1">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-          </button>
+      <!-- ⚡ 防呆升級：三個統計數字預設顯示 ──，防止未讀取前先顯 0 -->
+      <div class="stat-row">
+        <div class="stat-card stat-accent">
+          <div class="stat-label">待確認</div>
           <div>
-            <div class="section-title">選擇時辰</div>
-            <div style="font-size:11px;color:var(--ink-3);margin-top:2px;">{{ selectedDate }}</div>
+            <span class="stat-val">{{ pendingCountDisplay }}</span>
+            <span class="stat-unit">件</span>
           </div>
         </div>
-        <div v-if="availableSlots.length===0" class="empty">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto;opacity:.35;"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-          <div class="empty-title">此日暫無可選時段</div>
-        </div>
-        <div v-else class="slot-grid">
-          <div v-for="slot in availableSlots" :key="slot"
-            :class="['slot-btn', selectedSlot===slot?'selected':'']"
-            @click="selectedSlot=slot; bookStep=3">{{ slot }}</div>
-        </div>
-      </div>
-
-      <!-- 步驟3：選喵寶 -->
-      <div v-if="bookStep===3" class="card card-accent">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-          <button class="btn btn-icon" @click="bookStep=2">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-          </button>
+        <div class="stat-card">
+          <div class="stat-label">今後排程</div>
           <div>
-            <div class="section-title">選擇喵寶</div>
-            <div style="font-size:11px;color:var(--ink-3);margin-top:2px;">{{ selectedDate }} · {{ selectedSlot }}</div>
+            <span class="stat-val">{{ scheduleCountDisplay }}</span>
+            <span class="stat-unit">筆</span>
           </div>
         </div>
-        <div v-if="myCats.length===0" class="empty">
-          <div class="empty-title">尚未登記喵寶</div>
-          <div class="empty-sub">請先至「護照」頁新增</div>
-        </div>
-        <div v-else style="margin-bottom:16px;">
-          <div v-for="cat in myCats" :key="cat.name"
-            :class="['cat-select-item', selectedCats.includes(cat.name)?'selected':'']"
-            @click="toggleCatSelect(cat.name)">
-            <div style="display:flex;align-items:center;gap:10px;">
-              <div class="cat-avatar" style="width:32px;height:32px;">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" :stroke="selectedCats.includes(cat.name)?'var(--orange)':'var(--ink-3)'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-              </div>
-              <div>
-                <div style="font-weight:700;font-size:13px;">{{ cat.name }}</div>
-                <div style="font-size:11px;color:var(--ink-2);">{{ cat.breed }}·{{ cat.weight }}kg</div>
-              </div>
-            </div>
-            <div :class="['cat-check', selectedCats.includes(cat.name)?'checked':'']">
-              <svg v-if="selectedCats.includes(cat.name)" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
+        <div class="stat-card">
+          <div class="stat-label">客戶數</div>
+          <div>
+            <span class="stat-val">{{ clientCountDisplay }}</span>
+            <span class="stat-unit">戶</span>
           </div>
-        </div>
-        <div class="divider"></div>
-        <div class="field-wrap">
-          <label class="field-label">洗浴台數</label>
-          <div class="counter">
-            <button class="btn btn-icon" @click="bookCatCount=Math.max(1,bookCatCount-1)">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            </button>
-            <span class="counter-val">{{ bookCatCount }}</span>
-            <button class="btn btn-icon" @click="bookCatCount++">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="12" y2="12"/></svg>
-            </button>
-            <span class="counter-unit">台 已勾 {{ selectedCats.length }} 隻</span>
-          </div>
-        </div>
-        <div class="field-wrap">
-          <label class="field-label">備註（選填）</label>
-          <input v-model="bookNotes" class="field" placeholder="特殊需求或叮嚀">
-        </div>
-        <button class="btn btn-primary" @click="bookStep=4">
-          下一步 — 確認預約
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
-      </div>
-
-      <!-- 步驟4：確認 -->
-      <div v-if="bookStep===4" class="card card-accent">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-          <button class="btn btn-icon" @click="bookStep=3">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-          </button>
-          <div class="section-title">確認預約資訊</div>
-        </div>
-        <div class="confirm-table">
-          <div class="confirm-row"><span class="confirm-key">良辰吉日</span><span class="confirm-val">{{ selectedDate }}</span></div>
-          <div class="confirm-row"><span class="confirm-key">時辰</span><span class="confirm-val">{{ selectedSlot }}</span></div>
-          <div class="confirm-row"><span class="confirm-key">喵寶</span><span class="confirm-val">{{ selectedCats.join('、') || '（未指定）' }}</span></div>
-          <div class="confirm-row"><span class="confirm-key">台數</span><span class="confirm-val">{{ bookCatCount }} 台</span></div>
-          <div v-if="bookNotes" class="confirm-row"><span class="confirm-key">備註</span><span class="confirm-val">{{ bookNotes }}</span></div>
-        </div>
-        <div style="font-size:11px;color:var(--ink-3);text-align:center;margin:14px 0 16px;line-height:1.8;">送出後由美容師確認時間<br>請留意 LINE 訊息通知</div>
-        <button class="btn btn-success" @click="submitBooking" :disabled="bookLoading">
-          {{ bookLoading?'送出中…':'送出預約申請' }}
-        </button>
-      </div>
-
-      <!-- 步驟5：完成 -->
-      <div v-if="bookStep===5" class="card">
-        <div class="success-wrap">
-          <div class="success-circle">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          </div>
-          <div class="success-title">預約申請已送出</div>
-          <div class="success-sub" style="margin-bottom:24px;">美容師收到後會與您確認時間<br>請留意 LINE 訊息通知</div>
-          <button class="btn btn-secondary" @click="resetBook" style="max-width:160px;margin:0 auto;">返回日曆</button>
         </div>
       </div>
+    </header>
 
-      <!-- 我的預約（加入待確認刪除功能）-->
-      <div v-if="bookStep===1 && myProfile.uid" style="margin-top:4px;">
-        <div class="card card-accent">
-          <div class="section-header" style="cursor:pointer;margin-bottom:0;" @click="apptExpanded=!apptExpanded">
-            <span class="section-title" style="font-size:13px;">我的預約</span>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span v-if="myAppointments.length" style="font-size:11px;color:var(--ink-3);">{{ myAppointments.length }} 筆</span>
-              <svg :style="apptExpanded?'transform:rotate(180deg)':''" style="transition:.15s;color:var(--ink-3);" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    <div class="main pull-up">
+
+            <!-- ════ TAB：家長（客戶檔案 + 金流登記）════ -->
+      <!-- ════ TAB2：客戶檔案 ════ -->
+      <div v-if="activeTab==='tab-clients'">
+        <div v-if="!t2SelectUid">
+          <div class="card" style="margin-bottom:0;border-radius:12px 12px 0 0;border-bottom:none;">
+            <div style="display:flex;align-items:center;gap:8px;padding:12px 14px;">
+              <input type="text" v-model="t2SearchQuery" placeholder="搜尋姓名或卡號…" class="search-input" style="border:none;background:var(--bg);padding:8px 12px;">
             </div>
           </div>
-          <div v-show="apptExpanded" style="margin-top:12px;">
-            <div v-if="apptLoading" style="text-align:center;padding:16px;">
-              <svg class="spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-            </div>
-            <div v-else-if="myAppointments.length===0" style="text-align:center;padding:16px;font-size:12px;color:var(--ink-3);">近 3 個月無預約紀錄</div>
+          <div class="card" style="border-radius:0 0 12px 12px;padding:0;">
+            <div v-if="filteredClients.length===0" class="empty"><div class="empty-title">查無符合客戶</div></div>
             <div v-else>
-              <div v-for="appt in myAppointments" :key="appt.rowIndex+'_'+appt.source"
-                :style="{borderLeft: appt.status==='pending'?'3px solid var(--orange)': appt.status==='confirmed'?'3px solid var(--ok)':'3px solid var(--ink-3)'}"
-                style="padding:11px 2px;border-bottom:1px solid var(--border);">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-                  <span style="font-size:13px;font-weight:700;color:var(--ink);">{{ appt.date }} · {{ appt.time }}</span>
-                  <div style="display:flex;align-items:center;gap:6px;">
-                    <!-- 🚨 新增：只有待確認狀態，才顯示『× 取消』按鈕 -->
-                    <button v-if="appt.status==='pending'" class="btn-cancel-appt" @click.stop="cancelMyAppointment(appt)">
-                      × 取消
-                    </button>
-                    <span :style="{background: appt.status==='pending'?'var(--orange-l)': appt.status==='confirmed'?'var(--ok-l)':'var(--warm)', color: appt.status==='pending'?'var(--orange-d)': appt.status==='confirmed'?'var(--ok)':'var(--ink-3)'}"
-                      style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;">
-                      {{ appt.status==='pending'?'待確認': appt.status==='confirmed'?'已確認':'已完成' }}
-                    </span>
+              <div v-for="c in filteredClients" :key="c.uid" class="client-card" @click="openClient(c.uid)">
+                <div class="client-avatar">{{ (c.name||'?')[0] }}</div>
+                <div style="flex:1;min-width:0;">
+                  <div class="client-name">{{ c.name }}</div>
+                  <div class="client-uid">{{ c.uid }}</div>
+                </div>
+                <div>
+                  <div :class="['client-bal', c.balance>0?'pos':'zero']">{{ hasLoadedClients ? c.balance : '──' }}</div>
+                  <div style="font-size:10px;color:var(--ink-3);text-align:right;">元</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-else>
+          <!-- 客戶詳情：頂部資訊卡 -->
+          <div style="background:var(--indigo);padding:20px 20px 28px;border-radius:0 0 0 0;position:relative;overflow:hidden;">
+            <div style="position:absolute;right:-20px;bottom:-20px;width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,.06);pointer-events:none;"></div>
+            <button class="btn btn-icon" @click="t2SelectUid=''" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2);color:#fff;margin-bottom:14px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <div style="color:rgba(255,255,255,.55);font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px;font-family:monospace;">{{ t2Profile.info.uid }}</div>
+            <div style="color:#fff;font-size:22px;font-weight:700;margin-bottom:12px;font-family:'Noto Serif TC',serif;letter-spacing:.04em;">{{ t2Profile.info.name || '—' }}</div>
+            <div style="display:flex;align-items:baseline;gap:6px;">
+              <span style="color:rgba(255,255,255,.55);font-size:11px;letter-spacing:.08em;">剩餘餘額</span>
+              <span style="color:var(--orange);font-size:24px;font-weight:700;font-family:monospace;">{{ t2Loaded ? t2Profile.info.balance : '──' }}</span>
+              <span style="color:rgba(255,255,255,.4);font-size:12px;">元</span>
+            </div>
+          </div>
+
+          <!-- 金流登記（綁定此客戶 ID，id 錨點供快捷鍵跳轉） -->
+          <div class="card card-accent-indigo" id="flow-anchor">
+            <div class="card-head">
+              <div class="card-title">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                金流登記
+              </div>
+              <span style="font-size:11px;color:var(--indigo-l);font-family:monospace;">{{ t2Profile.info.uid }}</span>
+            </div>
+            <div class="card-body">
+              <div class="seg" style="margin-bottom:13px;">
+                <button :class="['seg-btn', t1Type==='minus'?'active-err':'']" @click="t1Type='minus'">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  扣款
+                </button>
+                <button :class="['seg-btn', t1Type==='plus'?'active-ok':'']" @click="t1Type='plus'">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  儲值
+                </button>
+              </div>
+              <div class="field-wrap">
+                <label class="field-label">金額（元）</label>
+                <input type="number" v-model.number="t1Amount" inputmode="numeric" class="field" style="font-size:20px;font-family:monospace;font-weight:700;" placeholder="0">
+              </div>
+              <div class="field-wrap">
+                <label class="field-label">說明</label>
+                <input type="text" v-model="t1Desc" class="field" placeholder="消費或儲值備註">
+                <div class="quick-tags">
+                  <span v-for="tag in ['洗浴','儲值','美容']" :key="tag" class="quick-tag" @click="t1Desc=tag">{{ tag }}</span>
+                </div>
+              </div>
+              <button class="btn btn-primary" @click="submitT1Bound" :disabled="loading">
+                {{ loading ? '處理中…' : '確認交易' }}
+              </button>
+            </div>
+          </div>
+          <div class="card card-accent-indigo">
+            <div class="card-head"><div class="card-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              聯絡資料
+            </div></div>
+            <div class="card-body">
+              <div class="info-table">
+                <div class="info-row"><span class="info-key">電話</span><span class="info-val" style="font-family:monospace;">{{ t2Profile.info.phone||'—' }}</span></div>
+                <div class="info-row"><span class="info-key">地址</span><span class="info-val">{{ t2Profile.info.address||'—' }}</span></div>
+                <div class="info-row"><span class="info-key">電梯</span><span class="info-val">{{ t2Profile.info.elevator||'—' }}</span></div>
+                <div class="info-row"><span class="info-key">停車</span><span class="info-val">{{ t2Profile.info.parking||'—' }}</span></div>
+              </div>
+              <div class="field-wrap"><label class="field-label">內部備忘錄</label><textarea v-model="t2Profile.info.note" rows="2" class="field" placeholder="對洗劑敏感、需要輕柔處理…"></textarea></div>
+              <button class="btn btn-ghost btn-sm" @click="saveNote" :disabled="loading">{{ loading ? '儲存中...' : '儲存備忘錄' }}</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><div class="card-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              登記喵寶 ({{ t2Profile.cats.length }})
+            </div></div>
+            <div v-if="t2Profile.cats.length===0" class="empty"><div class="empty-title">尚無喵寶護照</div></div>
+            <div v-else>
+              <div v-for="cat in t2Profile.cats" :key="cat.name" style="padding:11px 16px;border-bottom:1px solid var(--border);">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
+                  <span style="font-weight:700;font-size:13px;">{{ cat.name }}</span>
+                  <span class="tag tag-past">{{ cat.gender }}</span>
+                </div>
+                <div style="font-size:11px;color:var(--ink-2);">{{ cat.breed }} · {{ cat.weight }}kg<span v-if="cat.note"> · {{ cat.note }}</span></div>
+              </div>
+            </div>
+          </div>
+          <!-- 總儲值 / 總消費 摘要 -->
+          <div class="fin-grid-2" style="margin-bottom:12px;">
+            <div class="fin-sub-card">
+              <div class="fin-sub-label">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                累積儲值
+              </div>
+              <div class="fin-sub-val val-pos">{{ t2Loaded ? '+' + (t2Profile.info.totalTopup||0) : '──' }}</div>
+            </div>
+            <div class="fin-sub-card">
+              <div class="fin-sub-label">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                累積消費
+              </div>
+              <div class="fin-sub-val val-neutral">{{ t2Loaded ? (t2Profile.info.totalConsume||0) : '──' }}</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                交易明細
+              </div>
+              <button class="btn-link" @click="recalc" :disabled="loading">{{ loading ? '計算中…' : '重算餘額' }}</button>
+            </div>
+            <div v-if="t2Profile.logs.length===0" class="empty"><div class="empty-title">無明細</div></div>
+            <div v-else style="max-height:280px;overflow-y:auto;">
+              <div v-for="log in t2Profile.logs" :key="log.rowIndex" class="log-item">
+                <div style="flex:1;">
+                  <div class="log-desc">{{ log.desc }}</div>
+                  <div class="log-time">{{ log.time }}</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span :class="['log-amount', log.amount>=0?'pos':'neg']">{{ log.amount>=0?'+':'' }}{{ log.amount }}</span>
+                  <button class="btn btn-icon" style="width:26px;height:26px;" @click="delLog(log)">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--err)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card" style="border:1px solid rgba(184,65,65,.2);border-left:3px solid var(--err);">
+            <div class="card-body">
+              <div style="font-size:12px;font-weight:700;color:var(--err);margin-bottom:4px;">刪除客戶資料</div>
+              <div style="font-size:11px;color:var(--ink-2);margin-bottom:12px;">永久刪除此客戶所有資料，操作無法復原。</div>
+              <button class="btn btn-danger btn-sm" @click="delClient" :disabled="loading">{{ loading ? '刪除中...' : '刪除此客戶' }}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ TAB：行程管理 ════ -->
+      <!-- ════ TAB3：行程管理 ════ -->
+      <div v-if="activeTab==='tab-schedule'">
+        <div class="card card-accent-amber">
+          <div class="card-head">
+            <div class="card-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 17z"/></svg>
+              待確認
+              <span v-if="bookingRequests.length" class="badge badge-orange">{{ bookingRequests.length }}</span>
+            </div>
+            <button class="btn-link" @click="loadScheduleTab" :disabled="loading">{{ loading ? "…" : "刷新" }}</button>
+          </div>
+          <div v-if="!hasLoadedBookings" style="text-align:center;padding:20px;">
+            <svg class="spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 6px;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            <div style="font-size:11px;color:var(--ink-3);">載入中…</div>
+          </div>
+          <div v-else-if="bookingRequests.length===0" class="empty" style="padding:20px;"><div class="empty-title">無待確認預約</div></div>
+          <div v-else>
+            <div v-for="(r,idx) in bookingRequests" :key="r.rowIndex" class="list-item" @click="pickBooking(idx)">
+              <div class="list-item-main">
+                <div class="list-date">{{ r.date }} · {{ r.time }}</div>
+                <div class="list-name">{{ r.name }}<span style="font-family:monospace;font-weight:400;color:var(--ink-3);font-size:10px;margin-left:5px;">{{ r.uid }}</span></div>
+                <div class="list-meta">{{ r.count }} 台 · {{ r.catDetail }}</div>
+                <div v-if="r.notes" style="font-size:11px;color:var(--ink-2);margin-top:3px;display:flex;align-items:center;gap:4px;">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                  {{ r.notes }}
+                </div>
+                <div v-if="r.merchantNote" style="font-size:11px;color:var(--indigo-l);margin-top:2px;display:flex;align-items:center;gap:4px;">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  {{ r.merchantNote }}
+                </div>
+              </div>
+              <div class="list-actions">
+                <button v-if="r.uid && r.uid!=='未指定'" class="btn-money" @click.stop="goToFlow(r.uid)" title="金流登記">$</button>
+                <a v-if="clientLineUid(r.uid)" href="https://manager.line.biz/account/%40605isdpd/chat" target="_blank" @click.stop class="btn-chat" title="開啟對話">💬</a>
+                <button class="btn btn-icon" style="width:28px;height:28px;" @click.stop="delBooking(r)">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--err)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 表單 -->
+        <div class="form-card" id="form-anchor">
+          <div class="form-title">{{ formTitle }}</div>
+          <div class="form-desc">{{ formDesc }}</div>
+          <div class="grid-2 field-wrap">
+            <div>
+              <label class="field-label">客戶卡號</label>
+              <select v-model="form.uid" class="field">
+                <option value="">— 未指定 —</option>
+                <option v-for="c in clientsList" :key="c.uid" :value="c.uid">{{ c.uid }} · {{ c.name }}</option>
+              </select>
+            </div>
+            <div><label class="field-label">台數</label><input type="number" min="1" v-model="form.count" class="field" style="text-align:center;font-size:16px;font-weight:700;font-family:monospace;"></div>
+          </div>
+          <div class="field-wrap"><label class="field-label">地址</label><input type="text" v-model="form.address" class="field" placeholder="可留空"></div>
+          <div class="grid-2 field-wrap">
+            <div><label class="field-label">日期</label><input type="date" v-model="form.date" class="field"></div>
+            <div>
+              <label class="field-label">時辰</label>
+              <select v-model="form.time" class="field">
+                <option value="">— 選擇 —</option>
+                <option v-for="s in customSlots" :key="s" :value="s">{{ s }}</option>
+                <option value="__custom__">自訂…</option>
+              </select>
+              <input v-if="form.time==='__custom__'" type="text" v-model="form.customTime" class="field" placeholder="自訂時段" style="margin-top:6px;">
+            </div>
+          </div>
+          <div class="field-wrap"><label class="field-label">喵寶細節</label><input type="text" v-model="form.catDetail" class="field" placeholder="品種、體重、叮嚀"></div>
+          <div class="field-wrap">
+            <label class="field-label">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px;"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+              家長備註
+            </label>
+            <input type="text" v-model="form.notes" class="field" placeholder="客人填寫的備註">
+          </div>
+          <div class="field-wrap">
+            <label class="field-label" style="color:var(--indigo-l);">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              我的備註
+            </label>
+            <input type="text" v-model="form.merchantNote" class="field" placeholder="商家自用，客人不會看到" style="border-color:rgba(91,127,166,.3);">
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-primary" style="flex:1;" @click="commitSchedule" :disabled="!form.date || loading">{{ loading ? '儲存中...' : formBtnText }}</button>
+            <button class="btn btn-ghost" @click="clearForm">新建</button>
+          </div>
+        </div>
+
+        <!-- 排程雙頁籤 -->
+        <div class="card" style="padding:0;">
+          <div class="tab-row">
+            <button :class="['tab-btn', scheduleView==='current'?'active':'']" @click="scheduleView='current'">已排定</button>
+            <button :class="['tab-btn', scheduleView==='history'?'active':'']" @click="switchToHistory">歷史紀錄</button>
+          </div>
+
+          <div v-if="scheduleView==='current'">
+            <div v-if="!hasLoadedSchedules" style="text-align:center;padding:20px;">
+            <svg class="spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 6px;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            <div style="font-size:11px;color:var(--ink-3);">載入中…</div>
+          </div>
+          <div v-else-if="confirmedSchedules.length===0" class="empty"><div class="empty-title">尚無排程</div></div>
+            <div v-else>
+              <div v-for="(s,idx) in confirmedSchedules" :key="s.rowIndex" class="list-item" @click="pickSchedule(idx)">
+                <div class="list-item-main">
+                  <div class="list-date">{{ s.date }} · {{ s.time }}</div>
+                  <div class="list-name">{{ clientName(s.uid) }}<span style="font-family:monospace;font-weight:400;color:var(--ink-3);font-size:10px;margin-left:5px;">{{ s.uid }}</span></div>
+                  <div class="list-meta">{{ s.count }} 台 · {{ s.address }}<span v-if="s.catDetail"> · {{ s.catDetail }}</span></div>
+                  <div v-if="s.notes" style="font-size:11px;color:var(--ink-2);margin-top:3px;display:flex;align-items:center;gap:4px;">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                    {{ s.notes }}
+                  </div>
+                  <div v-if="s.merchantNote" style="font-size:11px;color:var(--indigo-l);margin-top:2px;display:flex;align-items:center;gap:4px;">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    {{ s.merchantNote }}
                   </div>
                 </div>
-                <div style="font-size:11px;color:var(--ink-2);">洗浴 {{ appt.count }} 台<span v-if="appt.catDetail"> · {{ appt.catDetail }}</span></div>
-                <div v-if="appt.notes" style="font-size:11px;color:var(--ink-2);margin-top:3px;display:flex;align-items:center;gap:4px;">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
-                  {{ appt.notes }}
+                <div class="list-actions">
+                  <button v-if="s.uid && s.uid!=='未指定'" class="btn-money" @click.stop="goToFlow(s.uid)" title="金流登記">$</button>
+                  <a v-if="clientLineUid(s.uid)" href="https://manager.line.biz/account/%40605isdpd/chat" target="_blank" @click.stop class="btn-chat" title="開啟對話">💬</a>
+                  <button class="btn btn-icon" style="width:28px;height:28px;" @click.stop="delSchedule(s)">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--err)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
                 </div>
-                <!-- 商家備註不顯示給客人 -->
               </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <!-- 文案公告板（我的預約下方）-->
-      <div v-if="bookStep===1 && myProfile.uid" style="margin-top:12px;">
-        <!-- 公告欄 loading -->
-        <div v-if="contentLoading" style="text-align:center;padding:16px;">
-          <svg class="spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-        </div>
-        <div v-else-if="contentItems.length > 0">
-        <div class="card card-accent" style="padding:0;overflow:hidden;">
-          <!-- 公告欄標題 -->
-          <div style="display:flex;align-items:center;gap:8px;padding:14px 16px 12px;border-bottom:1px solid var(--border);">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-            <span style="font-family:'Noto Serif TC',serif;font-size:14px;font-weight:700;color:var(--ink);letter-spacing:.04em;">公告欄</span>
-          </div>
-          <!-- 文案清單 -->
-          <div v-for="(item, idx) in contentItems" :key="item.rowIndex"
-            :style="{borderBottom: idx < contentItems.length-1 ? '1px solid var(--border)' : 'none'}">
-            <!-- 標題列，點擊展開 -->
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;"
-              @click="toggleContentItem(item.rowIndex)">
-              <span style="font-size:13px;font-weight:600;color:var(--ink);letter-spacing:.02em;">{{ item.title }}</span>
-              <svg :style="expandedContentIds.includes(item.rowIndex)?'transform:rotate(180deg)':''"
-                style="transition:.2s;color:var(--ink-3);flex-shrink:0;"
-                width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="6 9 12 15 18 9"/>
-              </svg>
+          <div v-if="scheduleView==='history'">
+            <div style="padding:12px 14px;border-bottom:1px solid var(--border);display:flex;gap:8px;">
+              <input type="date" v-model="historyStart" @change="loadHistory" class="field" style="flex:1;font-size:12px;padding:7px 10px;">
+              <input type="date" v-model="historyEnd" @change="loadHistory" class="field" style="flex:1;font-size:12px;padding:7px 10px;">
             </div>
-            <!-- 展開內容 -->
-            <div v-show="expandedContentIds.includes(item.rowIndex)"
-              style="padding:0 16px 14px 16px;font-size:13px;color:var(--ink-2);line-height:1.9;white-space:pre-line;border-top:1px solid var(--border);">
-              {{ item.body }}
+            <div style="padding:8px 14px;border-bottom:1px solid var(--border);display:flex;gap:8px;">
+              <input type="text" v-model="historyQuery" @input="debounceHistorySearch" placeholder="搜尋卡號或姓名…" class="field" style="flex:1;font-size:12px;padding:7px 10px;">
+              <button class="btn btn-ghost btn-sm" @click="exportHistoryCsv">匯出</button>
+            </div>
+            <div v-if="historyLoading" style="text-align:center;padding:20px;">
+              <svg class="spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 6px;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+              <div style="font-size:11px;color:var(--ink-3);">查詢中…</div>
+            </div>
+            <div v-else-if="scheduleHistory.length===0" class="empty"><div class="empty-title">此區間查無紀錄</div></div>
+            <div v-else>
+              <div v-for="h in scheduleHistory" :key="h.rowIndex" class="list-item" @click="pickHistoryItem(h)">
+                <div class="list-item-main">
+                  <div class="list-date">{{ h.date }} · {{ h.time }}</div>
+                  <div class="list-name">{{ h.name||'未指定' }}<span style="font-family:monospace;font-weight:400;color:var(--ink-3);font-size:10px;margin-left:5px;">{{ h.uid }}</span></div>
+                  <div class="list-meta">{{ h.count }} 台 · {{ h.address }}</div>
+                </div>
+                <div class="list-actions">
+                  <button v-if="h.uid && h.uid!=='未指定'" class="btn-money" @click.stop="goToFlow(h.uid)" title="金流登記">$</button>
+                  <a v-if="clientLineUid(h.uid)" href="https://manager.line.biz/account/%40605isdpd/chat" target="_blank" @click.stop class="btn-chat">💬</a>
+                  <button class="btn btn-icon" style="width:28px;height:28px;" @click.stop="delHistoryItem(h)">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--err)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- ════ 喵星護照 ════ -->
-    <div v-if="currentTab==='cats' && !authFailed">
-      <div v-if="myCats.length>0" class="card card-accent">
-        <div class="section-header">
-          <span class="section-title">已登記喵寶</span>
-          <span class="section-sub">{{ myCats.length }} 隻</span>
-        </div>
-        <div v-for="(cat,idx) in myCats" :key="idx" class="cat-item">
-          <div class="cat-item-head" @click="toggleEdit(idx)">
-            <div style="display:flex;align-items:center;gap:10px;">
-              <div class="cat-avatar">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-              </div>
-              <div>
-                <span class="cat-name">{{ cat.name }}</span>
-                <span class="cat-gender-tag">{{ cat.gender }}</span>
-                <div class="cat-meta">{{ cat.breed||'品種未填' }} · {{ cat.weight||'?' }}kg</div>
-              </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            時段範本
+          </div></div>
+          <div class="card-body">
+            <div style="margin-bottom:10px;">
+              <span v-for="(s,idx) in customSlots" :key="s"
+                class="slot-chip"
+                draggable="true"
+                @dragstart="dragStart(idx)"
+                @dragover.prevent="dragOver(idx)"
+                @dragend="dragEnd"
+                :class="{ dragging: dragIdx===idx, 'drag-over': dragOverIdx===idx && dragOverIdx!==dragIdx }">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:.4;cursor:grab;flex-shrink:0;"><circle cx="9" cy="5" r="1.5" fill="currentColor"/><circle cx="9" cy="12" r="1.5" fill="currentColor"/><circle cx="9" cy="19" r="1.5" fill="currentColor"/><circle cx="15" cy="5" r="1.5" fill="currentColor"/><circle cx="15" cy="12" r="1.5" fill="currentColor"/><circle cx="15" cy="19" r="1.5" fill="currentColor"/></svg>
+                {{ s }}
+                <span class="slot-chip-del" @click.stop="removeSlot(idx)">×</span>
+              </span>
             </div>
-            <svg :style="editIdx===idx?'transform:rotate(180deg)':''" style="transition:.15s;flex-shrink:0;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            <div style="display:flex;gap:8px;">
+              <input type="text" v-model="newSlot" placeholder="例如 早上、下午、晚上" class="field" style="flex:1;padding:8px 11px;font-size:12px;">
+              <button class="btn btn-ghost btn-sm" @click="addSlot" :disabled="loading">{{ loading ? '新增中…' : '新增' }}</button>
+            </div>
           </div>
-          <div v-if="editIdx===idx" class="cat-body">
-            <div class="field-wrap"><label class="field-label">名字</label><input v-model="editCat.name" class="field"></div>
-            <div class="field-wrap">
-              <label class="field-label">性別</label>
-              <div class="seg-control">
-                <button :class="['seg-btn', editCat.gender==='男'?'active':'']" @click="editCat.gender='男'"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="14" r="5"/><line x1="19" y1="5" x2="14.14" y2="9.86"/><polyline points="15 5 19 5 19 9"/></svg> 男</button>
-                <button :class="['seg-btn', editCat.gender==='女'?'active':'']" @click="editCat.gender='女'"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="6"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="9" y1="19" x2="15" y2="19"/></svg> 女</button>
-              </div>
+        </div>
+
+        <div class="card card-accent-ok">
+          <div class="card-head"><div class="card-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            批次時段開關
+          </div></div>
+          <div class="card-body">
+            <!-- 開放提前天數 -->
+            <div style="display:flex;align-items:center;gap:8px;padding-bottom:12px;border-bottom:1px solid var(--border);margin-bottom:12px;">
+              <span style="font-size:12px;color:var(--ink-2);white-space:nowrap;">開放提前天數</span>
+              <select v-model.number="advanceDays" class="field" style="flex:1;font-size:12px;padding:6px 8px;">
+                <option v-for="n in 31" :key="n-1" :value="n-1">{{ n-1 }} 天{{ n-1===0?' （當天可選）':n-1===1?' （明天起）':'' }}</option>
+              </select>
+              <button class="btn btn-ghost btn-sm" style="white-space:nowrap;" @click="saveAdvanceDays" :disabled="loading">
+                {{ loading ? '儲存中…' : '確認' }}
+              </button>
+            </div>
+            <!-- 家長預約顯示 -->
+            <div style="display:flex;align-items:center;gap:8px;padding-bottom:12px;border-bottom:1px solid var(--border);margin-bottom:12px;">
+              <span style="font-size:12px;color:var(--ink-2);white-space:nowrap;">家長預約顯示</span>
+              <select v-model.number="apptMonths" class="field" style="flex:1;font-size:12px;padding:6px 8px;">
+                <option :value="0">全部</option>
+                <option v-for="n in 24" :key="n" :value="n">{{ n }} 個月</option>
+              </select>
+              <button class="btn btn-ghost btn-sm" style="white-space:nowrap;" @click="saveApptMonths" :disabled="loading">
+                {{ loading ? '儲存中…' : '確認' }}
+              </button>
             </div>
             <div class="grid-2 field-wrap">
-              <div><label class="field-label">品種</label><input v-model="editCat.breed" class="field" placeholder="米克斯"></div>
-              <div><label class="field-label">體重 kg</label><input type="number" step="0.1" inputmode="decimal" v-model="editCat.weight" class="field" placeholder="4.5"></div>
+              <div><label class="field-label">起</label><input type="date" v-model="batch.startDate" @change="onBatchStartChange" class="field" style="font-size:12px;"></div>
+              <div><label class="field-label">迄</label><input type="date" v-model="batch.endDate" @change="onBatchEndChange" class="field" style="font-size:12px;"></div>
             </div>
-            <div class="field-wrap"><label class="field-label">健康叮嚀</label><input v-model="editCat.note" class="field" placeholder="怕吹風機…"></div>
-            
+            <div class="field-wrap">
+              <label class="field-label">選時段</label>
+              <div>
+                <span v-for="s in customSlots" :key="s" :class="['slot-chip', batch.selectedSlots.includes(s)?'active':'']" @click="toggleBatch(s)">{{ s }}</span>
+              </div>
+            </div>
+            <div class="grid-2">
+              <button class="btn btn-ok btn-sm" style="width:100%;" @click="doBatch('open')" :disabled="loading">
+                {{ loading ? '更改中…' : '開放' }}
+              </button>
+              <button class="btn btn-sm" style="width:100%;background:var(--err-l);color:var(--err);border:1px solid rgba(184,65,65,.2);" @click="doBatch('close')" :disabled="loading">
+                {{ loading ? '更改中…' : '關閉' }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px;">
+          <div class="month-nav">
+            <button class="btn btn-icon" @click="moveMonth(-1)" :disabled="calLoading">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <span class="month-label">{{ calMonthTitle }}</span>
+            <button class="btn btn-icon" @click="moveMonth(1)" :disabled="calLoading">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+            <button class="btn-link" style="font-size:11px;color:var(--indigo-l);margin-left:4px;" @click="fetchHolidays" :disabled="holidayLoading">
+              {{ holidayLoading ? '更新中…' : '更新假日' }}
+            </button>
+          </div>
+          <!-- 載入中 -->
+          <div v-if="calLoading" style="text-align:center;padding:32px 0;">
+            <svg class="spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--indigo-l)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            <div style="font-size:11px;color:var(--ink-3);margin-top:8px;">載入月曆中…</div>
+          </div>
+          <!-- 載入完成 -->
+          <div v-else style="padding:12px;">
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:9px;color:var(--ink-3);font-weight:700;margin-bottom:6px;">
+              <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
+            </div>
+            <div v-if="calGrid.length===0" style="text-align:center;padding:20px;font-size:12px;color:var(--ink-3);">尚無開放時段記錄</div>
+            <div v-else class="cal-admin">
+              <div v-for="(day,idx) in calGrid" :key="idx"
+                :class="['cal-admin-cell', day.isToday?'cal-admin-today':'', day.isHoliday?'cal-admin-holiday':'']"
+                :style="day.empty?'background:transparent;border-color:transparent;':day.isPast?'background:#f8f8f8;border-color:#e8e8e8;':''">
+                <div v-if="!day.empty" class="cal-admin-day" style="position:relative;display:inline-block;"
+                  :style="day.isToday ? '' : day.isPast ? 'color:#bbb;' : day.isWorkday ? '' : (day.isHolidayMark||day.isSunday) ? 'color:var(--err);font-weight:700;' : day.isSaturday ? 'color:var(--orange);font-weight:700;' : ''">
+                  {{ day.dayNum }}
+                  <svg v-if="day.isToday" style="position:absolute;top:-7px;right:-10px;" width="11" height="11" viewBox="0 0 24 24" fill="#F5C518" stroke="#F5C518" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                </div>
+                <!-- 有時段資料時顯示 -->
+                <template v-if="!day.empty && day.slots.length > 0">
+                  <div v-for="s in day.slots" :key="s.shortName"
+                    :class="['cal-admin-slot', s.isOpen && !s.isPast ? 'open' : s.isOpen && s.isPast ? 'cal-slot-past' : 'closed']"
+                    :style="s.isPast && s.isOpen ? 'background:rgba(150,150,150,.12);color:#999;' : ''">
+                    <span :style="s.isPast && s.isOpen ? 'color:#aaa;' : ''">{{ s.isOpen ? '●' : '' }}</span>{{ s.shortName }}
+                  </div>
+                </template>
+                <!-- 無時段但有日期：顯示空格子 -->
+                <template v-else-if="!day.empty">
+                  <div style="height:6px;"></div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- ── 文案公告板（行程頁底部）── -->
+        <div class="card" style="margin-top:4px;overflow:visible;">
+          <div class="card-head" style="flex-shrink:0;">
+            <div class="card-title" style="flex-shrink:0;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              文案公告板
+            </div>
+            <button class="btn-link" @click="openNewContent" :disabled="contentSaving">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:2px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              {{ contentSaving ? '處理中…' : '新增' }}
+            </button>
+          </div>
+          <div v-if="contentForm.show" style="padding:14px 16px;border-bottom:1px solid var(--border);background:var(--indigo-x);">
+            <div class="field-wrap">
+              <label class="field-label">標題</label>
+              <input type="text" v-model="contentForm.title" class="field" placeholder="例如：儲值方案說明">
+            </div>
+            <div class="field-wrap">
+              <label class="field-label">內容</label>
+              <textarea v-model="contentForm.body" class="field" rows="5" placeholder="文案內容，支援換行" style="-webkit-user-select:text;user-select:text;"></textarea>
+            </div>
+            <div class="field-wrap">
+              <label class="field-label">顯示給客戶</label>
+              <div @click="contentForm.enabled=!contentForm.enabled" style="display:flex;align-items:center;gap:10px;padding:10px 0;cursor:pointer;">
+                <div :style="{background:contentForm.enabled?'var(--ok)':'var(--ink-3)'}" style="width:42px;height:24px;border-radius:12px;position:relative;transition:background .2s;">
+                  <div :style="{left:contentForm.enabled?'20px':'2px'}" style="position:absolute;top:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.2);"></div>
+                </div>
+                <span style="font-size:13px;font-weight:600;" :style="{color:contentForm.enabled?'var(--ok)':'var(--ink-3)'}">{{ contentForm.enabled ? '啟用（顯示給客戶）' : '停用（草稿）' }}</span>
+              </div>
+            </div>
             <div style="display:flex;gap:8px;">
-              <button class="btn btn-primary" style="flex:1;" @click="saveEditCat(idx)" :disabled="isSavingCat">
-                {{ isSavingCat ? '儲存中...' : '儲存變更' }}
+              <button class="btn btn-primary" style="flex:1;" @click="saveContent" :disabled="contentSaving">
+                {{ contentSaving ? '儲存中…' : '儲存' }}
               </button>
-              <button class="btn btn-danger-sm" @click="removeCat(idx)" :disabled="isSavingCat">
-                {{ isSavingCat ? '刪除中...' : '刪除' }}
-              </button>
+              <button class="btn btn-ghost" @click="contentForm.show=false">取消</button>
+            </div>
+          </div>
+
+          <!-- 文案清單 -->
+          <div v-if="!hasLoadedContent" style="text-align:center;padding:24px;">
+            <svg class="spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 8px;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            <div style="font-size:11px;color:var(--ink-3);">載入文案中…</div>
+          </div>
+          <div v-else-if="contentList.length===0" class="empty" style="padding:20px;">
+            <div class="empty-title">尚無文案，點右上角新增</div>
+          </div>
+          <div v-else>
+            <div v-for="(item,cidx) in contentList" :key="item.rowIndex"
+              @dragover.prevent="contentDragOver(cidx)"
+              :style="{opacity: contentDragIdx===cidx?0.4:1, borderBottom: cidx < contentList.length-1 ? '1px solid var(--border)' : 'none'}">
+              <!-- 標題列：箭頭 + 標題 + 操作按鈕 -->
+              <div style="display:flex;align-items:center;gap:8px;padding:12px 16px;">
+                <svg @click="toggleAdminContent(item.rowIndex)"
+                  :style="adminExpandedIds.includes(item.rowIndex)?'transform:rotate(180deg)':''"
+                  style="transition:.2s;color:var(--ink-3);flex-shrink:0;cursor:pointer;"
+                  width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+                <span @click="toggleAdminContent(item.rowIndex)"
+                  style="font-size:13px;font-weight:600;color:var(--ink);flex:1;cursor:pointer;">
+                  {{ item.title }}
+                </span>
+                <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
+                  <!-- 開關 -->
+                  <div @click="toggleContent(item)"
+                    :style="{background:item.enabled?'var(--ok)':'var(--ink-3)'}"
+                    style="width:30px;height:18px;border-radius:9px;position:relative;cursor:pointer;transition:background .2s;">
+                    <div :style="{left:item.enabled?'14px':'2px'}"
+                      style="position:absolute;top:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);"></div>
+                  </div>
+                  <!-- 鉛筆 -->
+                  <button class="btn btn-icon" style="width:26px;height:26px;" @click="editContent(item)">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                  </button>
+                  <!-- 刪除 -->
+                  <button class="btn btn-icon" style="width:26px;height:26px;" @click="deleteContent(item)">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--err)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                  <!-- Grip 拖曳 -->
+                  <div draggable="true"
+                    @dragstart="contentDragStart(cidx)"
+                    @dragend="contentDragEnd"
+                    style="cursor:grab;color:var(--ink-3);padding:2px 4px;flex-shrink:0;">
+                    <svg width="10" height="14" viewBox="0 0 10 14" fill="currentColor">
+                      <circle cx="3" cy="2.5" r="1.2"/><circle cx="7" cy="2.5" r="1.2"/>
+                      <circle cx="3" cy="7" r="1.2"/><circle cx="7" cy="7" r="1.2"/>
+                      <circle cx="3" cy="11.5" r="1.2"/><circle cx="7" cy="11.5" r="1.2"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <!-- 展開內容 -->
+              <div v-show="adminExpandedIds.includes(item.rowIndex)"
+                style="padding:0 16px 14px 36px;font-size:13px;color:var(--ink-2);line-height:1.9;white-space:pre-line;border-top:1px solid var(--border);">
+                {{ item.body }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      </div>
+
+      <!-- ════ TAB：收支報表 ════ -->
+      <!-- ════ TAB4：收支報表 ════ -->
+      <div v-if="activeTab==='tab-finance'">
+        <div class="fin-hero-card">
+          <div class="fin-hero-label">全體剩餘儲值金</div>
+          <div><span class="fin-hero-val">{{ finance.totalBalance !== null ? finance.totalBalance : '──' }}</span><span class="fin-hero-unit">元</span></div>
+          <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:8px;">全體客戶預付儲值金總和，為商家應履行服務的負債。</div>
+        </div>
+
+        <div class="card card-accent-indigo" style="margin-bottom:12px;">
+          <div class="card-body">
+            <label class="field-label">查詢區間</label>
+            <div class="grid-2" style="margin-bottom:0;">
+              <input type="date" v-model="financeStart" @change="loadFinance" class="field" style="font-size:12px;">
+              <input type="date" v-model="financeEnd" @change="loadFinance" class="field" style="font-size:12px;">
+            </div>
+          </div>
+        </div>
+
+        <!-- 區間淨收入 -->
+        <div class="card" style="padding:20px; text-align:center; border-top:4px solid var(--indigo);">
+          <div style="font-size:11px; color:var(--ink-2); font-weight:700; letter-spacing:.1em; margin-bottom:8px;">區間淨現金流</div>
+          <div>
+            <span style="font-size:36px; font-weight:700; font-family:monospace;" :class="finance.net >= 0 ? 'val-pos' : 'val-neg'">
+              {{ finance.net !== null ? (finance.net >= 0 ? '+' : '') + finance.net : '──' }}
+            </span>
+            <span style="font-size:13px; color:var(--ink-3); margin-left:4px;">元</span>
+          </div>
+          <div style="font-size:11px; color:var(--ink-3); margin-top:6px;">＝ 儲值金 ＋ 雜費進款 － 雜費支出</div>
+        </div>
+
+        <div class="fin-grid-2">
+          <div class="fin-sub-card">
+            <div class="fin-sub-label">儲值金</div>
+            <div class="fin-sub-val val-pos">{{ finance.recharge !== null ? '+' + finance.recharge : '──' }}</div>
+          </div>
+          <div class="fin-sub-card" style="background:var(--bg); border-color:transparent;">
+            <div class="fin-sub-label">客消費 (服務量)</div>
+            <div class="fin-sub-val val-neutral">{{ finance.consumption !== null ? finance.consumption : '──' }}</div>
+          </div>
+        </div>
+
+        <div class="fin-grid-2">
+          <div class="fin-sub-card">
+            <div class="fin-sub-label">雜費進款</div>
+            <div class="fin-sub-val val-pos">{{ finance.income !== null ? '+' + finance.income : '──' }}</div>
+          </div>
+          <div class="fin-sub-card">
+            <div class="fin-sub-label">雜費支出</div>
+            <div class="fin-sub-val val-neg">{{ finance.expense !== null ? '-' + finance.expense : '──' }}</div>
+          </div>
+        </div>
+
+        <div class="card card-accent-indigo">
+          <div class="card-head"><div class="card-title">登記雜費</div></div>
+          <div class="card-body">
+            <div class="field-wrap"><label class="field-label">日期</label><input type="date" v-model="shop.date" class="field"></div>
+            <div class="seg" style="margin-bottom:13px;">
+              <button :class="['seg-btn', shop.type==='minus'?'active-err':'']" @click="shop.type='minus'">- 支出</button>
+              <button :class="['seg-btn', shop.type==='plus'?'active-ok':'']" @click="shop.type='plus'">+ 進款</button>
+            </div>
+            <div class="field-wrap"><label class="field-label">金額</label><input type="number" v-model.number="shop.amount" inputmode="numeric" class="field" style="font-size:18px;font-family:monospace;font-weight:700;" placeholder="0"></div>
+            <div class="field-wrap">
+              <label class="field-label">說明</label>
+              <input type="text" v-model="shop.desc" class="field" placeholder="說明">
+              <div class="quick-tags">
+                <span v-for="tag in ['車資','現金','耗材','雜支']" :key="tag" class="quick-tag" @click="shop.desc=tag">{{ tag }}</span>
+              </div>
+            </div>
+            <button class="btn btn-primary" @click="submitShop" :disabled="loading">{{ loading ? '處理中...' : '送出' }}</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><div class="card-title">收支明細</div></div>
+          <div v-if="finance.logs.length===0" class="empty"><div class="empty-title">此區間無明細</div></div>
+          <div v-else style="max-height:400px;overflow-y:auto;">
+            <div v-for="log in finance.logs" :key="log.rowIndex" class="log-item">
+              <div style="flex:1;">
+                <div class="log-desc">{{ log.displayName }}</div>
+                <div style="font-size:11px;color:var(--ink-2);">{{ log.desc }}</div>
+                <div class="log-time">{{ log.time }}</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span :class="['log-amount', log.amount>=0?'pos':'neg']">{{ log.amount>=0?'+':'' }}{{ log.amount }}</span>
+                <button class="btn btn-icon" style="width:26px;height:26px;" @click="delFinanceLog(log)">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--err)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="card card-accent">
-        <div class="section-header">
-          <span class="section-title">新增喵寶護照</span>
-        </div>
-        <div class="field-wrap"><label class="field-label">名字 <span style="color:var(--err)">*</span></label><input v-model="newCat.name" class="field" placeholder="咪咪"></div>
-        <div class="field-wrap">
-          <label class="field-label">性別</label>
-          <div class="seg-control">
-            <button :class="['seg-btn', newCat.gender==='男'?'active':'']" @click="newCat.gender='男'"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="14" r="5"/><line x1="19" y1="5" x2="14.14" y2="9.86"/><polyline points="15 5 19 5 19 9"/></svg> 男</button>
-            <button :class="['seg-btn', newCat.gender==='女'?'active':'']" @click="newCat.gender='女'"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="6"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="9" y1="19" x2="15" y2="19"/></svg> 女</button>
+    </div>
+
+      <!-- 底部導航 -->
+      <nav class="bottom-nav">
+        <div class="nav-inner">
+          <div :class="['nav-item', activeTab==='tab-clients'?'active':'']" @click="switchTab('tab-clients')" style="position:relative;">
+            <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span class="nav-label">家長</span>
+          </div>
+          <div :class="['nav-item', activeTab==='tab-schedule'?'active':'']" @click="switchTab('tab-schedule')" style="position:relative;">
+            <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span class="nav-label">行程</span>
+            <span v-if="bookingRequests.length" class="badge badge-orange" style="position:absolute;top:2px;right:8px;font-size:9px;min-width:16px;height:16px;">{{ bookingRequests.length }}</span>
+          </div>
+          <div :class="['nav-item', activeTab==='tab-finance'?'active':'']" @click="switchTab('tab-finance')">
+            <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            <span class="nav-label">收支</span>
           </div>
         </div>
-        <div class="grid-2 field-wrap">
-          <div><label class="field-label">品種</label><input v-model="newCat.breed" class="field" placeholder="布偶貓"></div>
-          <div><label class="field-label">體重 kg</label><input type="number" step="0.1" inputmode="decimal" v-model="newCat.weight" class="field" placeholder="4.5"></div>
-        </div>
-        <div class="field-wrap"><label class="field-label">健康叮嚀</label><input v-model="newCat.note" class="field" placeholder="怕吹風機…"></div>
-        
-        <button class="btn btn-primary" @click="registerCat" :disabled="isRegisteringCat">
-          {{ isRegisteringCat ? '喵寶登錄中...' : '新增這隻喵寶' }}
-        </button>
-      </div>
-    </div>
+      </nav>
 
-    <!-- ════ 家長中心 ════ -->
-    <div v-if="currentTab==='member' && !authFailed">
-      <div class="card card-accent">
-        <div class="section-header">
-          <span class="section-title">家長資料</span>
-        </div>
-        <div class="field-wrap"><label class="field-label">姓名 / 暱稱</label><input v-model="myProfile.name" class="field" placeholder="怎麼稱呼您"></div>
-        <div class="field-wrap"><label class="field-label">聯絡電話</label><input type="tel" inputmode="numeric" v-model="myProfile.phone" class="field" placeholder="0912 345 678"></div>
-        <div class="field-wrap"><label class="field-label">到府地址</label><input v-model="myProfile.address" class="field" placeholder="完整地址"></div>
 
-        <div class="field-wrap">
-          <label class="field-label">電梯資訊</label>
-          <div class="check-row" @click="myProfile.elevator = myProfile.elevator==='有電梯'?'無電梯':'有電梯'">
-            <div :class="['check-box', myProfile.elevator==='有電梯'?'checked':'']">
-              <svg v-if="myProfile.elevator==='有電梯'" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
-            <div>
-              <div class="check-label-text">有電梯</div>
-              <div class="check-label-sub">{{ myProfile.elevator==='有電梯'?'已勾選，感謝告知':'未勾選 = 無電梯' }}</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="field-wrap"><label class="field-label">停車 / 到府提醒</label><input v-model="myProfile.parking" class="field" placeholder="巷口有停車場、到樓下請打電話"></div>
-        
-        <button class="btn btn-primary" @click="saveProfile" :disabled="isSavingProfile">
-          {{ isSavingProfile ? '資料儲存中...' : '儲存資料' }}
-        </button>
-      </div>
-    </div>
-
-  </div><!-- /main -->
-
-  <!-- 底部導航 -->
-  <nav class="bottom-nav">
-    <div class="nav-inner">
-      <div :class="['nav-item', currentTab==='booking'?'active':'']" @click="switchTab('booking')">
-        <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        <span class="nav-label">良辰吉日</span>
-      </div>
-      <div :class="['nav-item', currentTab==='cats'?'active':'']" @click="switchTab('cats')">
-        <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        <span class="nav-label">喵星護照</span>
-      </div>
-      <div :class="['nav-item', currentTab==='member'?'active':'']" @click="switchTab('member')">
-        <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <span class="nav-label">家長中心</span>
-      </div>
-    </div>
-  </nav>
+  </template>
 </div>
-
 <script>
   // ══════════════════════════════════════════════════════
   // 🔧 維護資料（每次更新請修改這裡）
   // ══════════════════════════════════════════════════════
-  const VERSION          = 'v260724.02';                    // 版本號
-  const GAS_API          = "https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec"; // GAS 部署網址
-  const LIFF_ID          = '2010742657-DOz9QdF3';           // LINE LIFF ID
-  const LINE_CHANNEL_ID  = '2010742657';                    // LINE Login Channel ID（idToken 驗證用）
+  const ADMIN_VERSION    = 'v260724.05';                    // 版本號
+  const LINE_OA_URL      = 'https://manager.line.biz/account/%40605isdpd/chat'; // LINE OA Manager（💬 按鈕連結）
+  const STORAGE_KEY      = 'jemin_admin_pwd';               // localStorage 密碼金鑰（改密碼時一起改）
   // ══════════════════════════════════════════════════════
+  const { createApp, ref, onMounted, computed } = Vue;
+  createApp({
+    setup() {
+      const loading = ref(false), isAuthenticated = ref(false), passwordInput = ref(''), activeTab = ref('tab-schedule');
+      
+      // ⚡ 核心優化：狀態標記變數（預設為 false，避免呈現假數字或 0）
+      const hasLoadedClients = ref(false);
+      const hasLoadedBookings = ref(false);
+      const hasLoadedSchedules = ref(false);
 
-      const { createApp, ref, onMounted } = Vue;
-      createApp({
-        setup() {
-          const currentTab = ref('booking');
-          const myProfile = ref({ uid:'', name:'', balance: null, address:'', phone:'', elevator:'有電梯', parking:'', note:'' });
-          const myCats = ref([]);
-          const calendarDates = ref([]);
-          const clientHolidayData = ref({ holidays:{}, workdays:{} });
-          const advanceDays = ref(1); // 從後端讀取的提前天數
-          const loadAdvanceDays = async () => {
-            try {
-              const res = await apiGet({ action:'getAdvanceDays' });
-              if(res && res.success){
-                advanceDays.value = res.days;
-                renderMonth(); // 更新後重新渲染月曆套用新提前天數
-              }
-            } catch(e) {}
-          };
-          const loadClientHolidays = async () => {
-            try {
-              const res = await apiGet({ action:'getHolidays' });
-              if(res && res.holidays) clientHolidayData.value = res.holidays;
-            } catch(e) {}
-          };
-          const inHolidaySet = (year, md, dict) => {
-            var yStr = String(year);
-            return dict && dict[yStr] && dict[yStr].indexOf(md) >= 0;
-          };
-          const selectedDate = ref('');
-          const newCat = ref({ name:'', breed:'', weight:'', gender:'男生', note:'' });
-          const editIdx = ref(-1);
-          const editCat = ref({ name:'', breed:'', weight:'', gender:'男生', note:'' });
-          const _cn=new Date(); const calYear=ref(_cn.getFullYear()); const calMonth=ref(_cn.getMonth()+1);
-          const toast = ref({ show:false, message:'', isError:false });
-          const statusCode = ref('INIT');
-          const isLineMode = ref(true);
-          const authFailed = ref(false);
+      const clientsList = ref([]);
+      const bookingRequests = ref([]);
+      const confirmedSchedules = ref([]);
 
-          const globalLoading = ref(false);
-          const isSavingProfile = ref(false);
-          const isRegisteringCat = ref(false);
-          const isSavingCat = ref(false);
+      // ⚡ 計算屬性：沒載入完成前一律顯示 ──
+      const clientCountDisplay = computed(() => hasLoadedClients.value ? clientsList.value.length : '──');
+      const pendingCountDisplay = computed(() => hasLoadedBookings.value ? bookingRequests.value.length : '──');
+      const scheduleCountDisplay = computed(() => hasLoadedSchedules.value ? confirmedSchedules.value.length : '──');
 
-          const bookStep = ref(1);
-          const selectedSlot = ref('');
-          const selectedCats = ref([]);
-          const bookCatCount = ref(1);
-          const bookNotes = ref('');
-          const bookLoading = ref(false);
-          const refreshing = ref(false);
-          const myAppointments = ref([]);
-          const apptLoading = ref(false);
-          const apptExpanded = ref(true);
-          // 文案公告板
-          const contentItems = ref([]);
-          const contentLoading = ref(false);
-          const expandedContentIds = ref([]);
-          const toggleContentItem = (id) => {
-            const idx = expandedContentIds.value.indexOf(id);
-            if(idx >= 0) expandedContentIds.value.splice(idx, 1);
-            else expandedContentIds.value.push(id);
-          };
-          const loadContentItems = async () => {
-            contentLoading.value = true;
-            try {
-              const res = await apiGet({ action: 'getContentList' });
-              if(res && res.success) contentItems.value = res.list || [];
-            } catch(e) {}
-            contentLoading.value = false;
-          }; 
-          const availableSlots = ref([]);
-          const calMonthLabel = ref('');
-          let scheduleCacheMap = {};
-          let idToken = '';
+      const toast = ref({ show:false, message:'' });
+      const showToast = (m) => { toast.value.message=m; toast.value.show=true; setTimeout(()=>toast.value.show=false, 3000); };
+      const confirmModal = ref({ show:false, title:'', message:'', onConfirm:null });
+      const triggerConfirm = (t,m,fn,label) => { confirmModal.value={ show:true, title:t, message:m, onConfirm:fn, confirmLabel:label||'確認' }; };
+      const executeConfirmAction = () => { if(confirmModal.value.onConfirm) confirmModal.value.onConfirm(); confirmModal.value.show=false; };
+      const pwd = () => passwordInput.value;
 
-          const showToast = (m, e=false) => { toast.value={ show:true, message:m, isError:e }; setTimeout(()=>toast.value.show=false, 3000); };
-          const switchTab = (t) => {
-            if (authFailed.value) return; 
-            if(bookStep.value > 1 && t !== 'booking') {
-              if(!confirm('預約尚未完成，確定要離開嗎？')) return;
-              resetBook();
-            }
-            if(editIdx.value >= 0 && t !== 'cats') {
-              if(!confirm('貓咪資料尚未儲存，確定要離開嗎？')) return;
-              editIdx.value = -1;
-            }
-            currentTab.value = t;
-          };
+      // ⚡ 靜默抓取待確認件數
+      const fetchPendingBookings = () => {
+        if (!isAuthenticated.value) return;
+        google.script.run
+          .withSuccessHandler((res)=>{
+            bookingRequests.value = (res && res.list) ? res.list : [];
+            hasLoadedBookings.value = true;
+          })
+          .withFailureHandler(()=>{ hasLoadedBookings.value = true; }) // 失敗也停止轉圈
+          .adminGetBookings(pwd());
+      };
 
-          const forceRelogin = () => {
-            if (typeof liff !== 'undefined') {
-              liff.logout();
-              liff.login({ redirectUri: location.href });
-            }
-          };
+      // ⚡ 靜默抓取今後排程筆數
+      const fetchConfirmedSchedules = () => {
+        if (!isAuthenticated.value) return;
+        google.script.run
+          .withSuccessHandler((res)=>{
+            confirmedSchedules.value = (res && res.list) ? res.list : [];
+            hasLoadedSchedules.value = true;
+          })
+          .withFailureHandler(()=>{ hasLoadedSchedules.value = true; }) // 失敗也停止轉圈
+          .adminGetSchedules(pwd());
+      };
 
-          // ---- fetch 封裝（非阻塞 Sync 標籤）----
-          const apiGet = async (params) => {
-            globalLoading.value = true;
-            try {
-              const url = GAS_API + "?" + new URLSearchParams(params).toString();
-              const r = await fetch(url); 
-              return await r.json();
-            } finally { globalLoading.value = false; }
-          };
-          const apiPost = async (payload) => {
-            globalLoading.value = true;
-            try {
-              const r = await fetch(GAS_API, { method:"POST", headers:{ "Content-Type":"text/plain;charset=utf-8" }, body:JSON.stringify(payload) });
-              return await r.json();
-            } finally { globalLoading.value = false; }
-          };
+      // ⚡ 靜默抓取客戶名冊與客戶數
+      const refreshClients = () => {
+        google.script.run.withSuccessHandler((res)=>{ 
+          clientsList.value = (res && res.list) ? res.list : []; 
+          hasLoadedClients.value = true;
+        }).adminGetClients(pwd());
+      };
 
-          const applyProfile = (res) => {
-            myProfile.value.uid=res.info.uid; myProfile.value.name=res.info.name;
-            myProfile.value.phone=res.info.phone; myProfile.value.address=res.info.address;
-            myProfile.value.elevator=res.info.elevator||'有電梯'; myProfile.value.parking=res.info.parking||'';
-            myProfile.value.balance=res.info.balance; myProfile.value.note=res.info.note;
-            myCats.value=(res.cats||[]).map(c=>({
-              ...c,
-              gender: c.gender==='男生'?'男': c.gender==='女生'?'女': c.gender
-            }));
-          };
-
-          const loadProfile = async () => {
-            statusCode.value='FETCH·0';
-            loadCalendar();  
-            try {
-              const res = await apiGet({ action:"getMyProfile", idToken });
-              if(res && res.success){ 
-                applyProfile(res); 
-                statusCode.value='OK·'+res.info.uid; 
-                loadMyAppointments();
-                loadContentItems();
-                loadClientHolidays();
-                loadAdvanceDays();
-                authFailed.value = false; 
-              }
-              else {
-                statusCode.value='ERR·'+((res&&res.error)?res.error.substring(0,20):'null');
-                showToast('讀取失敗：'+(res?res.error:'null'), true);
-                authFailed.value = true; 
-                try {
-                  const dbg = await apiGet({ action:"debugVerify", idToken });
-                  statusCode.value = 'DBG·'+dbg.httpCode+'·'+(dbg.rawResponse?dbg.rawResponse.substring(0,40):'');
-                } catch(e2) { statusCode.value += '·DBG·FAIL'; }
-              }
-            } catch(e){ 
-              statusCode.value='NET·ERR'; 
-              showToast('連線出錯了 '+e.message, true); 
-            }
-          };
-          const reloadProfile = async () => {
-            try { const res = await apiGet({ action:"getMyProfile", idToken }); if(res && res.success) applyProfile(res); } catch(e){}
-          };
-
-          const loadCalendar = async () => {
-            const t=new Date();
-            try {
-              // 同時抓月曆資料和提前天數
-              const [calRes, advRes] = await Promise.all([
-                apiGet({ action:"getCalendar", year:t.getFullYear(), month:t.getMonth()+1 }),
-                apiGet({ action:'getAdvanceDays' })
-              ]);
-              if(calRes && calRes.scheduleMap) scheduleCacheMap=calRes.scheduleMap;
-              if(advRes && advRes.success) advanceDays.value = advRes.days;
-            } catch(e){}
-            renderMatrix();
-          };
-          const renderMonth = () => {
-            const today = new Date(); today.setHours(0,0,0,0);
-            const tomorrow = new Date(today); tomorrow.setDate(today.getDate()+1);
-            const todayStr = today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
-            // 用 calYear/calMonth 決定顯示哪個月
-            const firstDay = new Date(calYear.value, calMonth.value-1, 1);
-            const total = new Date(calYear.value, calMonth.value, 0).getDate();
-            const emptyBefore = firstDay.getDay(); // 0=日，第一天前要填幾個空格
-            calMonthLabel.value = calYear.value+'年'+String(calMonth.value).padStart(2,'0')+'月';
-            const arr=[];
-            // 只在第一個格子放 emptyBefore，其他格子不用
-            for(let d=1;d<=total;d++){
-              let fm=String(calMonth.value).padStart(2,'0'), fd=String(d).padStart(2,'0');
-              let dStr=calYear.value+'-'+fm+'-'+fd;
-              let t=new Date(calYear.value, calMonth.value-1, d);
-              let weekDay=t.getDay();
-              let isSunday=weekDay===0, isSaturday=weekDay===6;
-              let isToday=(dStr===todayStr);
-              // 只能選明天以後
-              // 提前天數：今天 + advanceDays.value 天後才可選
-              const minDate = new Date(today); minDate.setDate(today.getDate() + advanceDays.value);
-              let isPast=(t.getTime()<minDate.getTime()), isOpen=false, isClickable=false;
-              if(!isPast && scheduleCacheMap[dStr]){
-                let dm=scheduleCacheMap[dStr];
-                if(Object.keys(dm).some(s=>String(dm[s]).trim()==='開放')){ isOpen=true; isClickable=true; }
-              }
-              let md=fm+'-'+fd;
-              let hd=clientHolidayData.value.holidays||{};
-              let wd=clientHolidayData.value.workdays||{};
-              let isHolidayMark=inHolidaySet(calYear.value, md, hd);
-              let isWorkday=inHolidaySet(calYear.value, md, wd);
-              arr.push({ dateStr:dStr, dayNum:d, emptyBefore:(d===1?emptyBefore:0),
-                isPast, isOpen, isClickable, isToday,
-                isSunday, isSaturday, isHolidayMark, isWorkday });
-            }
-            calendarDates.value=arr;
-          };
-          const renderMatrix = renderMonth; // 相容舊呼叫
-          const loadMyAppointments = async () => {
-            apptLoading.value = true;
-            try {
-              const res = await apiGet({ action:"getMyAppointments", idToken });
-              if(res && res.success) myAppointments.value = res.list || [];
-            } catch(e){}
-            apptLoading.value = false;
-          };
-
-          // 🚨 新增：顧客主動取消自己的預約 (含二次彈窗確認 + 樂觀更新)
-          const cancelMyAppointment = async (appt) => {
-            if (!confirm(`確定要取消「${appt.date} ${appt.time}」的預約申請嗎？`)) return;
-            try {
-              const res = await apiPost({
-                action: 'deleteMyAppointment',
-                idToken,
-                rowIndex: appt.rowIndex,
-                dateStr: appt.date
-              });
-              if (res && res.success) {
-                showToast('已成功取消該筆預約！');
-                // 樂觀更新：立刻從前端清單中剔除該筆預約
-                myAppointments.value = myAppointments.value.filter(a => a.rowIndex !== appt.rowIndex);
-                loadCalendar(); // 背景刷新日曆
-              } else {
-                showToast('取消失敗：' + (res ? res.error : '未知錯誤'), true);
-              }
-            } catch(e) { showToast('取消失敗 ' + e.message, true); }
-          };
-
-          const refreshCalendar = async () => {
-            refreshing.value = true;
-            try {
-              // 同時重新抓時段和提前天數
-              const [calRes, advRes] = await Promise.all([
-                apiGet({ action:"getCalendar", year:calYear.value, month:calMonth.value }),
-                apiGet({ action:'getAdvanceDays' })
-              ]);
-              if(calRes && calRes.scheduleMap) scheduleCacheMap = calRes.scheduleMap;
-              if(advRes && advRes.success) advanceDays.value = advRes.days;
-              renderMonth();
-              showToast('時段已更新');
-            } catch(e){ showToast('更新失敗', true); }
-            refreshing.value = false;
-          };
-          const selectDate = (day) => {
-            if(!day.isClickable) return;
-            selectedDate.value = day.dateStr;
-            selectedSlot.value = '';
-            selectedCats.value = [];
-            bookCatCount.value = 1;
-            const dm = scheduleCacheMap[day.dateStr] || {};
-            availableSlots.value = Object.keys(dm).filter(s => String(dm[s]).trim() === '開放');
-          };
-          const moveCalMonth = (dir) => {
-            calMonth.value += dir;
-            if(calMonth.value > 12){ calMonth.value=1; calYear.value++; }
-            if(calMonth.value < 1){ calMonth.value=12; calYear.value--; }
-            renderMonth();
-          };
-          const toggleCatSelect = (name) => {
-            const i = selectedCats.value.indexOf(name);
-            if(i >= 0) selectedCats.value.splice(i,1);
-            else { selectedCats.value.push(name); bookCatCount.value = selectedCats.value.length; }
-          };
-          const submitBooking = async () => {
-            bookLoading.value = true;
-            try {
-              const catDetails = selectedCats.value.join('、') || '(未指定)';
-              const res = await apiPost({
-                action: 'submitMyAppointment', idToken,
-                dateStr: selectedDate.value, slotStr: selectedSlot.value,
-                catCount: bookCatCount.value, catDetails, notes: bookNotes.value
-              });
-              if(res && res.success){ bookStep.value = 5; loadMyAppointments(); }
-              else showToast('送出失敗：'+(res?res.error:'null'), true);
-            } catch(e){ showToast('送出失敗 '+e.message, true); }
-            bookLoading.value = false;
-          };
-          const resetBook = () => {
-            bookStep.value = 1; selectedDate.value = ''; selectedSlot.value = '';
-            selectedCats.value = []; bookCatCount.value = 1; bookNotes.value = '';
-          };
-
-          const saveProfile = async () => {
-            const p=myProfile.value;
-            isSavingProfile.value = true;
-            try {
-              const res = await apiPost({ action:"updateMyProfile", idToken, name:p.name, address:p.address, phone:p.phone, elevator:p.elevator, parking:p.parking });
-              showToast(res&&res.success?'資料儲存好囉！':'更新失敗', !(res&&res.success));
-            } catch(e){ showToast('更新失敗 '+e.message, true); }
-            isSavingProfile.value = false;
-          };
-
-          const registerCat = async () => {
-            if(!newCat.value.name.trim()){ showToast('請先幫喵寶取名字～', true); return; }
-            isRegisteringCat.value = true;
-            try {
-              const res = await apiPost({ action:"registerMyCat", idToken, cat:JSON.parse(JSON.stringify(newCat.value)) });
-              if(res&&res.success){ 
-                showToast('喵寶護照新增成功！'); 
-                newCat.value={ name:'', breed:'', weight:'', gender:'男生', note:'' }; 
-                reloadProfile(); 
-              }
-              else showToast('新增失敗', true);
-            } catch(e){ showToast('新增失敗 '+e.message, true); }
-            isRegisteringCat.value = false;
-          };
-
-          const toggleEdit = (idx) => {
-            if(editIdx.value===idx){ editIdx.value=-1; return; }
-            editIdx.value=idx; editCat.value=JSON.parse(JSON.stringify(myCats.value[idx]));
-          };
-          
-          const saveEditCat = async (idx) => {
-            const oldName = myCats.value[idx].name;
-            const obj = JSON.parse(JSON.stringify(editCat.value));
-            if(!obj.name.trim()){ showToast('名字不能空白喔', true); return; }
-            
-            isSavingCat.value = true;
-            try {
-              const res = await apiPost({ action:"updateMyCat", idToken, oldName: oldName, cat: obj });
-              if(res && res.success){ 
-                showToast('喵寶資料更新好囉！'); 
-                myCats.value[idx] = { ...obj }; 
-                editIdx.value = -1; 
-                reloadProfile(); 
-              }
-              else showToast('更新失敗，請再試一次', true);
-            } catch(e){ showToast('更新失敗 '+e.message, true); }
-            isSavingCat.value = false;
-          };
-          
-          const removeCat = async (idx) => {
-            const name = myCats.value[idx].name;
-            if (!confirm(`確定要刪除「${name}」的護照嗎？`)) return;
-            isSavingCat.value = true;
-            try {
-              const res = await apiPost({ action:"deleteMyCat", idToken, catName: name });
-              if(res && res.success){ 
-                showToast('已刪除 ' + name); 
-                myCats.value.splice(idx, 1);
-                editIdx.value = -1; 
-                reloadProfile(); 
-              }
-              else showToast('刪除失敗，請再試一次', true);
-            } catch(e){ showToast('刪除失敗 '+e.message, true); }
-            isSavingCat.value = false;
-          };
-
-          onMounted(()=>{
-            statusCode.value='AUTH·0';
-            window.addEventListener('beforeunload', function(e) {
-              e.preventDefault(); e.returnValue = '';
-            });
-            history.pushState(null, '', location.href);
-            window.addEventListener('popstate', function() {
-              const hasUnsaved = bookStep.value > 1 || editIdx.value >= 0;
-              if (hasUnsaved && !confirm('尚有未完成的操作，確定要離開嗎？')) {
-                history.pushState(null, '', location.href);
-              }
-            });
-            liff.init({ liffId:LIFF_ID }).then(()=>{
-              if(!liff.isLoggedIn()){
-                statusCode.value='AUTH·0';
-                liff.login({ redirectUri: location.href });
-                return;
-              }
-              idToken = liff.getIDToken();
-              if(!idToken){ 
-                statusCode.value='AUTH·ERR'; 
-                showToast('身分驗證失敗，請重開', true); 
-                authFailed.value = true; 
-                return; 
-              }
-              statusCode.value='AUTH·1';
-              loadProfile();
-            }).catch((err)=>{ statusCode.value='LIFF·ERR'; showToast('LIFF 初始化失敗', true); });
-          });
-
-          return { currentTab, myProfile, myCats, calendarDates, selectedDate, newCat, editIdx, editCat, toast, statusCode, isLineMode, authFailed, forceRelogin,
-            globalLoading, isSavingProfile, isRegisteringCat, isSavingCat,
-            switchTab, moveCalMonth, selectDate, saveProfile, registerCat, toggleEdit, saveEditCat, removeCat,
-            bookStep, selectedSlot, selectedCats, bookCatCount, bookNotes, bookLoading, availableSlots, calMonthLabel,
-            toggleCatSelect, submitBooking, resetBook, refreshing, refreshCalendar,
-            myAppointments, apptLoading, apptExpanded, cancelMyAppointment, moveCalMonth, calYear, calMonth, clientHolidayData, advanceDays,
-            contentItems, contentLoading, expandedContentIds, toggleContentItem };
+      // 登入成功邏輯：一次平行發起所有核心背景載入
+      const fetchCal = (forceRefresh) => {
+        // 有快取且不強制重整 → 直接渲染，不轉圈
+        if(scheduleMapCache && !forceRefresh) {
+          renderCal(null, scheduleMapCache);
+          return;
         }
-      }).mount('#app');
+        calLoading.value = true;
+        calGrid.value = [];
+        google.script.run
+          .withSuccessHandler((res)=>{
+            calLoading.value=false;
+            if(res){
+              scheduleMapCache = res.scheduleMap; // 存快取
+              renderCal(res.slots, res.scheduleMap);
+            }
+          })
+          .withFailureHandler(()=>{ calLoading.value=false; showToast('月曆載入失敗', true); })
+          .adminGetCalendar(calYear.value, calMonth.value, pwd());
+      };
+
+      const verifyPassword = () => {
+        const p = passwordInput.value.trim(); if(!p) return;
+        loading.value = true;
+        google.script.run.withSuccessHandler((res)=>{
+          loading.value = false;
+          if(res && res.success){ 
+            isAuthenticated.value = true; 
+            localStorage.setItem('jemin_admin_pwd', p); 
+            showToast('🔑 驗證成功！'); 
+            
+            // 🚀 一開機全速背景載入
+            refreshClients(); 
+            fetchPendingBookings();
+            fetchConfirmedSchedules();
+            loadFinance();
+            loadContent();
+            // 單獨載入時段範本（不依賴 loadScheduleTab）
+            google.script.run
+              .withSuccessHandler((r)=>{ if(r&&r.success&&r.slots&&r.slots.length>0) customSlots.value=r.slots; })
+              .adminGetSlots(p);
+            loadAdvanceDays();
+            loadApptMonths();
+            // 立刻觸發月曆載入
+            loadHolidayData();
+            fetchCal();
+          }
+          else { showToast('❌ 密碼錯誤！'); localStorage.removeItem('jemin_admin_pwd'); }
+        }).withFailureHandler((e)=>{ loading.value=false; showToast('連線失敗：'+e); }).adminVerifyPwd({ pwd: p });
+      };
+      const logout = () => { localStorage.removeItem('jemin_admin_pwd'); location.reload(); };
+
+      const switchTab = (t) => {
+        if(loading.value) { showToast('⏳ 請等待目前操作完成'); return; }
+        activeTab.value = t;
+        if(t==='tab-clients') refreshClients();
+        else if(t==='tab-schedule'){ loadScheduleTab(); if(!hasLoadedContent.value) loadContent(); }
+        else if(t==='tab-finance') loadFinance();
+      };
+
+      // TAB1
+      const t1SelectUid=ref(''), t1CustomUid=ref(''), t1Type=ref('minus'), t1Amount=ref(''), t1Desc=ref('');
+      const submitT1Bound = () => {
+        // 從目前開啟的客戶詳情頁取 UID，直接綁定不需選人
+        const uid = t2SelectUid.value;
+        if(!uid){ showToast('❌ 請先進入客戶檔案', true); return; }
+        let amt = parseFloat(t1Amount.value);
+        const desc = t1Desc.value.trim();
+        if(isNaN(amt) || amt <= 0 || !desc){ showToast('❌ 請填寫金額與說明', true); return; }
+        const finalAmt = t1Type.value==='minus' ? -Math.abs(amt) : Math.abs(amt);
+        loading.value = true;
+        google.script.run
+          .withSuccessHandler((r)=>{
+            loading.value = false;
+            if(r && r.success){
+              showToast('✅ 交易已登錄');
+              t1Amount.value = '';
+              t1Desc.value = '';
+              // 重新載入該客戶的明細和累積數字
+              loadClient();
+              refreshClients();
+            } else showToast('❌ 登錄失敗', true);
+          })
+          .withFailureHandler(()=>{ loading.value=false; showToast('❌ 連線失敗', true); })
+          .adminAddTransaction(uid, finalAmt, desc, pwd());
+      };
+      const submitT1 = () => {
+        const uid = t1SelectUid.value || t1CustomUid.value.trim();
+        let amt = parseFloat(t1Amount.value); const desc = t1Desc.value.trim();
+        if(!uid || isNaN(amt) || amt<0 || !desc){ showToast('❌ 欄位未完整'); return; }
+        const finalAmt = t1Type.value==='minus' ? -Math.abs(amt) : Math.abs(amt);
+        loading.value = true;
+        google.script.run.withSuccessHandler((res)=>{ loading.value=false; showToast(res && res.success ? `✅ 完成！餘額 ${res.newBalance}` : '失敗'); t1Amount.value=''; t1Desc.value=''; refreshClients(); }).adminAddTransaction(uid, finalAmt, desc, pwd());
+      };
+
+      // TAB2
+      const t2SelectUid=ref(''), t2SearchQuery=ref(''), t2Profile=ref({ info:{}, cats:[], logs:[] });
+          const t2Loaded = ref(false);
+      const clientName = (uid) => {
+        if(!uid || uid==='未指定') return '未指定';
+        const c = clientsList.value.find(c=>c.uid===uid);
+        return c ? c.name : uid;
+      };
+      const clientLineUid = (uid) => {
+        if(!uid || uid==='未指定') return '';
+        const c = clientsList.value.find(c=>c.uid===uid);
+        return c ? c.lineUid : '';
+      };
+      const filteredClients = computed(()=>{ if(!t2SearchQuery.value.trim()) return clientsList.value; const q=t2SearchQuery.value.toLowerCase().trim(); return clientsList.value.filter(c=>c.uid.toLowerCase().includes(q)||c.name.toLowerCase().includes(q)); });
+      const openClient = (uid) => { t2SelectUid.value=uid; loadClient(); };
+      const goToFlow = (uid) => {
+        // 跳到家長頁該客戶的金流登記區塊
+        if(!uid || uid==='未指定') { showToast('此筆無指定客戶', true); return; }
+        switchTab('tab-clients');
+        t2SelectUid.value = uid;
+        loadClient();
+        // 等畫面渲染後 scroll 到金流登記
+        setTimeout(() => {
+          const el = document.getElementById('flow-anchor');
+          if(el) el.scrollIntoView({ behavior:'smooth', block:'start' });
+        }, 500);
+      };
+      const loadClient = () => { if(!t2SelectUid.value) return; loading.value=true; t2Loaded.value=false; google.script.run.withSuccessHandler((res)=>{ loading.value=false; if(res && res.success){ t2Profile.value=res; t2Loaded.value=true; } }).adminGetProfile(t2SelectUid.value, pwd()); };
+      const saveNote = () => { loading.value=true; google.script.run.withSuccessHandler(()=>{ loading.value=false; showToast('備註已儲存'); }).adminUpdateNote(t2SelectUid.value, t2Profile.value.info.note, pwd()); };
+      const recalc = () => { loading.value=true; google.script.run.withSuccessHandler((r)=>{ loading.value=false; showToast('已重算餘額：'+ (r?r.newBalance:'')); loadClient(); refreshClients(); }).adminRecalc(t2SelectUid.value, pwd()); };
+      const delLog = (log) => { triggerConfirm('⚠️ 刪除交易','刪除後會反向平衡餘額，確定？',()=>{ loading.value=true; google.script.run.withSuccessHandler(()=>{ loading.value=false; showToast('已刪除'); refreshClients(); loadClient(); }).adminDeleteLog(log.rowIndex, t2SelectUid.value, log.amount, pwd()); }); };
+      const delClient = () => { triggerConfirm('🚨 徹底註銷','將永久刪除此家長所有資料，不可逆！確定？',()=>{ loading.value=true; google.script.run.withSuccessHandler(()=>{ loading.value=false; showToast('已註銷'); t2SelectUid.value=''; refreshClients(); }).adminDeleteClient(t2SelectUid.value, pwd()); }); };
+
+      // TAB3
+      const customSlots=ref([]), newSlot=ref('');
+      const dragIdx=ref(-1), dragOverIdx=ref(-1);
+      const dragStart = (idx) => { dragIdx.value=idx; };
+      const dragOver  = (idx) => { dragOverIdx.value=idx; };
+      const dragEnd   = () => {
+        const from=dragIdx.value, to=dragOverIdx.value;
+        if(from<0||to<0||from===to){ dragIdx.value=-1; dragOverIdx.value=-1; return; }
+        const arr=[...customSlots.value];
+        arr.splice(to, 0, arr.splice(from, 1)[0]);
+        customSlots.value=arr;
+        // 存新順序到後端
+        google.script.run
+          .withSuccessHandler((r)=>{ if(r&&r.success) showToast('順序已儲存'); })
+          .adminSaveSlots(arr, pwd());
+        dragIdx.value=-1; dragOverIdx.value=-1;
+      };
+      const scheduleView = ref('current');
+      const todayStr = ref('');
+      const scheduleHistory = ref([]);
+      const historyLoading = ref(false);
+      const historyStart = ref(''), historyEnd = ref(''), historyQuery = ref('');
+      let historySearchTimer = null;
+
+      const switchToHistory = () => { scheduleView.value = 'history'; loadHistory(); };
+      const loadHistory = () => {
+        historyLoading.value = true;
+        google.script.run
+          .withSuccessHandler((res)=>{ historyLoading.value=false; scheduleHistory.value = (res && res.list) ? res.list : []; })
+          .withFailureHandler(()=>{ historyLoading.value=false; showToast('查詢失敗', true); })
+          .adminGetScheduleHistory(historyStart.value, historyEnd.value, historyQuery.value, pwd());
+      };
+      const debounceHistorySearch = () => { clearTimeout(historySearchTimer); historySearchTimer = setTimeout(loadHistory, 400); };
+      const exportHistoryCsv = () => {
+        google.script.run.withSuccessHandler((res)=>{
+          if (!res || !res.success) { showToast('匯出失敗', true); return; }
+          const blob = new Blob(["\ufeff" + res.csv], { type: 'text/csv;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a'); a.href = url; a.download = `排程紀錄_${historyStart.value}_${historyEnd.value}.csv`;
+          document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); showToast('已匯出 CSV');
+        }).adminExportScheduleHistoryCsv(historyStart.value, historyEnd.value, historyQuery.value, pwd());
+      };
+      const formTitle=ref('📝 行程表單'), formBtnText=ref('✦ 存入排程'), formDesc=ref('點擊左側帶入資料，或直接填寫新建行程');
+      const clearForm = () => {
+        formTitle.value='📝 新建行程'; formBtnText.value='✦ 存入排程'; formDesc.value='手動填寫，直接新增至排程';
+        form.value={ originRowIndex:'0', editScheduleRowIndex:'0', uid:'', count:'1', address:'', date:'', time:'', customTime:'', catDetail:'', notes:'', merchantNote:'' };
+        document.getElementById('form-anchor').scrollIntoView({behavior:'smooth', block:'center'});
+      };
+      const form=ref({ originRowIndex:'0', editScheduleRowIndex:'0', uid:'', count:'', address:'', date:'', time:'', catDetail:'', notes:'' });
+      const batch=ref({ startDate:'', endDate:'', selectedSlots:[] });
+      const advanceDays = ref(1);
+      const apptMonths = ref(0); // 家長預約顯示月數，0=全部
+      const loadAdvanceDays = () => {
+        google.script.run
+          .withSuccessHandler((r)=>{ if(r&&r.success) advanceDays.value=r.days; })
+          .getAdvanceDays();
+      };
+      const saveAdvanceDays = () => {
+        loading.value = true;
+        google.script.run
+          .withSuccessHandler((r)=>{ loading.value=false; if(r&&r.success) showToast('✅ 提前天數已儲存'); else showToast('❌ 儲存失敗', true); })
+          .withFailureHandler(()=>{ loading.value=false; showToast('❌ 連線失敗', true); })
+          .saveAdvanceDays(advanceDays.value, pwd());
+      };
+      const loadApptMonths = () => {
+        google.script.run
+          .withSuccessHandler((r)=>{ if(r&&r.success) apptMonths.value=r.months; })
+          .getApptMonths();
+      };
+      const saveApptMonths = () => {
+        loading.value = true;
+        google.script.run
+          .withSuccessHandler((r)=>{ loading.value=false; if(r&&r.success) showToast('✅ 顯示月數已儲存'); else showToast('❌ 儲存失敗', true); })
+          .withFailureHandler(()=>{ loading.value=false; showToast('❌ 連線失敗', true); })
+          .saveApptMonths(apptMonths.value, pwd());
+      };
+      const _now = new Date();
+      const calYear=ref(_now.getFullYear()), calMonth=ref(_now.getMonth()+1);
+      const calMonthTitle=ref(_now.getFullYear()+'年'+String(_now.getMonth()+1).padStart(2,'0')+'月');
+      const calGrid=ref([]), calLoading=ref(false);
+      let scheduleMapCache = null; // 月曆資料快取，null=尚未載入
+      const _todayStr = _now.getFullYear()+'-'+String(_now.getMonth()+1).padStart(2,'0')+'-'+String(_now.getDate()).padStart(2,'0');
+      
+
+      const loadScheduleTab = () => {
+        loading.value = true;
+        calLoading.value = true;
+        calGrid.value = [];
+        scheduleMapCache = null; // 清快取，確保重抓最新資料
+        google.script.run.withSuccessHandler((res)=>{
+          loading.value = false;
+          if(res && res.success) {
+            bookingRequests.value = res.bookings || [];
+            hasLoadedBookings.value = true;
+            confirmedSchedules.value = res.schedules || [];
+            hasLoadedSchedules.value = true;
+            // 時段範本：只在有值時才更新，避免空值蓋掉本地已有的
+            if(res.slots && res.slots.length > 0) customSlots.value = res.slots;
+            renderCal(res.calSlots, res.scheduleMap);
+          }
+          calLoading.value = false;
+        }).withFailureHandler((e)=>{
+          loading.value=false;
+          calLoading.value=false;
+          showToast('載入失敗：'+e, true);
+        }).adminGetScheduleTabData(pwd(), calYear.value, calMonth.value);
+      };
+      const pickBooking = (idx) => {
+        const r = bookingRequests.value[idx];
+        formTitle.value='📝 審核預約單'; formBtnText.value='✦ 確認登錄排程'; formDesc.value='來自客人預約申請，可修改後登錄';
+        form.value = { originRowIndex:String(r.rowIndex), editScheduleRowIndex:'0', uid:r.uid, count:String(r.count), address:r.address, date:r.date, time:r.time, catDetail:r.catDetail, notes:r.notes, merchantNote:r.merchantNote||'' };
+        document.getElementById('form-anchor').scrollIntoView({behavior:'smooth', block:'center'});
+      };
+      const delBooking = (r) => { triggerConfirm('🗑️ 刪除預約','永久移除此預約申請？',()=>{ loading.value=true; google.script.run.withSuccessHandler(()=>{ loading.value=false; showToast('已清除'); loadScheduleTab(); }).adminDeleteBooking(r.rowIndex, pwd()); }); };
+      const pickSchedule = (idx) => {
+        const s = confirmedSchedules.value[idx];
+        formTitle.value='✏️ 修改行程'; formBtnText.value='💾 儲存變更'; formDesc.value='點擊帶入，直接修改後儲存';
+        form.value = { originRowIndex:'0', editScheduleRowIndex:String(s.rowIndex), uid:s.uid, count:s.count, address:s.address, date:s.date, time:s.time, catDetail:s.catDetail, notes:s.notes, merchantNote:s.merchantNote||'' };
+        document.getElementById('form-anchor').scrollIntoView({behavior:'smooth', block:'center'});
+      };
+      const pickHistoryItem = (h) => {
+        formTitle.value='✏️ 修改歷史紀錄'; formBtnText.value='💾 儲存變更'; formDesc.value='點擊帶入，直接修改後儲存（含歷史紀錄）';
+        form.value = { originRowIndex:'0', editScheduleRowIndex:String(h.rowIndex), uid:h.uid==='未指定'?'':h.uid, count:h.count, address:h.address, date:h.date, time:h.time, customTime:'', catDetail:h.catDetail, notes:h.notes, merchantNote:h.merchantNote||'' };
+        document.getElementById('form-anchor').scrollIntoView({behavior:'smooth', block:'center'});
+      };
+      const commitSchedule = () => {
+        const f = form.value;
+        const finalTime = (f.time==='__custom__') ? f.customTime.trim() : f.time;
+        if(!f.date || !finalTime){ showToast('❌ 請至少填寫日期與時辰'); return; }
+        loading.value = true;
+        google.script.run.withSuccessHandler(()=>{
+          loading.value=false; showToast('✅ 排程已同步！');
+          formTitle.value='📝 行程表單'; formBtnText.value='✦ 存入排程';
+          formDesc.value='點擊左側帶入資料，或直接填寫新建行程';
+          form.value={ originRowIndex:'0', editScheduleRowIndex:'0', uid:'', count:'1', address:'', date:'', time:'', customTime:'', catDetail:'', notes:'', merchantNote:'' };
+          loadScheduleTab();
+          if (scheduleView.value==='history') loadHistory();
+        }).adminCommitSchedule({ pwd:pwd(), originRowIndex:f.originRowIndex, editScheduleRowIndex:f.editScheduleRowIndex, uid:f.uid||'未指定', count:f.count||'1', address:f.address, date:f.date, time:finalTime, catDetail:f.catDetail, notes:f.notes, merchantNote:f.merchantNote||'' });
+      };
+      const delSchedule = (s) => { triggerConfirm('⚠️ 取消行程','釋放此時段？',()=>{ loading.value=true; google.script.run.withSuccessHandler(()=>{ loading.value=false; showToast('已取消'); loadScheduleTab(); if(scheduleView.value==='history') loadHistory(); }).adminDeleteSchedule(s.rowIndex, pwd()); },'確認取消'); };
+      const delHistoryItem = (h) => { triggerConfirm('⚠️ 刪除歷史紀錄','此操作無法復原，確定刪除？',()=>{ loading.value=true; google.script.run.withSuccessHandler(()=>{ loading.value=false; showToast('已刪除'); loadHistory(); }).adminDeleteSchedule(h.rowIndex, pwd()); }); };
+      const addSlot = () => {
+        const v=newSlot.value.trim(); if(!v) return;
+        if(customSlots.value.includes(v)){ showToast('⚠️ 已存在此時段'); return; }
+        const newSlots = [...customSlots.value, v];
+        loading.value=true;
+        google.script.run
+          .withSuccessHandler((r)=>{ loading.value=false; if(r&&r.success){ customSlots.value=r.slots||newSlots; newSlot.value=''; showToast('✅ 時段已加入'); } else showToast('❌ 新增失敗',true); })
+          .withFailureHandler(()=>{ loading.value=false; showToast('❌ 連線失敗',true); })
+          .adminSaveSlots(newSlots, pwd());
+      };
+      const removeSlot = (idx) => {
+        const s=customSlots.value[idx];
+        triggerConfirm('刪除時段',`從範本庫移除「${s}」？過去已批次設定的記錄不受影響。`,()=>{
+          loading.value=true;
+          google.script.run
+            .withSuccessHandler((r)=>{ loading.value=false; if(r&&r.success){ customSlots.value=r.slots||customSlots.value.filter((_,i)=>i!==idx); showToast('已移除'); } })
+            .withFailureHandler(()=>{ loading.value=false; showToast('❌ 連線失敗',true); })
+            .adminRemoveSlot(s, pwd());
+        });
+      };
+      const toggleBatch = (s) => { const i=batch.value.selectedSlots.indexOf(s); if(i>=0) batch.value.selectedSlots.splice(i,1); else batch.value.selectedSlots.push(s); };
+      const onBatchStartChange = () => { if(batch.value.startDate > batch.value.endDate) batch.value.endDate = batch.value.startDate; };
+      const onBatchEndChange   = () => { if(batch.value.endDate < batch.value.startDate) batch.value.startDate = batch.value.endDate; };
+      const doBatch = (mode) => {
+        const b=batch.value; if(!b.startDate||!b.endDate||b.selectedSlots.length===0){ showToast('❌ 未完整'); return; }
+        let arr=[], dt=new Date(b.startDate+'T00:00:00'), end=new Date(b.endDate+'T00:00:00');
+        if(dt>end){ showToast('❌ 日期錯誤'); return; }
+        while(dt<=end){ let y=dt.getFullYear(),m=dt.getMonth()+1,d=dt.getDate(); arr.push(`${y}-${m<10?'0'+m:m}-${d<10?'0'+d:d}`); dt.setDate(dt.getDate()+1); }
+        triggerConfirm('⚡ 批次調整',`將選取期間設為「${mode==='open'?'開放':'關閉'}」？`,()=>{ loading.value=true; google.script.run.withSuccessHandler(()=>{ loading.value=false; showToast('⚡ 完成！'); batch.value.selectedSlots=[]; scheduleMapCache=null; loadScheduleTab(); }).adminBatchSchedule(arr, b.selectedSlots, mode, pwd()); },'確認調整');
+      };
+      const moveMonth = (dir) => {
+        calMonth.value += dir;
+        if(calMonth.value>12){ calMonth.value=1; calYear.value++; }
+        if(calMonth.value<1){ calMonth.value=12; calYear.value--; }
+        calMonthTitle.value = calYear.value+'年'+(calMonth.value<10?'0'+calMonth.value:calMonth.value)+'月';
+        fetchCal(); // 有快取就直接渲染，不重抓
+      };
+
+
+      // 台灣公定假日（格式 MM-DD，每年可更新）
+      const twHolidays = new Set([
+        '01-01','02-16','02-17','02-18','02-19','02-20','02-21','02-22',
+        '04-03','04-04','04-05','05-01','06-19','09-28','10-10'
+      ]);
+      const isHoliday = (dateStr) => {
+        const md = dateStr.substring(5); // yyyy-MM-DD → MM-DD
+        return twHolidays.has(md);
+      };
+      const renderCal = (slots, scheduleMap) => {
+        const grid=[]; const firstDay=new Date(calYear.value, calMonth.value-1, 1).getDay(); const total=new Date(calYear.value, calMonth.value, 0).getDate();
+        for(let i=0;i<firstDay;i++) grid.push({empty:true});
+        const todayStr = _todayStr; // 使用初始化時算好的今日字串
+        for(let d=1;d<=total;d++){
+          const fm=calMonth.value<10?'0'+calMonth.value:calMonth.value, fd=d<10?'0'+d:d;
+          const dateStr=calYear.value+'-'+fm+'-'+fd;
+          const isPast = dateStr < todayStr;
+          const isToday = dateStr === todayStr;
+          const holiday = isHoliday(dateStr);
+          const weekDay = new Date(calYear.value, calMonth.value-1, d).getDay(); // 0=日 6=六
+          const isSunday = weekDay === 0;
+          const isSaturday = weekDay === 6;
+          // ★ 從 scheduleMap 直接讀這天的實際時段，不依賴範本庫
+          // 這樣過去的記錄不會因為範本庫改了而消失
+          let dayData = scheduleMap ? (scheduleMap[dateStr] || {}) : {};
+          let cells = [];
+          const daySlots = Object.keys(dayData); // 這天實際有記錄的時段
+          if(daySlots.length > 0){
+            daySlots.forEach(s => {
+              cells.push({ shortName:(s.split(' ')[0]||s), isOpen: dayData[s]==='開放', isPast });
+            });
+          }
+          // holidays/workdays 優先判斷
+          var md = fm+'-'+fd;
+          var isHolidayMark = inHolidaySet(calYear.value, md, holidayData.value.holidays) || holiday;
+          var isWorkday     = inHolidaySet(calYear.value, md, holidayData.value.workdays);
+          grid.push({ empty:false, dayNum:d, dateStr, isToday, isPast, isHoliday:holiday, isHolidayMark, isWorkday, isSunday, isSaturday, slots:cells });
+        }
+        calGrid.value = grid;
+      };
+
+      // TAB4
+      const financeStart=ref(''), financeEnd=ref('');
+      // 文案公告板
+      const contentList = ref([]);
+      const contentSaving = ref(false);  // 文案操作專用 loading
+      const holidayLoading = ref(false); // 更新假日專用 loading
+      const holidayData = ref({ holidays:{}, workdays:{} }); // 從後端載入的假日資料
+
+      // 判斷某日期（MM-DD）是否在指定年份的清單裡
+      const inHolidaySet = (year, md, dict) => {
+        var yStr = String(year);
+        return dict && dict[yStr] && dict[yStr].indexOf(md) >= 0;
+      };
+      const hasLoadedContent = ref(false);
+      const adminExpandedIds = ref([]);
+      const toggleAdminContent = (id) => {
+        const idx = adminExpandedIds.value.indexOf(id);
+        if(idx >= 0) adminExpandedIds.value.splice(idx, 1);
+        else adminExpandedIds.value.push(id);
+      };
+      const contentDragIdx = ref(-1), contentDragOverIdx = ref(-1);
+      const contentDragStart = (idx) => { contentDragIdx.value = idx; };
+      const contentDragOver  = (idx) => { contentDragOverIdx.value = idx; };
+      const contentDragEnd   = () => {
+        const from = contentDragIdx.value, to = contentDragOverIdx.value;
+        if(from < 0 || to < 0 || from === to){ contentDragIdx.value=-1; contentDragOverIdx.value=-1; return; }
+        // 重新排列清單
+        const arr = [...contentList.value];
+        arr.splice(to, 0, arr.splice(from, 1)[0]);
+        // 更新每筆的 sort 值（依新順序 1,2,3...）
+        arr.forEach((item, i) => { item.sort = i + 1; });
+        contentList.value = arr;
+        contentDragIdx.value = -1; contentDragOverIdx.value = -1;
+        // 批次寫回 Sheet 的排序欄
+        contentSaving.value = true;
+        let done = 0;
+        arr.forEach((item) => {
+          google.script.run
+            .withSuccessHandler(() => {
+              done++;
+              if(done === arr.length){ contentSaving.value = false; showToast('✅ 順序已儲存'); }
+            })
+            .withFailureHandler(() => { contentSaving.value = false; showToast('❌ 儲存失敗', true); })
+            .adminSaveContent(item.rowIndex, item.key||'', item.title, item.body, item.sort, item.enabled, pwd());
+        });
+      };
+      const contentForm = ref({ show:false, rowIndex:0, key:'', title:'', body:'', sort:99, enabled:true });
+
+      const fetchHolidays = () => {
+        holidayLoading.value = true;
+        google.script.run
+          .withSuccessHandler((r)=>{
+            holidayLoading.value=false;
+            if(r&&r.success){
+              showToast('✅ '+r.message);
+              // 重新載入月曆以套用新假日
+              fetchCal();
+            } else showToast('❌ 更新失敗', true);
+          })
+          .withFailureHandler(()=>{ holidayLoading.value=false; showToast('❌ 連線失敗', true); })
+          .adminFetchHolidays(pwd());
+      };
+      // 從後端載入假日資料（登入後和更新後呼叫）
+      const loadHolidayData = () => {
+        google.script.run
+          .withSuccessHandler((r)=>{
+            if(r) {
+              holidayData.value = r;
+              // 假日資料載入後重新渲染月曆套用顏色
+              if(calGrid.value.length > 0) fetchCal();
+            }
+          })
+          .getHolidayList();
+      };
+      const loadContent = () => {
+        hasLoadedContent.value = false;
+        google.script.run
+          .withSuccessHandler((r)=>{ if(r&&r.success){ contentList.value=r.list; } hasLoadedContent.value=true; })
+          .withFailureHandler(()=>{ hasLoadedContent.value=true; showToast('文案載入失敗', true); })
+          .adminGetContent(pwd());
+      };
+      const openNewContent = () => {
+        contentForm.value = { show:true, rowIndex:0, key:'', title:'', body:'', sort:contentList.value.length+1, enabled:true };
+      };
+      const editContent = (item) => {
+        contentForm.value = { show:true, rowIndex:item.rowIndex, key:item.key||'', title:item.title, body:item.body, sort:item.sort, enabled:item.enabled };
+        // scroll 到表單
+        setTimeout(()=>{ const el=document.querySelector('[placeholder="例如：儲值方案說明"]'); if(el) el.scrollIntoView({behavior:'smooth',block:'center'}); }, 100);
+      };
+      const saveContent = () => {
+        const f = contentForm.value;
+        if(!f.title.trim()){ showToast('❌ 請填寫標題', true); return; }
+        contentSaving.value = true;
+        google.script.run
+          .withSuccessHandler((r)=>{ contentSaving.value=false; if(r&&r.success){ showToast('✅ 已儲存'); contentForm.value.show=false; loadContent(); } else showToast('❌ 儲存失敗', true); })
+          .withFailureHandler(()=>{ contentSaving.value=false; showToast('❌ 連線失敗', true); })
+          .adminSaveContent(f.rowIndex, f.key||'', f.title, f.body, f.sort, f.enabled, pwd());
+      };
+      const toggleContent = (item) => {
+        contentSaving.value = true;
+        google.script.run
+          .withSuccessHandler((r)=>{ contentSaving.value=false; if(r&&r.success){ item.enabled=!item.enabled; showToast(item.enabled?'✅ 已啟用':'已停用'); } })
+          .withFailureHandler(()=>{ contentSaving.value=false; showToast('❌ 更新失敗', true); })
+          .adminSaveContent(item.rowIndex, item.key||'', item.title, item.body, item.sort, !item.enabled, pwd());
+      };
+      const deleteContent = (item) => {
+        triggerConfirm('刪除文案', `確定刪除「${item.title}」？此操作無法復原。`, ()=>{
+          contentSaving.value = true;
+          google.script.run
+            .withSuccessHandler((r)=>{ contentSaving.value=false; if(r&&r.success){ showToast('已刪除'); loadContent(); } else showToast('❌ 刪除失敗', true); })
+            .withFailureHandler(()=>{ contentSaving.value=false; showToast('❌ 連線失敗', true); })
+            .adminDeleteContent(item.rowIndex, pwd());
+        });
+      };
+      // ⚡ 防呆優化：預設值設為 null，未載入時畫面顯示 ──，避免閃出 0 元
+      const finance=ref({ totalBalance: null, recharge: null, consumption: null, income: null, expense: null, net: null, logs:[] });
+      const shop=ref({ date:'', type:'minus', amount:'', desc:'' });
+      const loadFinance = () => {
+        if(!financeStart.value||!financeEnd.value) return;
+        loading.value = true;
+        google.script.run.withSuccessHandler((res)=>{
+          loading.value = false;
+          finance.value={ 
+            totalBalance: res.totalMemberBalance||0, 
+            recharge: res.memberRecharge||0,
+            consumption: res.memberConsumption||0, 
+            income: res.shopIncome||0, 
+            expense: res.shopExpense||0, 
+            net: res.netIncome||0, 
+            logs: res.detailedLogs||[] 
+          };
+        }).withFailureHandler(()=>{ loading.value = false; }).adminGetFinance(financeStart.value, financeEnd.value, pwd());
+      };
+      const delFinanceLog = (log) => { triggerConfirm('⚠️ 刪除帳務','若為家長扣款會反向調平餘額，確定？',()=>{ loading.value=true; google.script.run.withSuccessHandler(()=>{ loading.value=false; showToast('已刪除'); loadFinance(); refreshClients(); }).adminDeleteLog(log.rowIndex, log.uid, log.amount, pwd()); }); };
+      const submitShop = () => {
+        const s=shop.value;
+        if(!s.date || isNaN(parseFloat(s.amount)) || parseFloat(s.amount)<=0 || !s.desc){ showToast('❌ 未完整'); return; }
+        const finalAmt = s.type==='minus' ? -Math.abs(s.amount) : Math.abs(s.amount);
+        loading.value=true;
+        google.script.run.withSuccessHandler(()=>{ loading.value=false; showToast('💰 記帳完成！'); shop.value.amount=''; shop.value.desc=''; loadFinance(); }).adminAddShopRecord(finalAmt, s.desc.trim(), s.date, pwd());
+      };
+
+      onMounted(()=>{
+        window.addEventListener('beforeunload', function(e) { e.preventDefault(); e.returnValue = ''; });
+        history.pushState(null, '', location.href);
+        window.addEventListener('popstate', function() { if (loading.value && !confirm('操作進行中，確定要離開嗎？')) history.pushState(null, '', location.href); });
+        
+        setInterval(()=>{
+          if(isAuthenticated.value && !loading.value) fetchPendingBookings();
+        }, 30*1000);
+
+        const t=new Date(), y=t.getFullYear(), m=t.getMonth()+1, d=t.getDate(), fm=m<10?'0'+m:m, fd=d<10?'0'+d:d;
+        todayStr.value = `${y}-${fm}-${fd}`;
+        financeStart.value=`${y}-${fm}-01`; financeEnd.value=`${y}-${fm}-${fd}`; shop.value.date=`${y}-${fm}-${fd}`;
+        batch.value.startDate=`${y}-${fm}-${fd}`; batch.value.endDate=`${y}-${fm}-${fd}`;
+        
+        const past3m = new Date(t); past3m.setMonth(past3m.getMonth()-3);
+        const py=past3m.getFullYear(), pm=past3m.getMonth()+1, pd=past3m.getDate();
+        historyStart.value = `${py}-${pm<10?'0'+pm:pm}-${pd<10?'0'+pd:pd}`;
+        historyEnd.value = todayStr.value;
+        calYear.value=y; calMonth.value=m; calMonthTitle.value=`${y}年${fm}月`;
+        const saved=localStorage.getItem('jemin_admin_pwd');
+        if(saved){ passwordInput.value=saved; verifyPassword(); }
+      });
+
+      return { loading, isAuthenticated, passwordInput, activeTab, toast, clientsList, verifyPassword, logout, switchTab,
+        confirmModal, executeConfirmAction,
+        clientCountDisplay, pendingCountDisplay, scheduleCountDisplay,
+        t1SelectUid, t1CustomUid, t1Type, t1Amount, t1Desc, submitT1, submitT1Bound,
+        t2SelectUid, t2SearchQuery, filteredClients, openClient, t2Profile, t2Loaded, saveNote, recalc, delLog, delClient,
+        bookingRequests, confirmedSchedules, hasLoadedBookings, hasLoadedSchedules, customSlots, newSlot, formTitle, formBtnText, formDesc, form, batch, calMonthTitle, calGrid, calLoading, clearForm, clientName,
+        scheduleView, todayStr, scheduleHistory, historyLoading, historyStart, historyEnd, historyQuery, switchToHistory, loadHistory, debounceHistorySearch, exportHistoryCsv, delHistoryItem, pickHistoryItem,
+        clientLineUid, goToFlow, pickBooking, delBooking, pickSchedule, commitSchedule, delSchedule, addSlot, removeSlot, dragIdx, dragOverIdx, dragStart, dragOver, dragEnd, onBatchStartChange, onBatchEndChange, advanceDays, saveAdvanceDays, apptMonths, saveApptMonths, toggleBatch, doBatch, moveMonth,
+        contentList, hasLoadedContent, contentForm, contentSaving, holidayLoading, holidayData, loadHolidayData, adminExpandedIds, toggleAdminContent, contentDragIdx, contentDragOverIdx, contentDragStart, contentDragOver, contentDragEnd, openNewContent, editContent, saveContent, toggleContent, deleteContent, fetchHolidays,
+        financeStart, financeEnd, finance, shop, loadFinance, delFinanceLog, submitShop };
+    }
+  }).mount('#app');
 </script>
 </body>
 </html>
