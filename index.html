@@ -3,7 +3,7 @@
   ╔══════════════════════════════════════════════════════════════════════════════╗
   ║  🔧 洗里喵 客端 維護資料                                                     ║
   ╠══════════════════════════════════════════════════════════════════════════════╣
-  ║  版本號      : v260803.04                                                       ║
+  ║  版本號      : v260803.05                                                       ║
   ║  GAS API     : https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec ║
   ║  GitHub URL  : https://jemin0819.github.io/xilemeow/                                         ║
   ║  LIFF URL    : https://liff.line.me/2010742657-DOz9QdF3                              ║
@@ -196,9 +196,9 @@
 <body>
 <div id="app" v-cloak>
 
-  <!-- 系統列 (正式進版: v260803.04) -->
+  <!-- 系統列 (正式進版: v260803.05) -->
   <div :class="['sys-bar', isLineMode?'live':'dev']">
-    <span>v260803.04 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
+    <span>v260803.05 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
     <span v-if="globalLoading" class="sync-badge">
       <svg class="spin" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
       同步中
@@ -650,7 +650,7 @@
   // ══════════════════════════════════════════════════════
   // 🔧 維護資料（每次更新請修改這裡）
   // ══════════════════════════════════════════════════════
-  const VERSION          = 'v260803.04';                    // 版本號
+  const VERSION          = 'v260803.05';                    // 版本號
   const GAS_API          = "https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec"; // GAS 部署網址
   const LIFF_ID          = '2010742657-DOz9QdF3';           // LINE LIFF ID
   const LINE_CHANNEL_ID  = '2010742657';                    // LINE Login Channel ID（idToken 驗證用）
@@ -960,10 +960,12 @@
             calMonth.value += dir;
             if(calMonth.value > 12){ calMonth.value=1; calYear.value++; }
             if(calMonth.value < 1){ calMonth.value=12; calYear.value--; }
+            // 更新月份標題
+            calMonthLabel.value = calYear.value+'年'+String(calMonth.value).padStart(2,'0')+'月';
             // 檢查目標月份是否在快取範圍內
             if(!isInCache(calYear.value, calMonth.value)) {
-              // 往後切：抓接下來6個月
-              // 往前切：抓往前6個月
+              // 超出範圍：清空月曆觸發 skeleton，抓新資料
+              calendarDates.value = [];
               const isForward = dir > 0;
               let sYear, sMonth, eYear, eMonth;
               if(isForward) {
@@ -975,7 +977,6 @@
                 const startDate = new Date(eYear, eMonth-1-5, 1);
                 sYear=startDate.getFullYear(); sMonth=startDate.getMonth()+1;
               }
-              calLoading.value = true;
               try {
                 const res = await apiGet({ action:'getPublicData',
                   startYear:sYear, startMonth:sMonth, endYear:eYear, endMonth:eMonth });
@@ -984,7 +985,6 @@
                   updateCacheRange(sYear, sMonth, eYear, eMonth);
                 }
               } catch(e) {}
-              calLoading.value = false;
             }
             renderMonth();
           };
