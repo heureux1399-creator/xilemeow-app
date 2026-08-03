@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <!--
   ╔══════════════════════════════════════════════════════════════════════════════╗
-  ║  🔧 洗咧喵 客端 維護資料                                                     ║
+  ║  🔧 洗里喵 客端 維護資料                                                     ║
   ╠══════════════════════════════════════════════════════════════════════════════╣
-  ║  版本號      : v260724.06                                                       ║
+  ║  版本號      : v260803.08                                                       ║
   ║  GAS API     : https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec ║
   ║  GitHub URL  : https://jemin0819.github.io/xilemeow/                                         ║
   ║  LIFF URL    : https://liff.line.me/2010742657-DOz9QdF3                              ║
@@ -16,7 +16,7 @@
   <base target="_top">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>洗咧喵</title>
+  <title>洗里喵</title>
   <script src="https://unpkg.com/vue@3.3.4/dist/vue.global.prod.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -184,14 +184,21 @@
     .seg-btn{ flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:9px 8px; border-radius:6px; border:none; background:transparent; font-family:'Noto Sans TC',sans-serif; font-size:13px; font-weight:500; color:var(--ink-2); cursor:pointer; transition:all .15s; }
     .seg-btn.active{ background:var(--card); color:var(--ink); font-weight:700; box-shadow:0 1px 4px rgba(42,32,20,.12); }
     .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    /* Skeleton loading */
+    .skeleton{ background:linear-gradient(90deg,#ede8e1 25%,#f5f0eb 50%,#ede8e1 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:6px; }
+    @keyframes shimmer{ 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    .sk-line{ height:12px; margin-bottom:8px; border-radius:4px; }
+    .sk-line.lg{ height:16px; }
+    .sk-line.sm{ height:10px; width:60%; }
+    .sk-cal-cell{ aspect-ratio:1; border-radius:8px; }
   </style>
 </head>
 <body>
 <div id="app" v-cloak>
 
-  <!-- 系統列 (正式進版: v260724.06) -->
+  <!-- 系統列 (正式進版: v260803.08) -->
   <div :class="['sys-bar', isLineMode?'live':'dev']">
-    <span>v260724.06 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
+    <span>v260803.08 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
     <span v-if="globalLoading" class="sync-badge">
       <svg class="spin" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
       同步中
@@ -206,7 +213,7 @@
   <!-- Header -->
   <header class="app-header">
     <div class="header-eyebrow">到府美容服務</div>
-    <h1 class="header-title">洗咧喵</h1>
+    <h1 class="header-title">洗里喵</h1>
     <p class="header-sub">翻閱農民曆選吉日 · 喵寶在家洗浴</p>
   </header>
 
@@ -263,8 +270,13 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
         </div>
-        <div v-if="calendarDates.length===0" style="text-align:center;padding:28px 0;">
-          <svg class="spin" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+        <div v-if="calendarDates.length===0">
+          <div class="cal-grid" style="margin-bottom:4px;">
+            <div v-for="n in 7" :key="n" class="cal-day-header skeleton" style="height:14px;border-radius:3px;"></div>
+          </div>
+          <div class="cal-grid">
+            <div v-for="n in 35" :key="n" class="sk-cal-cell skeleton"></div>
+          </div>
         </div>
         <div v-else>
           <!-- 星期標題列 -->
@@ -435,8 +447,11 @@
             </div>
           </div>
           <div v-show="apptExpanded" style="margin-top:12px;">
-            <div v-if="apptLoading" style="text-align:center;padding:16px;">
-              <svg class="spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            <div v-if="apptLoading" style="padding:12px 0;">
+              <div v-for="n in 2" :key="n" style="padding:10px 0;border-bottom:1px solid var(--border);">
+                <div class="sk-line lg skeleton" style="width:40%;margin-bottom:6px;"></div>
+                <div class="sk-line sm skeleton" style="width:65%;"></div>
+              </div>
             </div>
             <div v-else-if="myAppointments.length===0" style="text-align:center;padding:16px;font-size:12px;color:var(--ink-3);">近 3 個月無預約紀錄</div>
             <div v-else>
@@ -470,9 +485,12 @@
 
       <!-- 文案公告板（我的預約下方）-->
       <div v-if="bookStep===1 && myProfile.uid" style="margin-top:12px;">
-        <!-- 公告欄 loading -->
-        <div v-if="contentLoading" style="text-align:center;padding:16px;">
-          <svg class="spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+        <!-- 公告欄 skeleton -->
+        <div v-if="contentLoading" class="card card-accent" style="padding:14px 16px;">
+          <div class="sk-line lg skeleton" style="width:30%;margin-bottom:14px;"></div>
+          <div v-for="n in 3" :key="n" style="padding:10px 0;border-bottom:1px solid var(--border);">
+            <div class="sk-line skeleton" style="width:50%;"></div>
+          </div>
         </div>
         <div v-else-if="contentItems.length > 0">
         <div class="card card-accent" style="padding:0;overflow:hidden;">
@@ -506,7 +524,14 @@
 
     <!-- ════ 喵星護照 ════ -->
     <div v-if="currentTab==='cats' && !authFailed">
-      <div v-if="myCats.length>0" class="card card-accent">
+      <div v-show="profileLoading" class="card card-accent" style="padding:16px;">
+        <div class="sk-line lg skeleton" style="width:40%;margin-bottom:16px;"></div>
+        <div v-for="n in 2" :key="n" style="padding:12px 0;border-bottom:1px solid var(--border);">
+          <div class="sk-line skeleton" style="width:55%;margin-bottom:6px;"></div>
+          <div class="sk-line sm skeleton" style="width:35%;"></div>
+        </div>
+      </div>
+      <div v-show="!profileLoading && myCats.length>0" class="card card-accent">
         <div class="section-header">
           <span class="section-title">已登記喵寶</span>
           <span class="section-sub">{{ myCats.length }} 隻</span>
@@ -578,7 +603,14 @@
 
     <!-- ════ 家長中心 ════ -->
     <div v-if="currentTab==='member' && !authFailed">
-      <div class="card card-accent">
+      <div v-show="profileLoading" class="card card-accent" style="padding:16px;">
+        <div class="sk-line lg skeleton" style="width:30%;margin-bottom:16px;"></div>
+        <div v-for="n in 4" :key="n" style="margin-bottom:12px;">
+          <div class="sk-line sm skeleton" style="width:20%;margin-bottom:6px;"></div>
+          <div class="sk-line skeleton" style="width:90%;height:36px;border-radius:8px;"></div>
+        </div>
+      </div>
+      <div v-show="!profileLoading" class="card card-accent">
         <div class="section-header">
           <span class="section-title">家長資料</span>
         </div>
@@ -604,8 +636,8 @@
         <button class="btn btn-primary" @click="saveProfile" :disabled="isSavingProfile">
           {{ isSavingProfile ? '資料儲存中...' : '儲存資料' }}
         </button>
-      </div>
-    </div>
+      </div><!-- end v-else card -->
+    </div><!-- end tab member -->
 
   </div><!-- /main -->
 
@@ -632,7 +664,7 @@
   // ══════════════════════════════════════════════════════
   // 🔧 維護資料（每次更新請修改這裡）
   // ══════════════════════════════════════════════════════
-  const VERSION          = 'v260724.06';                    // 版本號
+  const VERSION          = 'v260803.08';                    // 版本號
   const GAS_API          = "https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec"; // GAS 部署網址
   const LIFF_ID          = '2010742657-DOz9QdF3';           // LINE LIFF ID
   const LINE_CHANNEL_ID  = '2010742657';                    // LINE Login Channel ID（idToken 驗證用）
@@ -676,6 +708,7 @@
           const statusCode = ref('INIT');
           const isLineMode = ref(true);
           const authFailed = ref(false);
+          const profileLoading = ref(true); // profile 載入中
 
           const globalLoading = ref(false);
           const isSavingProfile = ref(false);
@@ -711,7 +744,33 @@
           }; 
           const availableSlots = ref([]);
           const calMonthLabel = ref('');
+          // 區間快取：記錄已載入的範圍和資料
           let scheduleCacheMap = {};
+          let cacheLoadedStart = null; // { year, month } 已載入的最早月份
+          let cacheLoadedEnd   = null; // { year, month } 已載入的最晚月份
+
+          // 比較兩個 {year,month} 的大小
+          const ymLess = (a, b) => a.year < b.year || (a.year === b.year && a.month < b.month);
+          const ymLessEq = (a, b) => !ymLess(b, a);
+
+          // 目標月份是否在已載入範圍內
+          const isInCache = (year, month) => {
+            if(!cacheLoadedStart || !cacheLoadedEnd) return false;
+            const ym = {year, month};
+            return ymLessEq(cacheLoadedStart, ym) && ymLessEq(ym, cacheLoadedEnd);
+          };
+
+          // 合併新的 scheduleMap 到現有快取
+          const mergeScheduleMap = (newMap) => {
+            Object.keys(newMap).forEach(k => { scheduleCacheMap[k] = newMap[k]; });
+          };
+
+          // 更新快取範圍
+          const updateCacheRange = (sYear, sMonth, eYear, eMonth) => {
+            const s = {year:sYear, month:sMonth}, e = {year:eYear, month:eMonth};
+            if(!cacheLoadedStart || ymLess(s, cacheLoadedStart)) cacheLoadedStart = s;
+            if(!cacheLoadedEnd   || ymLess(cacheLoadedEnd, e))   cacheLoadedEnd   = e;
+          };
           let idToken = '';
 
           const showToast = (m, e=false) => { toast.value={ show:true, message:m, isError:e }; setTimeout(()=>toast.value.show=false, 3000); };
@@ -753,6 +812,7 @@
           };
 
           const applyProfile = (res) => {
+            profileLoading.value = false;
             myProfile.value.uid=res.info.uid; myProfile.value.name=res.info.name;
             myProfile.value.phone=res.info.phone; myProfile.value.address=res.info.address;
             myProfile.value.elevator=res.info.elevator||'有電梯'; myProfile.value.parking=res.info.parking||'';
@@ -771,16 +831,13 @@
               if(res && res.success){ 
                 applyProfile(res); 
                 statusCode.value='OK·'+res.info.uid; 
-                loadMyAppointments();
-                loadContentItems();
-                loadClientHolidays();
-                loadAdvanceDays();
+                loadMyAppointments(); // 唯一需要身份的請求
                 authFailed.value = false; 
               }
               else {
                 statusCode.value='ERR·'+((res&&res.error)?res.error.substring(0,20):'null');
                 showToast('讀取失敗：'+(res?res.error:'null'), true);
-                authFailed.value = true; 
+                authFailed.value = true; profileLoading.value = false;
                 try {
                   const dbg = await apiGet({ action:"debugVerify", idToken });
                   statusCode.value = 'DBG·'+dbg.httpCode+'·'+(dbg.rawResponse?dbg.rawResponse.substring(0,40):'');
@@ -797,16 +854,21 @@
 
           const loadCalendar = async () => {
             const t=new Date();
+            const sYear=t.getFullYear(), sMonth=t.getMonth()+1;
+            // 計算往後6個月的結束月份
+            const endDate = new Date(sYear, sMonth-1+5, 1);
+            const eYear=endDate.getFullYear(), eMonth=endDate.getMonth()+1;
             try {
-              // 同時抓月曆資料和提前天數
-              const [calRes, advRes, apptRes] = await Promise.all([
-                apiGet({ action:"getCalendar", year:t.getFullYear(), month:t.getMonth()+1 }),
-                apiGet({ action:'getAdvanceDays' }),
-                apiGet({ action:'getApptMonths' })
-              ]);
-              if(calRes && calRes.scheduleMap) scheduleCacheMap=calRes.scheduleMap;
-              if(advRes && advRes.success) advanceDays.value = advRes.days;
-              if(apptRes && apptRes.success) apptMonths.value = apptRes.months;
+              const res = await apiGet({ action:'getPublicData',
+                startYear:sYear, startMonth:sMonth, endYear:eYear, endMonth:eMonth });
+              if(res && res.success) {
+                mergeScheduleMap(res.scheduleMap || {});
+                updateCacheRange(sYear, sMonth, eYear, eMonth);
+                if(res.advanceDays !== undefined) advanceDays.value = res.advanceDays;
+                if(res.apptMonths  !== undefined) apptMonths.value  = res.apptMonths;
+                if(res.contentList) { contentItems.value = res.contentList; contentLoading.value = false; }
+                if(res.holidays)    clientHolidayData.value = res.holidays;
+              }
             } catch(e){}
             renderMatrix();
           };
@@ -880,18 +942,26 @@
 
           const refreshCalendar = async () => {
             refreshing.value = true;
+            contentLoading.value = true;
+            // 清快取，重抓當前月往後6個月
+            scheduleCacheMap = {}; cacheLoadedStart = null; cacheLoadedEnd = null;
+            const endDate2 = new Date(calYear.value, calMonth.value-1+5, 1);
+            const eY2=endDate2.getFullYear(), eM2=endDate2.getMonth()+1;
             try {
-              // 同時重新抓時段和提前天數
-              const [calRes, advRes] = await Promise.all([
-                apiGet({ action:"getCalendar", year:calYear.value, month:calMonth.value }),
-                apiGet({ action:'getAdvanceDays' })
-              ]);
-              if(calRes && calRes.scheduleMap) scheduleCacheMap = calRes.scheduleMap;
-              if(advRes && advRes.success) advanceDays.value = advRes.days;
-              renderMonth();
-              showToast('時段已更新');
+              const res = await apiGet({ action:'getPublicData',
+                startYear:calYear.value, startMonth:calMonth.value, endYear:eY2, endMonth:eM2 });
+              if(res && res.success) {
+                if(res.scheduleMap){ mergeScheduleMap(res.scheduleMap); updateCacheRange(calYear.value, calMonth.value, eY2, eM2); }
+                if(res.advanceDays !== undefined) advanceDays.value = res.advanceDays;
+                if(res.apptMonths  !== undefined) apptMonths.value  = res.apptMonths;
+                if(res.contentList) { contentItems.value = res.contentList; contentLoading.value = false; }
+                if(res.holidays)    clientHolidayData.value = res.holidays;
+                renderMonth();
+                showToast('已更新');
+              }
             } catch(e){ showToast('更新失敗', true); }
             refreshing.value = false;
+            contentLoading.value = false;
           };
           const selectDate = (day) => {
             if(!day.isClickable) return;
@@ -902,10 +972,36 @@
             const dm = scheduleCacheMap[day.dateStr] || {};
             availableSlots.value = Object.keys(dm).filter(s => String(dm[s]).trim() === '開放');
           };
-          const moveCalMonth = (dir) => {
+          const moveCalMonth = async (dir) => {
             calMonth.value += dir;
             if(calMonth.value > 12){ calMonth.value=1; calYear.value++; }
             if(calMonth.value < 1){ calMonth.value=12; calYear.value--; }
+            // 更新月份標題
+            calMonthLabel.value = calYear.value+'年'+String(calMonth.value).padStart(2,'0')+'月';
+            // 檢查目標月份是否在快取範圍內
+            if(!isInCache(calYear.value, calMonth.value)) {
+              // 超出範圍：清空月曆觸發 skeleton，抓新資料
+              calendarDates.value = [];
+              const isForward = dir > 0;
+              let sYear, sMonth, eYear, eMonth;
+              if(isForward) {
+                sYear=calYear.value; sMonth=calMonth.value;
+                const endDate = new Date(sYear, sMonth-1+5, 1);
+                eYear=endDate.getFullYear(); eMonth=endDate.getMonth()+1;
+              } else {
+                eYear=calYear.value; eMonth=calMonth.value;
+                const startDate = new Date(eYear, eMonth-1-5, 1);
+                sYear=startDate.getFullYear(); sMonth=startDate.getMonth()+1;
+              }
+              try {
+                const res = await apiGet({ action:'getPublicData',
+                  startYear:sYear, startMonth:sMonth, endYear:eYear, endMonth:eMonth });
+                if(res && res.success) {
+                  mergeScheduleMap(res.scheduleMap || {});
+                  updateCacheRange(sYear, sMonth, eYear, eMonth);
+                }
+              } catch(e) {}
+            }
             renderMonth();
           };
           const toggleCatSelect = (name) => {
@@ -1028,7 +1124,7 @@
             }).catch((err)=>{ statusCode.value='LIFF·ERR'; showToast('LIFF 初始化失敗', true); });
           });
 
-          return { currentTab, myProfile, myCats, calendarDates, selectedDate, newCat, editIdx, editCat, toast, statusCode, isLineMode, authFailed, forceRelogin,
+          return { currentTab, myProfile, myCats, calendarDates, selectedDate, newCat, editIdx, editCat, toast, statusCode, isLineMode, authFailed, profileLoading, forceRelogin,
             globalLoading, isSavingProfile, isRegisteringCat, isSavingCat,
             switchTab, moveCalMonth, selectDate, saveProfile, registerCat, toggleEdit, saveEditCat, removeCat,
             bookStep, selectedSlot, selectedCats, bookCatCount, bookNotes, bookLoading, availableSlots, calMonthLabel,
