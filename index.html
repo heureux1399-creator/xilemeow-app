@@ -809,16 +809,32 @@
 
           const loadProfile = async () => {
             statusCode.value='FETCH·0';
+            const t=new Date();
+            const sYear=t.getFullYear(), sMonth=t.getMonth()+1;
+            const endDate=new Date(sYear, sMonth-1+5, 1);
+            const eYear=endDate.getFullYear(), eMonth=endDate.getMonth()+1;
             try {
-              // 1. 最優先：個人資料（姓名/餘額/貓咪）
-              const res = await apiGet({ action:"getMyProfile", idToken });
-              if(res && res.success){ 
-                applyProfile(res); 
-                statusCode.value='OK·'+res.info.uid; 
+              // 單一請求：profile + 月曆 + 文案 + 假日 全部一次拿
+              const res = await apiGet({
+                action:'getInitData', idToken,
+                startYear:sYear, startMonth:sMonth,
+                endYear:eYear, endMonth:eMonth
+              });
+              if(res && res.success){
+                // 個人資料
+                applyProfile(res);
+                statusCode.value='OK·'+res.info.uid;
                 authFailed.value = false;
-                // 2. 個人資料填完後，同時發出月曆和預約
-                loadCalendar();          // 月曆/文案/假日
-                loadMyAppointments();    // 我的預約
+                // 公開資料（月曆/文案/假日）
+                mergeScheduleMap(res.scheduleMap || {});
+                updateCacheRange(sYear, sMonth, eYear, eMonth);
+                if(res.advanceDays !== undefined) advanceDays.value = res.advanceDays;
+                if(res.apptMonths  !== undefined) apptMonths.value  = res.apptMonths;
+                if(res.contentList){ contentItems.value = res.contentList; contentLoading.value = false; }
+                if(res.holidays)    clientHolidayData.value = res.holidays;
+                renderMatrix();
+                // 我的預約（唯一需要分開的）
+                loadMyAppointments();
               }
               else {
                 statusCode.value='ERR·'+((res&&res.error)?res.error.substring(0,20):'null');
