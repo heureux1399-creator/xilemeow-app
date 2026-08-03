@@ -3,7 +3,7 @@
   ╔══════════════════════════════════════════════════════════════════════════════╗
   ║  🔧 洗里喵 客端 維護資料                                                     ║
   ╠══════════════════════════════════════════════════════════════════════════════╣
-  ║  版本號      : v260803.21                                                       ║
+  ║  版本號      : v260803.22                                                       ║
   ║  GAS API     : https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec ║
   ║  GitHub URL  : https://jemin0819.github.io/xilemeow/                                         ║
   ║  LIFF URL    : https://liff.line.me/2010742657-DOz9QdF3                              ║
@@ -196,9 +196,9 @@
 <body>
 <div id="app" v-cloak>
 
-  <!-- 系統列 (正式進版: v260803.21) -->
+  <!-- 系統列 (正式進版: v260803.22) -->
   <div :class="['sys-bar', isLineMode?'live':'dev']">
-    <span>v260803.21 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
+    <span>v260803.22 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
     <span v-if="globalLoading" class="sync-badge">
       <svg class="spin" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
       同步中
@@ -446,10 +446,9 @@
               <svg :style="apptExpanded?'transform:rotate(180deg)':''" style="transition:.15s;color:var(--ink-3);" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
           </div>
-          <!-- 載入失敗重試（在展開區塊外，永遠可見）-->
-          <div v-if="apptFailed && !apptLoading" style="text-align:center;padding:8px;">
-            <span style="font-size:11px;color:var(--err);">載入失敗</span>
-            <button class="btn btn-ghost" style="font-size:11px;padding:4px 10px;margin-left:8px;" @click="loadMyAppointments">重試</button>
+          <!-- 重試按鈕 -->
+          <div style="text-align:right;padding:4px 0;">
+            <button class="btn-link" style="font-size:11px;color:var(--err);" v-if="apptFailed && !apptLoading" @click.stop="loadMyAppointments">重新載入</button>
           </div>
           <div v-show="apptExpanded" style="margin-top:12px;">
             <div v-if="apptLoading" style="padding:12px 0;">
@@ -531,10 +530,7 @@
 
     <!-- ════ 喵星護照 ════ -->
     <div v-if="currentTab==='cats' && !authFailed">
-      <div v-if="!myProfile.uid" style="text-align:center;padding:40px;">
-        <svg class="spin" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-      </div>
-      <div v-else-if="myCats.length>0" class="card card-accent">
+      <div v-if="myCats.length>0" class="card card-accent">
         <div class="section-header">
           <span class="section-title">已登記喵寶</span>
           <span class="section-sub">{{ myCats.length }} 隻</span>
@@ -606,10 +602,7 @@
 
     <!-- ════ 家長中心 ════ -->
     <div v-if="currentTab==='member' && !authFailed">
-      <div v-if="!myProfile.uid" style="text-align:center;padding:40px;">
-        <svg class="spin" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-      </div>
-      <div v-else class="card card-accent">
+      <div class="card card-accent">
         <div class="section-header">
           <span class="section-title">家長資料</span>
         </div>
@@ -647,11 +640,11 @@
         <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         <span class="nav-label">良辰吉日</span>
       </div>
-      <div :class="['nav-item', currentTab==='cats'?'active':'']" @click="switchTab('cats')">
+      <div :class="['nav-item', currentTab==='cats'?'active':'', !myProfile.uid?'nav-disabled':'']" @click="myProfile.uid && switchTab('cats')" :style="!myProfile.uid?'opacity:.4;pointer-events:none;':''">
         <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
         <span class="nav-label">喵星護照</span>
       </div>
-      <div :class="['nav-item', currentTab==='member'?'active':'']" @click="switchTab('member')">
+      <div :class="['nav-item', currentTab==='member'?'active':'', !myProfile.uid?'nav-disabled':'']" @click="myProfile.uid && switchTab('member')" :style="!myProfile.uid?'opacity:.4;pointer-events:none;':''">
         <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         <span class="nav-label">家長中心</span>
       </div>
@@ -663,7 +656,7 @@
   // ══════════════════════════════════════════════════════
   // 🔧 維護資料（每次更新請修改這裡）
   // ══════════════════════════════════════════════════════
-  const VERSION          = 'v260803.21';                    // 版本號
+  const VERSION          = 'v260803.22';                    // 版本號
   const GAS_API          = "https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec"; // GAS 部署網址
   const LIFF_ID          = '2010742657-DOz9QdF3';           // LINE LIFF ID
   const LINE_CHANNEL_ID  = '2010742657';                    // LINE Login Channel ID（idToken 驗證用）
