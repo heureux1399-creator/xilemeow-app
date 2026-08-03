@@ -824,10 +824,13 @@
             const endDate=new Date(sYear, sMonth-1+5, 1);
             const eYear=endDate.getFullYear(), eMonth=endDate.getMonth()+1;
             try {
-              // 1. 先讀 profile（UID/餘額/貓咪）
-              const res = await apiGet({ action:'getInitData', idToken,
-                startYear:sYear, startMonth:sMonth,
-                endYear:eYear, endMonth:eMonth });
+              // 並行發出：getInitData + getMyAppointments 同時跑
+              const [res] = await Promise.all([
+                apiGet({ action:'getInitData', idToken,
+                  startYear:sYear, startMonth:sMonth,
+                  endYear:eYear, endMonth:eMonth }),
+                loadMyAppointments() // 不等 initData，同時跑
+              ]);
               if(res && res.success){
                 applyProfile(res);
                 statusCode.value='OK·'+res.info.uid;
@@ -839,8 +842,6 @@
                 if(res.contentList){ contentItems.value = res.contentList; contentLoading.value = false; }
                 if(res.holidays)    clientHolidayData.value = res.holidays;
                 renderMatrix();
-                // 2. profile 完成後才讀我的預約
-                loadMyAppointments();
               }
               else {
                 statusCode.value='ERR·'+((res&&res.error)?res.error.substring(0,20):'null');
