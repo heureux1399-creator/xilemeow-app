@@ -3,7 +3,7 @@
   ╔══════════════════════════════════════════════════════════════════════════════╗
   ║  🔧 洗里喵 客端 維護資料                                                     ║
   ╠══════════════════════════════════════════════════════════════════════════════╣
-  ║  版本號      : v260803.11                                                       ║
+  ║  版本號      : v260803.12                                                       ║
   ║  GAS API     : https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec ║
   ║  GitHub URL  : https://jemin0819.github.io/xilemeow/                                         ║
   ║  LIFF URL    : https://liff.line.me/2010742657-DOz9QdF3                              ║
@@ -196,10 +196,9 @@
 <body>
 <div id="app" v-cloak>
 
-  <!-- 系統列 (正式進版: v260803.11) -->
+  <!-- 系統列 (正式進版: v260803.12) -->
   <div :class="['sys-bar', isLineMode?'live':'dev']">
-    <span>v260803.11 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
-    <span style="font-size:9px;color:rgba(255,255,255,.6);margin-left:4px;">uid:{{ myProfile.uid||'無' }} cats:{{ myCats.length }} tab:{{ currentTab }} auth:{{ authFailed }}</span>
+    <span>v260803.12 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
     <span v-if="globalLoading" class="sync-badge">
       <svg class="spin" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
       同步中
@@ -454,7 +453,7 @@
                 <div class="sk-line sm skeleton" style="width:65%;"></div>
               </div>
             </div>
-            <div v-else-if="myAppointments.length===0" style="text-align:center;padding:16px;font-size:12px;color:var(--ink-3);">{{ apptMonths===0 ? "目前無預約紀錄" : "近 "+apptMonths+" 個月無預約紀錄" }}</div>
+            <div v-else-if="myAppointments.length===0" style="text-align:center;padding:16px;font-size:12px;color:var(--ink-3);">{{ apptMonths===null||apptMonths===0 ? "目前無預約紀錄" : "近 "+apptMonths+" 個月無預約紀錄" }}</div>
             <div v-else>
               <div v-for="appt in myAppointments" :key="appt.rowIndex+'_'+appt.source"
                 :style="{borderLeft: appt.status==='pending'?'3px solid var(--orange)': appt.status==='confirmed'?'3px solid var(--ok)':'3px solid var(--ink-3)'}"
@@ -525,15 +524,6 @@
 
     <!-- ════ 喵星護照 ════ -->
     <div v-if="currentTab==='cats' && !authFailed">
-      <div v-if="!myProfile.uid" class="card card-accent" style="padding:16px;">
-        <div class="sk-line lg skeleton" style="width:40%;margin-bottom:16px;"></div>
-        <div v-for="n in 2" :key="'cs'+n" style="padding:12px 0;border-bottom:1px solid var(--border);">
-          <div class="sk-line skeleton" style="width:55%;margin-bottom:6px;"></div>
-          <div class="sk-line sm skeleton" style="width:35%;"></div>
-        </div>
-      </div>
-      <div v-if="myProfile.uid && myCats.length>0" class="card card-accent">
-
       <div v-if="myCats.length>0" class="card card-accent">
         <div class="section-header">
           <span class="section-title">已登記喵寶</span>
@@ -602,23 +592,10 @@
           {{ isRegisteringCat ? '喵寶登錄中...' : '新增這隻喵寶' }}
         </button>
       </div>
-            </div>
-      <div v-if="myProfile.uid && myCats.length===0" class="empty" style="padding:20px;">
-        <div class="empty-title">尚未登記喵寶</div>
-      </div>
     </div>
 
     <!-- ════ 家長中心 ════ -->
     <div v-if="currentTab==='member' && !authFailed">
-      <div v-if="!myProfile.uid" class="card card-accent" style="padding:16px;">
-        <div class="sk-line lg skeleton" style="width:30%;margin-bottom:16px;"></div>
-        <div v-for="n in 4" :key="'ms'+n" style="margin-bottom:12px;">
-          <div class="sk-line sm skeleton" style="width:20%;margin-bottom:6px;"></div>
-          <div class="sk-line skeleton" style="width:90%;height:36px;border-radius:8px;"></div>
-        </div>
-      </div>
-      <div v-if="myProfile.uid" class="card card-accent">
-
       <div class="card card-accent">
         <div class="section-header">
           <span class="section-title">家長資料</span>
@@ -645,11 +622,10 @@
         <button class="btn btn-primary" @click="saveProfile" :disabled="isSavingProfile">
           {{ isSavingProfile ? '資料儲存中...' : '儲存資料' }}
         </button>
-      </div>
-            </div>
-    </div>
+      </div><!-- end v-else card -->
+    </div><!-- end tab member -->
 
-      </div><!-- /main -->
+  </div><!-- /main -->
 
   <!-- 底部導航 -->
   <nav class="bottom-nav">
@@ -674,7 +650,7 @@
   // ══════════════════════════════════════════════════════
   // 🔧 維護資料（每次更新請修改這裡）
   // ══════════════════════════════════════════════════════
-  const VERSION          = 'v260803.11';                    // 版本號
+  const VERSION          = 'v260803.12';                    // 版本號
   const GAS_API          = "https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec"; // GAS 部署網址
   const LIFF_ID          = '2010742657-DOz9QdF3';           // LINE LIFF ID
   const LINE_CHANNEL_ID  = '2010742657';                    // LINE Login Channel ID（idToken 驗證用）
@@ -718,8 +694,6 @@
           const statusCode = ref('INIT');
           const isLineMode = ref(true);
           const authFailed = ref(false);
-          const profileLoading = ref(true); // profile 載入中
-
           const globalLoading = ref(false);
           const isSavingProfile = ref(false);
           const isRegisteringCat = ref(false);
@@ -822,7 +796,6 @@
           };
 
           const applyProfile = (res) => {
-            profileLoading.value = false;
             myProfile.value.uid=res.info.uid; myProfile.value.name=res.info.name;
             myProfile.value.phone=res.info.phone; myProfile.value.address=res.info.address;
             myProfile.value.elevator=res.info.elevator||'有電梯'; myProfile.value.parking=res.info.parking||'';
@@ -847,7 +820,7 @@
               else {
                 statusCode.value='ERR·'+((res&&res.error)?res.error.substring(0,20):'null');
                 showToast('讀取失敗：'+(res?res.error:'null'), true);
-                authFailed.value = true; profileLoading.value = false;
+                authFailed.value = true;
                 try {
                   const dbg = await apiGet({ action:"debugVerify", idToken });
                   statusCode.value = 'DBG·'+dbg.httpCode+'·'+(dbg.rawResponse?dbg.rawResponse.substring(0,40):'');
@@ -924,10 +897,8 @@
             apptLoading.value = true;
             try {
               const res = await apiGet({ action:"getMyAppointments", idToken, months: apptMonths.value });
-              console.log('appt res:', JSON.stringify(res).substring(0,200));
               if(res && res.success) myAppointments.value = res.list || [];
-              else console.log('appt 失敗:', res && res.error);
-            } catch(e){ console.log('appt 例外:', e); }
+            } catch(e){}
             apptLoading.value = false;
           };
 
@@ -1136,7 +1107,7 @@
             }).catch((err)=>{ statusCode.value='LIFF·ERR'; showToast('LIFF 初始化失敗', true); });
           });
 
-          return { currentTab, myProfile, myCats, calendarDates, selectedDate, newCat, editIdx, editCat, toast, statusCode, isLineMode, authFailed, profileLoading, forceRelogin,
+          return { currentTab, myProfile, myCats, calendarDates, selectedDate, newCat, editIdx, editCat, toast, statusCode, isLineMode, authFailed, forceRelogin,
             globalLoading, isSavingProfile, isRegisteringCat, isSavingCat,
             switchTab, moveCalMonth, selectDate, saveProfile, registerCat, toggleEdit, saveEditCat, removeCat,
             bookStep, selectedSlot, selectedCats, bookCatCount, bookNotes, bookLoading, availableSlots, calMonthLabel,
