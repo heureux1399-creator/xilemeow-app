@@ -3,7 +3,7 @@
   ╔══════════════════════════════════════════════════════════════════════════════╗
   ║  🔧 洗里喵 客端 維護資料                                                     ║
   ╠══════════════════════════════════════════════════════════════════════════════╣
-  ║  版本號      : v260803.02                                                       ║
+  ║  版本號      : v260803.03                                                       ║
   ║  GAS API     : https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec ║
   ║  GitHub URL  : https://jemin0819.github.io/xilemeow/                                         ║
   ║  LIFF URL    : https://liff.line.me/2010742657-DOz9QdF3                              ║
@@ -189,9 +189,9 @@
 <body>
 <div id="app" v-cloak>
 
-  <!-- 系統列 (正式進版: v260803.02) -->
+  <!-- 系統列 (正式進版: v260803.03) -->
   <div :class="['sys-bar', isLineMode?'live':'dev']">
-    <span>v260803.02 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
+    <span>v260803.03 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
     <span v-if="globalLoading" class="sync-badge">
       <svg class="spin" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
       同步中
@@ -632,7 +632,7 @@
   // ══════════════════════════════════════════════════════
   // 🔧 維護資料（每次更新請修改這裡）
   // ══════════════════════════════════════════════════════
-  const VERSION          = 'v260803.02';                    // 版本號
+  const VERSION          = 'v260803.03';                    // 版本號
   const GAS_API          = "https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec"; // GAS 部署網址
   const LIFF_ID          = '2010742657-DOz9QdF3';           // LINE LIFF ID
   const LINE_CHANNEL_ID  = '2010742657';                    // LINE Login Channel ID（idToken 驗證用）
@@ -765,19 +765,19 @@
 
           const loadProfile = async () => {
             statusCode.value='FETCH·0';
-            // 月曆資料、提前天數、預約月數 同時抓
+            // 第一層：月曆優先載入（讓用戶先看到日期）
             loadCalendar();
             try {
               const res = await apiGet({ action:"getMyProfile", idToken });
               if(res && res.success){ 
                 applyProfile(res); 
                 statusCode.value='OK·'+res.info.uid; 
-                // 所有資料同時並行載入，不等待彼此
+                // 第二層：我的預約 + 公告欄 同時並行（不互相等待）
                 Promise.all([
                   loadMyAppointments(),
                   loadContentItems(),
-                  loadClientHolidays(),
                 ]);
+                loadClientHolidays(); // 假日資料背景靜默載入
                 authFailed.value = false; 
               }
               else {
