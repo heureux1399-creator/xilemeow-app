@@ -3,7 +3,7 @@
   ╔══════════════════════════════════════════════════════════════════════════════╗
   ║  🔧 洗里喵 客端 維護資料                                                     ║
   ╠══════════════════════════════════════════════════════════════════════════════╣
-  ║  版本號      : v260803.02                                                       ║
+  ║  版本號      : v260803.01                                                       ║
   ║  GAS API     : https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec ║
   ║  GitHub URL  : https://jemin0819.github.io/xilemeow/                                         ║
   ║  LIFF URL    : https://liff.line.me/2010742657-DOz9QdF3                              ║
@@ -184,14 +184,21 @@
     .seg-btn{ flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:9px 8px; border-radius:6px; border:none; background:transparent; font-family:'Noto Sans TC',sans-serif; font-size:13px; font-weight:500; color:var(--ink-2); cursor:pointer; transition:all .15s; }
     .seg-btn.active{ background:var(--card); color:var(--ink); font-weight:700; box-shadow:0 1px 4px rgba(42,32,20,.12); }
     .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    /* Skeleton loading */
+    .skeleton{ background:linear-gradient(90deg,#ede8e1 25%,#f5f0eb 50%,#ede8e1 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:6px; }
+    @keyframes shimmer{ 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    .sk-line{ height:12px; margin-bottom:8px; border-radius:4px; }
+    .sk-line.lg{ height:16px; }
+    .sk-line.sm{ height:10px; width:60%; }
+    .sk-cal-cell{ aspect-ratio:1; border-radius:8px; }
   </style>
 </head>
 <body>
 <div id="app" v-cloak>
 
-  <!-- 系統列 (正式進版: v260803.02) -->
+  <!-- 系統列 (正式進版: v260803.01) -->
   <div :class="['sys-bar', isLineMode?'live':'dev']">
-    <span>v260803.02 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
+    <span>v260803.01 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
     <span v-if="globalLoading" class="sync-badge">
       <svg class="spin" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
       同步中
@@ -263,8 +270,14 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
         </div>
-        <div v-if="calendarDates.length===0" style="text-align:center;padding:28px 0;">
-          <svg class="spin" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+        <div v-if="calendarDates.length===0">
+          <!-- 月曆 skeleton -->
+          <div class="cal-grid" style="margin-bottom:4px;">
+            <div v-for="n in 7" :key="n" class="cal-day-header skeleton" style="height:14px;border-radius:3px;"></div>
+          </div>
+          <div class="cal-grid">
+            <div v-for="n in 35" :key="n" class="sk-cal-cell skeleton"></div>
+          </div>
         </div>
         <div v-else>
           <!-- 星期標題列 -->
@@ -428,15 +441,19 @@
         <div class="card card-accent">
           <div class="section-header" style="cursor:pointer;margin-bottom:0;" @click="apptExpanded=!apptExpanded">
             <span class="section-title" style="font-size:13px;">我的預約</span>
-            <span style="font-size:11px;color:var(--ink-3);margin-left:4px;">{{ apptMonths === null ? '（──）' : apptMonths === 0 ? '（全部）' : '（' + apptMonths + ' 個月內）' }}</span>
+            <span style="font-size:11px;color:var(--ink-3);margin-left:4px;">{{ apptMonths === 0 ? '（全部）' : '（' + apptMonths + ' 個月內）' }}</span>
             <div style="display:flex;align-items:center;gap:8px;">
               <span v-if="myAppointments.length" style="font-size:11px;color:var(--ink-3);">{{ myAppointments.length }} 筆</span>
               <svg :style="apptExpanded?'transform:rotate(180deg)':''" style="transition:.15s;color:var(--ink-3);" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
           </div>
           <div v-show="apptExpanded" style="margin-top:12px;">
-            <div v-if="apptLoading" style="text-align:center;padding:16px;">
-              <svg class="spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            <div v-if="apptLoading" style="padding:12px 0;">
+              <!-- 我的預約 skeleton -->
+              <div v-for="n in 2" :key="n" style="padding:10px 0;border-bottom:1px solid var(--border);">
+                <div class="sk-line lg skeleton" style="width:40%;margin-bottom:6px;"></div>
+                <div class="sk-line sm skeleton" style="width:65%;"></div>
+              </div>
             </div>
             <div v-else-if="myAppointments.length===0" style="text-align:center;padding:16px;font-size:12px;color:var(--ink-3);">近 3 個月無預約紀錄</div>
             <div v-else>
@@ -470,9 +487,12 @@
 
       <!-- 文案公告板（我的預約下方）-->
       <div v-if="bookStep===1 && myProfile.uid" style="margin-top:12px;">
-        <!-- 公告欄 loading -->
-        <div v-if="contentLoading" style="text-align:center;padding:16px;">
-          <svg class="spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+        <!-- 公告欄 skeleton -->
+        <div v-if="contentLoading" class="card card-accent" style="padding:14px 16px;">
+          <div class="sk-line lg skeleton" style="width:30%;margin-bottom:14px;"></div>
+          <div v-for="n in 3" :key="n" style="padding:10px 0;border-bottom:1px solid var(--border);">
+            <div class="sk-line skeleton" style="width:50%;"></div>
+          </div>
         </div>
         <div v-else-if="contentItems.length > 0">
         <div class="card card-accent" style="padding:0;overflow:hidden;">
@@ -632,7 +652,7 @@
   // ══════════════════════════════════════════════════════
   // 🔧 維護資料（每次更新請修改這裡）
   // ══════════════════════════════════════════════════════
-  const VERSION          = 'v260803.02';                    // 版本號
+  const VERSION          = 'v260803.01';                    // 版本號
   const GAS_API          = "https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec"; // GAS 部署網址
   const LIFF_ID          = '2010742657-DOz9QdF3';           // LINE LIFF ID
   const LINE_CHANNEL_ID  = '2010742657';                    // LINE Login Channel ID（idToken 驗證用）
@@ -647,7 +667,7 @@
           const calendarDates = ref([]);
           const clientHolidayData = ref({ holidays:{}, workdays:{} });
           const advanceDays = ref(1);
-          const apptMonths = ref(null); // null=載入中，0=全部 // 家長預約顯示月數，0=全部
+          const apptMonths = ref(0); // 家長預約顯示月數，0=全部
           const loadAdvanceDays = async () => {
             try {
               const res = await apiGet({ action:'getAdvanceDays' });
