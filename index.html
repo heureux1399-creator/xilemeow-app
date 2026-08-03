@@ -3,7 +3,7 @@
   ╔══════════════════════════════════════════════════════════════════════════════╗
   ║  🔧 洗里喵 客端 維護資料                                                     ║
   ╠══════════════════════════════════════════════════════════════════════════════╣
-  ║  版本號      : v260803.17                                                       ║
+  ║  版本號      : v260803.18                                                       ║
   ║  GAS API     : https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec ║
   ║  GitHub URL  : https://jemin0819.github.io/xilemeow/                                         ║
   ║  LIFF URL    : https://liff.line.me/2010742657-DOz9QdF3                              ║
@@ -196,9 +196,9 @@
 <body>
 <div id="app" v-cloak>
 
-  <!-- 系統列 (正式進版: v260803.17) -->
+  <!-- 系統列 (正式進版: v260803.18) -->
   <div :class="['sys-bar', isLineMode?'live':'dev']">
-    <span>v260803.17 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
+    <span>v260803.18 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
     <span v-if="globalLoading" class="sync-badge">
       <svg class="spin" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
       同步中
@@ -453,6 +453,10 @@
                 <div class="sk-line sm skeleton" style="width:65%;"></div>
               </div>
             </div>
+            <div v-else-if="apptFailed" style="text-align:center;padding:16px;">
+              <div style="font-size:12px;color:var(--err);margin-bottom:8px;">載入失敗</div>
+              <button class="btn btn-ghost" style="font-size:12px;padding:6px 16px;" @click="loadMyAppointments">重試</button>
+            </div>
             <div v-else-if="myAppointments.length===0" style="text-align:center;padding:16px;font-size:12px;color:var(--ink-3);">{{ apptMonths===null||apptMonths===0 ? "目前無預約紀錄" : "近 "+apptMonths+" 個月無預約紀錄" }}</div>
             <div v-else>
               <div v-for="appt in myAppointments" :key="appt.rowIndex+'_'+appt.source"
@@ -651,7 +655,7 @@
   // ══════════════════════════════════════════════════════
   // 🔧 維護資料（每次更新請修改這裡）
   // ══════════════════════════════════════════════════════
-  const VERSION          = 'v260803.17';                    // 版本號
+  const VERSION          = 'v260803.18';                    // 版本號
   const GAS_API          = "https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec"; // GAS 部署網址
   const LIFF_ID          = '2010742657-DOz9QdF3';           // LINE LIFF ID
   const LINE_CHANNEL_ID  = '2010742657';                    // LINE Login Channel ID（idToken 驗證用）
@@ -780,12 +784,18 @@
           };
 
           // ---- fetch 封裝（非阻塞 Sync 標籤）----
-          const apiGet = async (params) => {
+          const apiGet = async (params, retry=1) => {
             globalLoading.value = true;
             try {
-              const url = GAS_API + "?" + new URLSearchParams(params).toString();
-              const r = await fetch(url); 
+              const url = GAS_API + "?" + new URLSearchParams({...params, _t: Date.now()}).toString();
+              const r = await fetch(url, { signal: AbortSignal.timeout(15000) });
               return await r.json();
+            } catch(e) {
+              if(retry > 0) {
+                await new Promise(r => setTimeout(r, 1500)); // 等1.5秒重試
+                return apiGet(params, retry-1);
+              }
+              throw e;
             } finally { globalLoading.value = false; }
           };
           const apiPost = async (payload) => {
@@ -912,12 +922,15 @@
             calendarDates.value=arr;
           };
           const renderMatrix = renderMonth; // 相容舊呼叫
+          const apptFailed = ref(false);
           const loadMyAppointments = async () => {
             apptLoading.value = true;
+            apptFailed.value = false;
             try {
               const res = await apiGet({ action:"getMyAppointments", idToken, months: apptMonths.value });
               if(res && res.success) myAppointments.value = res.list || [];
-            } catch(e){}
+              else apptFailed.value = true;
+            } catch(e){ apptFailed.value = true; }
             apptLoading.value = false;
           };
 
@@ -1131,7 +1144,7 @@
             switchTab, moveCalMonth, selectDate, saveProfile, registerCat, toggleEdit, saveEditCat, removeCat,
             bookStep, selectedSlot, selectedCats, bookCatCount, bookNotes, bookLoading, availableSlots, calMonthLabel,
             toggleCatSelect, submitBooking, resetBook, refreshing, refreshCalendar,
-            myAppointments, apptLoading, apptExpanded, cancelMyAppointment, moveCalMonth, calYear, calMonth, clientHolidayData, advanceDays, apptMonths,
+            myAppointments, apptLoading, apptFailed, apptExpanded, cancelMyAppointment, moveCalMonth, calYear, calMonth, clientHolidayData, advanceDays, apptMonths,
             contentItems, contentLoading, expandedContentIds, toggleContentItem };
         }
       }).mount('#app');
