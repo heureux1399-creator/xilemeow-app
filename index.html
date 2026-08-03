@@ -3,7 +3,7 @@
   ╔══════════════════════════════════════════════════════════════════════════════╗
   ║  🔧 洗里喵 客端 維護資料                                                     ║
   ╠══════════════════════════════════════════════════════════════════════════════╣
-  ║  版本號      : v260803.08                                                       ║
+  ║  版本號      : v260803.09                                                       ║
   ║  GAS API     : https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec ║
   ║  GitHub URL  : https://jemin0819.github.io/xilemeow/                                         ║
   ║  LIFF URL    : https://liff.line.me/2010742657-DOz9QdF3                              ║
@@ -196,9 +196,9 @@
 <body>
 <div id="app" v-cloak>
 
-  <!-- 系統列 (正式進版: v260803.08) -->
+  <!-- 系統列 (正式進版: v260803.09) -->
   <div :class="['sys-bar', isLineMode?'live':'dev']">
-    <span>v260803.08 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
+    <span>v260803.09 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
     <span v-if="globalLoading" class="sync-badge">
       <svg class="spin" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
       同步中
@@ -453,7 +453,7 @@
                 <div class="sk-line sm skeleton" style="width:65%;"></div>
               </div>
             </div>
-            <div v-else-if="myAppointments.length===0" style="text-align:center;padding:16px;font-size:12px;color:var(--ink-3);">近 3 個月無預約紀錄</div>
+            <div v-else-if="myAppointments.length===0" style="text-align:center;padding:16px;font-size:12px;color:var(--ink-3);">{{ apptMonths===0 ? "目前無預約紀錄" : "近 "+apptMonths+" 個月無預約紀錄" }}</div>
             <div v-else>
               <div v-for="appt in myAppointments" :key="appt.rowIndex+'_'+appt.source"
                 :style="{borderLeft: appt.status==='pending'?'3px solid var(--orange)': appt.status==='confirmed'?'3px solid var(--ok)':'3px solid var(--ink-3)'}"
@@ -524,14 +524,14 @@
 
     <!-- ════ 喵星護照 ════ -->
     <div v-if="currentTab==='cats' && !authFailed">
-      <div v-show="profileLoading" class="card card-accent" style="padding:16px;">
+      <div v-show="!myProfile.uid" class="card card-accent" style="padding:16px;">
         <div class="sk-line lg skeleton" style="width:40%;margin-bottom:16px;"></div>
         <div v-for="n in 2" :key="n" style="padding:12px 0;border-bottom:1px solid var(--border);">
           <div class="sk-line skeleton" style="width:55%;margin-bottom:6px;"></div>
           <div class="sk-line sm skeleton" style="width:35%;"></div>
         </div>
       </div>
-      <div v-show="!profileLoading && myCats.length>0" class="card card-accent">
+      <div v-show="myProfile.uid && myCats.length>0" class="card card-accent">
         <div class="section-header">
           <span class="section-title">已登記喵寶</span>
           <span class="section-sub">{{ myCats.length }} 隻</span>
@@ -603,14 +603,14 @@
 
     <!-- ════ 家長中心 ════ -->
     <div v-if="currentTab==='member' && !authFailed">
-      <div v-show="profileLoading" class="card card-accent" style="padding:16px;">
+      <div v-show="!myProfile.uid" class="card card-accent" style="padding:16px;">
         <div class="sk-line lg skeleton" style="width:30%;margin-bottom:16px;"></div>
         <div v-for="n in 4" :key="n" style="margin-bottom:12px;">
           <div class="sk-line sm skeleton" style="width:20%;margin-bottom:6px;"></div>
           <div class="sk-line skeleton" style="width:90%;height:36px;border-radius:8px;"></div>
         </div>
       </div>
-      <div v-show="!profileLoading" class="card card-accent">
+      <div v-show="myProfile.uid" class="card card-accent">
         <div class="section-header">
           <span class="section-title">家長資料</span>
         </div>
@@ -664,7 +664,7 @@
   // ══════════════════════════════════════════════════════
   // 🔧 維護資料（每次更新請修改這裡）
   // ══════════════════════════════════════════════════════
-  const VERSION          = 'v260803.08';                    // 版本號
+  const VERSION          = 'v260803.09';                    // 版本號
   const GAS_API          = "https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec"; // GAS 部署網址
   const LIFF_ID          = '2010742657-DOz9QdF3';           // LINE LIFF ID
   const LINE_CHANNEL_ID  = '2010742657';                    // LINE Login Channel ID（idToken 驗證用）
@@ -914,8 +914,10 @@
             apptLoading.value = true;
             try {
               const res = await apiGet({ action:"getMyAppointments", idToken, months: apptMonths.value });
+              console.log('appt res:', JSON.stringify(res).substring(0,200));
               if(res && res.success) myAppointments.value = res.list || [];
-            } catch(e){}
+              else console.log('appt 失敗:', res && res.error);
+            } catch(e){ console.log('appt 例外:', e); }
             apptLoading.value = false;
           };
 
