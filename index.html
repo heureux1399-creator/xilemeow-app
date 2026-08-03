@@ -3,7 +3,7 @@
   ╔══════════════════════════════════════════════════════════════════════════════╗
   ║  🔧 洗里喵 客端 維護資料                                                     ║
   ╠══════════════════════════════════════════════════════════════════════════════╣
-  ║  版本號      : v260803.18                                                       ║
+  ║  版本號      : v260803.19                                                       ║
   ║  GAS API     : https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec ║
   ║  GitHub URL  : https://jemin0819.github.io/xilemeow/                                         ║
   ║  LIFF URL    : https://liff.line.me/2010742657-DOz9QdF3                              ║
@@ -196,9 +196,9 @@
 <body>
 <div id="app" v-cloak>
 
-  <!-- 系統列 (正式進版: v260803.18) -->
+  <!-- 系統列 (正式進版: v260803.19) -->
   <div :class="['sys-bar', isLineMode?'live':'dev']">
-    <span>v260803.18 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
+    <span>v260803.19 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
     <span v-if="globalLoading" class="sync-badge">
       <svg class="spin" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
       同步中
@@ -436,7 +436,7 @@
       </div>
 
       <!-- 我的預約（加入待確認刪除功能）-->
-      <div v-if="bookStep===1 && myProfile.uid" style="margin-top:4px;">
+      <div v-if="bookStep===1" style="margin-top:4px;">
         <div class="card card-accent">
           <div class="section-header" style="cursor:pointer;margin-bottom:0;" @click="apptExpanded=!apptExpanded">
             <span class="section-title" style="font-size:13px;">我的預約</span>
@@ -488,7 +488,7 @@
       </div>
 
       <!-- 文案公告板（我的預約下方）-->
-      <div v-if="bookStep===1 && myProfile.uid" style="margin-top:12px;">
+      <div v-if="bookStep===1" style="margin-top:12px;">
         <!-- 公告欄 skeleton -->
         <div v-if="contentLoading" class="card card-accent" style="padding:14px 16px;">
           <div class="sk-line lg skeleton" style="width:30%;margin-bottom:14px;"></div>
@@ -655,7 +655,7 @@
   // ══════════════════════════════════════════════════════
   // 🔧 維護資料（每次更新請修改這裡）
   // ══════════════════════════════════════════════════════
-  const VERSION          = 'v260803.18';                    // 版本號
+  const VERSION          = 'v260803.19';                    // 版本號
   const GAS_API          = "https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec"; // GAS 部署網址
   const LIFF_ID          = '2010742657-DOz9QdF3';           // LINE LIFF ID
   const LINE_CHANNEL_ID  = '2010742657';                    // LINE Login Channel ID（idToken 驗證用）
@@ -712,11 +712,11 @@
           const bookLoading = ref(false);
           const refreshing = ref(false);
           const myAppointments = ref([]);
-          const apptLoading = ref(false);
+          const apptLoading = ref(true); // 進頁面立刻顯示 skeleton
           const apptExpanded = ref(true);
           // 文案公告板
           const contentItems = ref([]);
-          const contentLoading = ref(false);
+          const contentLoading = ref(true); // 進頁面立刻顯示 skeleton
           const expandedContentIds = ref([]);
           const toggleContentItem = (id) => {
             const idx = expandedContentIds.value.indexOf(id);
@@ -824,18 +824,14 @@
             const endDate=new Date(sYear, sMonth-1+5, 1);
             const eYear=endDate.getFullYear(), eMonth=endDate.getMonth()+1;
             try {
-              // 單一請求：profile + 月曆 + 文案 + 假日 全部一次拿
-              const res = await apiGet({
-                action:'getInitData', idToken,
+              // 1. 先讀 profile（UID/餘額/貓咪）
+              const res = await apiGet({ action:'getInitData', idToken,
                 startYear:sYear, startMonth:sMonth,
-                endYear:eYear, endMonth:eMonth
-              });
+                endYear:eYear, endMonth:eMonth });
               if(res && res.success){
-                // 個人資料
                 applyProfile(res);
                 statusCode.value='OK·'+res.info.uid;
                 authFailed.value = false;
-                // 公開資料（月曆/文案/假日）
                 mergeScheduleMap(res.scheduleMap || {});
                 updateCacheRange(sYear, sMonth, eYear, eMonth);
                 if(res.advanceDays !== undefined) advanceDays.value = res.advanceDays;
@@ -843,7 +839,7 @@
                 if(res.contentList){ contentItems.value = res.contentList; contentLoading.value = false; }
                 if(res.holidays)    clientHolidayData.value = res.holidays;
                 renderMatrix();
-                // 我的預約（唯一需要分開的）
+                // 2. profile 完成後才讀我的預約
                 loadMyAppointments();
               }
               else {
