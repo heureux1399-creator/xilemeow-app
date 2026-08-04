@@ -3,7 +3,7 @@
   ╔══════════════════════════════════════════════════════════════════════════════╗
   ║  🔧 洗里喵 客端 維護資料                                                     ║
   ╠══════════════════════════════════════════════════════════════════════════════╣
-  ║  版本號      : v260803.30                                                       ║
+  ║  版本號      : v260803.31                                                       ║
   ║  GAS API     : https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec ║
   ║  GitHub URL  : https://jemin0819.github.io/xilemeow/                                         ║
   ║  LIFF URL    : https://liff.line.me/2010742657-DOz9QdF3                              ║
@@ -196,9 +196,9 @@
 <body>
 <div id="app" v-cloak>
 
-  <!-- 系統列 (正式進版: v260803.30) -->
+  <!-- 系統列 (正式進版: v260803.31) -->
   <div :class="['sys-bar', isLineMode?'live':'dev']">
-    <span>v260803.30 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
+    <span>v260803.31 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
     <span v-if="globalLoading" class="sync-badge">
       <svg class="spin" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
       同步中
@@ -656,7 +656,7 @@
   // ══════════════════════════════════════════════════════
   // 🔧 維護資料（每次更新請修改這裡）
   // ══════════════════════════════════════════════════════
-  const VERSION          = 'v260803.30';                    // 版本號
+  const VERSION          = 'v260803.31';                    // 版本號
   const GAS_API          = "https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec"; // GAS 部署網址
   const LIFF_ID          = '2010742657-DOz9QdF3';           // LINE LIFF ID
   const LINE_CHANNEL_ID  = '2010742657';                    // LINE Login Channel ID（idToken 驗證用）
@@ -734,33 +734,8 @@
           }; 
           const availableSlots = ref([]);
           const calMonthLabel = ref('');
-          // 區間快取：記錄已載入的範圍和資料
+          // 月曆資料快取（一次全部載入，不限範圍）
           let scheduleCacheMap = {};
-          let cacheLoadedStart = null; // { year, month } 已載入的最早月份
-          let cacheLoadedEnd   = null; // { year, month } 已載入的最晚月份
-
-          // 比較兩個 {year,month} 的大小
-          const ymLess = (a, b) => a.year < b.year || (a.year === b.year && a.month < b.month);
-          const ymLessEq = (a, b) => !ymLess(b, a);
-
-          // 目標月份是否在已載入範圍內
-          const isInCache = (year, month) => {
-            if(!cacheLoadedStart || !cacheLoadedEnd) return false;
-            const ym = {year, month};
-            return ymLessEq(cacheLoadedStart, ym) && ymLessEq(ym, cacheLoadedEnd);
-          };
-
-          // 合併新的 scheduleMap 到現有快取
-          const mergeScheduleMap = (newMap) => {
-            Object.keys(newMap).forEach(k => { scheduleCacheMap[k] = newMap[k]; });
-          };
-
-          // 更新快取範圍
-          const updateCacheRange = (sYear, sMonth, eYear, eMonth) => {
-            const s = {year:sYear, month:sMonth}, e = {year:eYear, month:eMonth};
-            if(!cacheLoadedStart || ymLess(s, cacheLoadedStart)) cacheLoadedStart = s;
-            if(!cacheLoadedEnd   || ymLess(cacheLoadedEnd, e))   cacheLoadedEnd   = e;
-          };
           let idToken = '';
 
           const showToast = (m, e=false) => { toast.value={ show:true, message:m, isError:e }; setTimeout(()=>toast.value.show=false, 3000); };
@@ -820,27 +795,18 @@
 
           const loadProfile = async () => {
             statusCode.value='FETCH·0';
-            const t=new Date();
-            const sYear=t.getFullYear(), sMonth=t.getMonth()+1;
-            const endDate=new Date(sYear, sMonth-1+5, 1);
-            const eYear=endDate.getFullYear(), eMonth=endDate.getMonth()+1;
             try {
-              // getInitData 完成後才讀我的預約
-              const res = await apiGet({ action:'getInitData', idToken,
-                startYear:sYear, startMonth:sMonth,
-                endYear:eYear, endMonth:eMonth });
+              const res = await apiGet({ action:'getInitData', idToken });
               if(res && res.success){
                 applyProfile(res);
                 statusCode.value='OK·'+res.info.uid;
                 authFailed.value = false;
-                mergeScheduleMap(res.scheduleMap || {});
-                updateCacheRange(sYear, sMonth, eYear, eMonth);
+                scheduleCacheMap = res.scheduleMap || {}; // 一次全部存快取，不限範圍
                 if(res.advanceDays !== undefined) advanceDays.value = res.advanceDays;
                 if(res.apptMonths  !== undefined) apptMonths.value  = res.apptMonths;
                 if(res.contentList){ contentItems.value = res.contentList; contentLoading.value = false; }
                 if(res.holidays)    clientHolidayData.value = res.holidays;
                 renderMatrix();
-                // 我的預約已包含在 getInitData 回傳裡，不需要再發請求
                 apptLoading.value = false;
                 apptFailed.value = false;
                 myAppointments.value = res.appointments || [];
@@ -864,22 +830,9 @@
           };
 
           const loadCalendar = async () => {
-            const t=new Date();
-            const sYear=t.getFullYear(), sMonth=t.getMonth()+1;
-            // 計算往後6個月的結束月份
-            const endDate = new Date(sYear, sMonth-1+5, 1);
-            const eYear=endDate.getFullYear(), eMonth=endDate.getMonth()+1;
             try {
-              const res = await apiGet({ action:'getPublicData',
-                startYear:sYear, startMonth:sMonth, endYear:eYear, endMonth:eMonth });
-              if(res && res.success) {
-                mergeScheduleMap(res.scheduleMap || {});
-                updateCacheRange(sYear, sMonth, eYear, eMonth);
-                if(res.advanceDays !== undefined) advanceDays.value = res.advanceDays;
-                if(res.apptMonths  !== undefined) apptMonths.value  = res.apptMonths;
-                if(res.contentList) { contentItems.value = res.contentList; contentLoading.value = false; }
-                if(res.holidays)    clientHolidayData.value = res.holidays;
-              }
+              const res = await apiGet({ action:'getCalendarAll' });
+              if(res && res.success) scheduleCacheMap = res.scheduleMap || {};
             } catch(e){}
             renderMatrix();
           };
@@ -956,17 +909,11 @@
 
           const refreshCalendar = async () => {
             refreshing.value = true;
-            // 只重抓月曆資料，不動公告欄
-            scheduleCacheMap = {}; cacheLoadedStart = null; cacheLoadedEnd = null;
-            const endDate2 = new Date(calYear.value, calMonth.value-1+5, 1);
-            const eY2=endDate2.getFullYear(), eM2=endDate2.getMonth()+1;
+            scheduleCacheMap = {}; // 清快取，重抓全部
             try {
-              const res = await apiGet({ action:'getPublicData',
-                startYear:calYear.value, startMonth:calMonth.value,
-                endYear:eY2, endMonth:eM2 });
+              const res = await apiGet({ action:'getCalendarAll' });
               if(res && res.success && res.scheduleMap) {
-                mergeScheduleMap(res.scheduleMap);
-                updateCacheRange(calYear.value, calMonth.value, eY2, eM2);
+                scheduleCacheMap = res.scheduleMap;
                 renderMonth();
                 showToast('時段已更新');
               }
@@ -982,37 +929,12 @@
             const dm = scheduleCacheMap[day.dateStr] || {};
             availableSlots.value = Object.keys(dm).filter(s => String(dm[s]).trim() === '開放');
           };
-          const moveCalMonth = async (dir) => {
+          const moveCalMonth = (dir) => {
             calMonth.value += dir;
             if(calMonth.value > 12){ calMonth.value=1; calYear.value++; }
             if(calMonth.value < 1){ calMonth.value=12; calYear.value--; }
-            // 更新月份標題
             calMonthLabel.value = calYear.value+'年'+String(calMonth.value).padStart(2,'0')+'月';
-            // 檢查目標月份是否在快取範圍內
-            if(!isInCache(calYear.value, calMonth.value)) {
-              // 超出範圍：清空月曆觸發 skeleton，抓新資料
-              calendarDates.value = [];
-              const isForward = dir > 0;
-              let sYear, sMonth, eYear, eMonth;
-              if(isForward) {
-                sYear=calYear.value; sMonth=calMonth.value;
-                const endDate = new Date(sYear, sMonth-1+5, 1);
-                eYear=endDate.getFullYear(); eMonth=endDate.getMonth()+1;
-              } else {
-                eYear=calYear.value; eMonth=calMonth.value;
-                const startDate = new Date(eYear, eMonth-1-5, 1);
-                sYear=startDate.getFullYear(); sMonth=startDate.getMonth()+1;
-              }
-              try {
-                const res = await apiGet({ action:'getPublicData',
-                  startYear:sYear, startMonth:sMonth, endYear:eYear, endMonth:eMonth });
-                if(res && res.success) {
-                  mergeScheduleMap(res.scheduleMap || {});
-                  updateCacheRange(sYear, sMonth, eYear, eMonth);
-                }
-              } catch(e) {}
-            }
-            renderMonth();
+            renderMonth(); // 一次抓全部資料存快取，切月份直接渲染不重抓
           };
           const toggleCatSelect = (name) => {
             const i = selectedCats.value.indexOf(name);
