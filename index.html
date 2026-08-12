@@ -3,7 +3,7 @@
   ╔══════════════════════════════════════════════════════════════════════════════╗
   ║  🔧 洗里喵 客端 維護資料                                                     ║
   ╠══════════════════════════════════════════════════════════════════════════════╣
-  ║  版本號      : v260812.02                                                       ║
+  ║  版本號      : v260812.03                                                       ║
   ║  GAS API     : https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec ║
   ║  GitHub URL  : https://jemin0819.github.io/xilemeow/                                         ║
   ║  LIFF URL    : https://liff.line.me/2010742657-DOz9QdF3                              ║
@@ -40,6 +40,10 @@
       --ok:       #3D6B4F;
       --ok-l:     #E8F3EC;
       --err:      #B84141;
+      --male-l:   #E8F0F4;
+      --male-d:   #4E7C93;
+      --female-l: #F7E9EC;
+      --female-d: #BD6478;
       --border:   rgba(44,44,44,.1);
     }
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; margin:0; padding:0; }
@@ -118,6 +122,8 @@
     .check-row{ display:flex; align-items:center; gap:12px; padding:12px 0; cursor:pointer; }
     .check-box{ width:22px; height:22px; border-radius:6px; border:1.5px solid var(--border); background:var(--paper); flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all .15s; }
     .check-box.checked{ background:var(--orange); border-color:var(--orange); }
+    .elevator-toggle{ width:46px; height:46px; border-radius:12px; border:1.5px solid var(--border); background:var(--paper); color:var(--ink-3); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .15s; }
+    .elevator-toggle.active{ background:var(--ok-l); border-color:rgba(61,107,79,.35); color:var(--ok); }
 
     .slot-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
     .slot-btn{ padding:13px; border-radius:8px; border:1px solid var(--border); background:var(--paper); color:var(--ink); font-size:14px; font-weight:500; font-family:'Noto Sans TC',sans-serif; cursor:pointer; text-align:center; transition:all .12s; }
@@ -183,6 +189,8 @@
     .seg-control{ display:flex; background:var(--warm); border-radius:8px; padding:3px; gap:3px; }
     .seg-btn{ flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:9px 8px; border-radius:6px; border:none; background:transparent; font-family:'Noto Sans TC',sans-serif; font-size:13px; font-weight:500; color:var(--ink-2); cursor:pointer; transition:all .15s; }
     .seg-btn.active{ background:var(--card); color:var(--ink); font-weight:700; box-shadow:0 1px 4px rgba(42,32,20,.12); }
+    .seg-btn.active.seg-male{ background:var(--male-l); color:var(--male-d); }
+    .seg-btn.active.seg-female{ background:var(--female-l); color:var(--female-d); }
     .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
     /* Skeleton loading */
     .skeleton{ background:linear-gradient(90deg,#ede8e1 25%,#f5f0eb 50%,#ede8e1 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:6px; }
@@ -196,9 +204,9 @@
 <body>
 <div id="app" v-cloak>
 
-  <!-- 系統列 (正式進版: v260812.02) -->
+  <!-- 系統列 (正式進版: v260812.03) -->
   <div :class="['sys-bar', isLineMode?'live':'dev']">
-    <span>v260812.02 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
+    <span>v260812.03 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
     <span v-if="globalLoading" class="sync-badge">
       <svg class="spin" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
       同步中
@@ -214,7 +222,7 @@
   <header class="app-header">
     <div class="header-eyebrow">到府美容服務</div>
     <h1 class="header-title">洗里喵</h1>
-    <p class="header-sub">翻閱農民曆選吉日 · 喵寶在家洗浴</p>
+    <p class="header-sub">挑選吉日 · 喵寶在家洗浴</p>
   </header>
 
   <!-- 會員卡 -->
@@ -562,7 +570,7 @@
               <div><label class="field-label">品種</label><input v-model="editCat.breed" class="field"></div>
               <div><label class="field-label">體重 kg</label><input type="number" step="0.1" inputmode="decimal" v-model="editCat.weight" class="field"></div>
             </div>
-            <div class="field-wrap"><label class="field-label">情緒叮嚀</label><input v-model="editCat.note" class="field" placeholder="情緒狀況注意事項、攻擊性? 有無舒緩緊張藥物或食品?"></div>
+            <div class="field-wrap"><label class="field-label">情緒叮嚀</label><input v-model="editCat.note" class="field" placeholder="攻擊性? 有無舒緩緊張食品?"></div>
             
             <div style="display:flex;gap:8px;">
               <button class="btn btn-primary" style="flex:1;" @click="saveEditCat(idx)" :disabled="isSavingCat">
@@ -584,15 +592,15 @@
         <div class="field-wrap">
           <label class="field-label">性別</label>
           <div class="seg-control">
-            <button :class="['seg-btn', newCat.gender==='男'?'active':'']" @click="newCat.gender='男'"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="14" r="5"/><line x1="19" y1="5" x2="14.14" y2="9.86"/><polyline points="15 5 19 5 19 9"/></svg> 男</button>
-            <button :class="['seg-btn', newCat.gender==='女'?'active':'']" @click="newCat.gender='女'"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="6"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="9" y1="19" x2="15" y2="19"/></svg> 女</button>
+            <button :class="['seg-btn', newCat.gender==='男'?'active seg-male':'']" @click="newCat.gender='男'"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="14" r="5"/><line x1="19" y1="5" x2="14.14" y2="9.86"/><polyline points="15 5 19 5 19 9"/></svg> 男</button>
+            <button :class="['seg-btn', newCat.gender==='女'?'active seg-female':'']" @click="newCat.gender='女'"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="6"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="9" y1="19" x2="15" y2="19"/></svg> 女</button>
           </div>
         </div>
         <div class="grid-2 field-wrap">
-          <div><label class="field-label">品種</label><input v-model="newCat.breed" class="field" placeholder="布偶貓"></div>
-          <div><label class="field-label">體重 kg</label><input type="number" step="0.1" inputmode="decimal" v-model="newCat.weight" class="field" placeholder="4.5"></div>
+          <div><label class="field-label">品種</label><input v-model="newCat.breed" class="field"></div>
+          <div><label class="field-label">體重 kg</label><input type="number" step="0.1" inputmode="decimal" v-model="newCat.weight" class="field"></div>
         </div>
-        <div class="field-wrap"><label class="field-label">情緒叮嚀</label><input v-model="newCat.note" class="field" placeholder="情緒狀況注意事項、攻擊性? 有無舒緩緊張藥物或食品?"></div>
+        <div class="field-wrap"><label class="field-label">情緒叮嚀</label><input v-model="newCat.note" class="field" placeholder="攻擊性? 有無舒緩緊張食品?"></div>
         
         <button class="btn btn-primary" @click="registerCat" :disabled="isRegisteringCat">
           {{ isRegisteringCat ? '喵寶登錄中...' : '新增這隻喵寶' }}
@@ -611,16 +619,13 @@
         <div class="field-wrap"><label class="field-label">到府地址</label><input v-model="myProfile.address" class="field" placeholder="到府服務詳細地址"></div>
 
         <div class="field-wrap">
-          <label class="field-label">電梯資訊</label>
-          <div class="check-row" @click="myProfile.elevator = myProfile.elevator==='有電梯'?'無電梯':'有電梯'">
-            <div :class="['check-box', myProfile.elevator==='有電梯'?'checked':'']">
-              <svg v-if="myProfile.elevator==='有電梯'" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
-            <div>
-              <div class="check-label-text">有電梯</div>
-              <div class="check-label-sub">{{ myProfile.elevator==='有電梯'?'已勾選，感謝告知':'未勾選 = 無電梯' }}</div>
-            </div>
-          </div>
+          <button type="button" class="elevator-toggle" :class="{active: myProfile.elevator==='有電梯'}" @click="myProfile.elevator = myProfile.elevator==='有電梯'?'無電梯':'有電梯'" :aria-label="myProfile.elevator==='有電梯'?'有電梯':'無電梯'">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="3" width="16" height="18" rx="2.5"/>
+              <polyline points="9 10 12 7 15 10"/>
+              <polyline points="9 14 12 17 15 14"/>
+            </svg>
+          </button>
         </div>
 
         <div class="field-wrap"><label class="field-label">停車建議</label><input v-model="myProfile.parking" class="field" placeholder="建議附近停車方式"></div>
@@ -656,7 +661,7 @@
   // ══════════════════════════════════════════════════════
   // 🔧 維護資料（每次更新請修改這裡）
   // ══════════════════════════════════════════════════════
-  const VERSION          = 'v260812.02';                    // 版本號
+  const VERSION          = 'v260812.03';                    // 版本號
   const GAS_API          = "https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec"; // GAS 部署網址
   const LIFF_ID          = '2010742657-DOz9QdF3';           // LINE LIFF ID
   const LINE_CHANNEL_ID  = '2010742657';                    // LINE Login Channel ID（idToken 驗證用）
