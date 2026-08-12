@@ -3,7 +3,7 @@
   ╔══════════════════════════════════════════════════════════════════════════════╗
   ║  🔧 洗里喵 客端 維護資料                                                     ║
   ╠══════════════════════════════════════════════════════════════════════════════╣
-  ║  版本號      : v260812.06                                                       ║
+  ║  版本號      : v260812.07                                                       ║
   ║  GAS API     : https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec ║
   ║  GitHub URL  : https://jemin0819.github.io/xilemeow/                                         ║
   ║  LIFF URL    : https://liff.line.me/2010742657-DOz9QdF3                              ║
@@ -208,9 +208,9 @@
 <body>
 <div id="app" v-cloak>
 
-  <!-- 系統列 (正式進版: v260812.06) -->
+  <!-- 系統列 (正式進版: v260812.07) -->
   <div :class="['sys-bar', isLineMode?'live':'dev']">
-    <span>v260812.06 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
+    <span>v260812.07 · {{ isLineMode?'LIVE':'DEV' }} · {{ statusCode }}</span>
     <span v-if="globalLoading" class="sync-badge">
       <svg class="spin" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
       同步中
@@ -392,7 +392,7 @@
         </div>
         <div class="divider"></div>
         <div class="field-wrap">
-          <label class="field-label">洗浴台數</label>
+          <label class="field-label">洗浴隻數</label>
           <div class="counter">
             <button class="btn btn-icon" @click="bookCatCount=Math.max(1,bookCatCount-1)">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -401,7 +401,7 @@
             <button class="btn btn-icon" @click="bookCatCount++">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="12" y2="12"/></svg>
             </button>
-            <span class="counter-unit">台 已勾 {{ selectedCats.length }} 隻</span>
+            <span class="counter-unit">隻 已勾 {{ selectedCats.length }} 隻</span>
           </div>
         </div>
         <div class="field-wrap">
@@ -426,7 +426,7 @@
           <div class="confirm-row"><span class="confirm-key">良辰吉日</span><span class="confirm-val">{{ selectedDate }}</span></div>
           <div class="confirm-row"><span class="confirm-key">時辰</span><span class="confirm-val">{{ selectedSlot }}</span></div>
           <div class="confirm-row"><span class="confirm-key">喵寶</span><span class="confirm-val">{{ selectedCats.join('、') || '（未指定）' }}</span></div>
-          <div class="confirm-row"><span class="confirm-key">台數</span><span class="confirm-val">{{ bookCatCount }} 台</span></div>
+          <div class="confirm-row"><span class="confirm-key">隻數</span><span class="confirm-val">{{ bookCatCount }} 隻</span></div>
           <div v-if="bookNotes" class="confirm-row"><span class="confirm-key">備註</span><span class="confirm-val">{{ bookNotes }}</span></div>
         </div>
         <div style="font-size:11px;color:var(--ink-3);text-align:center;margin:14px 0 16px;line-height:1.8;">送出後由美容師確認時間<br>請留意 LINE 訊息通知</div>
@@ -488,7 +488,7 @@
                     </span>
                   </div>
                 </div>
-                <div style="font-size:11px;color:var(--ink-2);">洗浴 {{ appt.count }} 台<span v-if="appt.catDetail"> · {{ appt.catDetail }}</span></div>
+                <div style="font-size:11px;color:var(--ink-2);">洗浴 {{ appt.count }} 隻<span v-if="appt.catDetail"> · {{ appt.catDetail }}</span></div>
                 <div v-if="appt.notes" style="font-size:11px;color:var(--ink-2);margin-top:3px;display:flex;align-items:center;gap:4px;">
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
                   {{ appt.notes }}
@@ -673,7 +673,7 @@
   // ══════════════════════════════════════════════════════
   // 🔧 維護資料（每次更新請修改這裡）
   // ══════════════════════════════════════════════════════
-  const VERSION          = 'v260812.06';                    // 版本號
+  const VERSION          = 'v260812.07';                    // 版本號
   const GAS_API          = "https://script.google.com/macros/s/AKfycbzAZXRm4mNYNxkB1SoBheay2ntSFt5xUIFG9mBWqyrf0qvTJUNyBtGqc2iMszztQk8j/exec"; // GAS 部署網址
   const LIFF_ID          = '2010742657-DOz9QdF3';           // LINE LIFF ID
   const LINE_CHANNEL_ID  = '2010742657';                    // LINE Login Channel ID（idToken 驗證用）
